@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CREDIT_PACKS, type CreditPack } from "@/lib/razorpay/packs";
-import { Check, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { CREDIT_PACKS, type CreditPack } from "@/lib/razorpay/packs";
 import { cn, formatINR } from "@/lib/utils";
 
 declare global {
@@ -87,7 +83,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
         name: "Tessar",
         description: `${pack.name} — ${pack.credits} architecture ${pack.credits === 1 ? "run" : "runs"}`,
         prefill: { name: data.user.name, email: data.user.email },
-        theme: { color: "#2563eb" },
+        theme: { color: "#5b3df6" },
         modal: { ondismiss: () => setLoadingPackId(null) },
         handler: async (resp) => {
           try {
@@ -115,76 +111,92 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
-      {CREDIT_PACKS.map((pack, i) => {
+    <div className="m3-stagger grid gap-4 md:grid-cols-3">
+      {CREDIT_PACKS.map((pack) => {
         const popular = pack.badge === "Most popular";
+        const tone = popular ? "primary" : pack.credits >= 10 ? "tertiary" : "secondary";
+        const toneSurface =
+          tone === "primary"
+            ? "bg-m3-primary text-m3-on-primary"
+            : tone === "tertiary"
+              ? "bg-m3-tertiary-container text-m3-on-tertiary-container"
+              : "bg-m3-secondary-container text-m3-on-secondary-container";
+        const accent =
+          tone === "primary"
+            ? "bg-m3-primary-container text-m3-on-primary-container"
+            : tone === "tertiary"
+              ? "bg-m3-tertiary text-m3-on-tertiary"
+              : "bg-m3-secondary text-m3-on-secondary";
+
         return (
-          <div
+          <article
             key={pack.id}
-            className="animate-reveal-up"
-            style={{
-              animationDelay: `${i * 90}ms`,
-              animationFillMode: "both",
-            }}
+            className={cn(
+              "relative overflow-hidden rounded-[32px] p-7",
+              "transition-all duration-m3-default-effects ease-m3-default-effects",
+              "hover:-translate-y-1 hover:shadow-m3-3",
+              popular ? "bg-m3-surface-container-high shadow-m3-2" : "bg-m3-surface-container-low",
+            )}
           >
-            <Card
+            {/* Floating decoration */}
+            <div
+              aria-hidden
               className={cn(
-                "card-lift relative flex h-full flex-col",
-                popular && "border-foreground/30",
+                "absolute -right-12 -top-12 size-44 rounded-[42%_58%_67%_33%/41%_44%_56%_59%] opacity-60 m3-blob",
+                accent,
+              )}
+            />
+
+            {pack.badge && (
+              <div className="relative mb-4 inline-flex items-center gap-1.5 rounded-full bg-m3-on-surface px-3 py-1 text-[11px] font-medium text-m3-surface">
+                <span className="ms text-[14px]" aria-hidden>star</span>
+                {pack.badge}
+              </div>
+            )}
+
+            <div className="relative text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+              {pack.name}
+            </div>
+            <div className="relative mt-3 flex items-baseline gap-1">
+              <span className="display text-[clamp(2.5rem,4.2vw,3.25rem)] leading-none tabular-nums">
+                {formatINR(pack.pricePaise)}
+              </span>
+            </div>
+            <div className="relative mt-2 text-[13px] text-m3-on-surface-variant">
+              {pack.credits} {pack.credits === 1 ? "design" : "designs"} ·{" "}
+              {formatINR(pack.perRunPaise)} / design
+            </div>
+
+            <p className="relative mt-5 text-[14px] leading-relaxed text-m3-on-surface-variant">
+              {pack.description}
+            </p>
+
+            <ul className="relative my-7 space-y-2.5 text-[13px]">
+              <Feature>Full report — diagrams, tiers, costs, risks</Feature>
+              <Feature>Downloadable PDF for stakeholders</Feature>
+              <Feature>Permanent history &amp; versioning</Feature>
+              <Feature>Refund on agent failure</Feature>
+            </ul>
+
+            <button
+              onClick={() => buyPack(pack)}
+              disabled={loadingPackId === pack.id}
+              className={cn(
+                "state-layer press m3-squircle-press relative inline-flex h-12 w-full items-center justify-center gap-2 text-[14px] font-medium shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-2",
+                toneSurface,
+                loadingPackId === pack.id && "opacity-60",
               )}
             >
-              {pack.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge
-                    className={cn(
-                      "px-3 py-1 text-[10px] font-medium uppercase tracking-wider shadow-sm",
-                      popular
-                        ? "border-transparent bg-foreground text-background"
-                        : "",
-                    )}
-                  >
-                    {pack.badge}
-                  </Badge>
-                </div>
+              {loadingPackId === pack.id ? (
+                <span className="ms animate-spin" aria-hidden>progress_activity</span>
+              ) : (
+                <>
+                  <span className="ms text-[18px]" aria-hidden>shopping_bag</span>
+                  Buy {pack.name}
+                </>
               )}
-              <CardContent className="flex flex-1 flex-col p-7">
-                <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  {pack.name}
-                </div>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="display text-[clamp(2.5rem,4.2vw,3.25rem)] tabular-nums leading-none">
-                    {formatINR(pack.pricePaise)}
-                  </span>
-                </div>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {pack.credits} {pack.credits === 1 ? "architecture run" : "architecture runs"} ·{" "}
-                  {formatINR(pack.perRunPaise)} / run
-                </div>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  {pack.description}
-                </p>
-                <ul className="my-7 space-y-2.5 text-sm">
-                  <Feature>Full report — diagrams, tiers, costs, risks</Feature>
-                  <Feature>Downloadable PDF for stakeholders</Feature>
-                  <Feature>Permanent history &amp; versioning</Feature>
-                  <Feature>Refund on agent failure</Feature>
-                </ul>
-                <Button
-                  onClick={() => buyPack(pack)}
-                  disabled={loadingPackId === pack.id}
-                  variant={popular ? "default" : "outline"}
-                  className="mt-auto"
-                  size="lg"
-                >
-                  {loadingPackId === pack.id ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    `Buy ${pack.name}`
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+            </button>
+          </article>
         );
       })}
     </div>
@@ -194,8 +206,8 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
 function Feature({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-2.5">
-      <Check className="mt-0.5 size-4 shrink-0 text-foreground" />
-      <span className="text-foreground/80">{children}</span>
+      <span className="ms mt-0.5 text-[16px] text-m3-primary" aria-hidden>check_circle</span>
+      <span className="text-m3-on-surface">{children}</span>
     </li>
   );
 }

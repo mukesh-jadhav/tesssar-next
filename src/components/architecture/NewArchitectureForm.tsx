@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { WavyProgress } from "@/components/m3/WavyProgress";
+import { Chip } from "@/components/m3/Chip";
 
 type ProgressEvent =
   | { type: "init"; architectureId: string }
@@ -44,7 +46,7 @@ const EXAMPLES = [
   },
   {
     icon: "health_and_safety",
-    label: "ABDM-compliant health records vault",
+    label: "ABDM-compliant health vault",
     seed:
       "Privacy-preserving health records vault for Indian hospitals. ABDM compliant, end-to-end encrypted, consent-based sharing, audit log, mobile + web.",
   },
@@ -65,10 +67,9 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 320) + "px";
+    el.style.height = Math.min(el.scrollHeight, 380) + "px";
   }, [brief]);
 
-  // Focus on seeded prompt
   useEffect(() => {
     if (seed && textareaRef.current) textareaRef.current.focus();
   }, [seed]);
@@ -151,34 +152,39 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     }
   }
 
+  // ===== Generating panel =====
   if (generating) {
     return (
       <div className="m3-page-enter mx-auto max-w-2xl">
-        <div className="rounded-3xl bg-m3-surface-container-low p-7">
+        <div className="rounded-[36px] bg-m3-surface-container-low p-8 shadow-m3-2">
           <div className="flex items-center gap-3">
-            <span className="ms text-m3-primary" aria-hidden>progress_activity</span>
-            <h2 className="text-[18px] font-medium tracking-tight">Designing your system…</h2>
+            <span className="grid size-12 place-items-center rounded-2xl bg-m3-primary-container text-m3-on-primary-container">
+              <span className="ms text-[24px] animate-spin" aria-hidden>progress_activity</span>
+            </span>
+            <div>
+              <h2 className="display text-[22px] leading-tight">Designing your system</h2>
+              <p className="text-[13px] text-m3-on-surface-variant">
+                Gemini 2.5 Pro is reasoning through your brief.
+              </p>
+            </div>
             <span className="ml-auto rounded-full bg-m3-surface-container px-3 py-1 font-mono text-[11px] tabular-nums text-m3-on-surface-variant">
               ~{tokens.toLocaleString("en-IN")} tokens
             </span>
           </div>
 
-          {/* M3 expressive linear progress */}
-          <div className="mt-5 h-1 overflow-hidden rounded-full bg-m3-secondary-container">
-            <div
-              className="h-full rounded-full bg-m3-primary transition-[width] duration-500 ease-m3-default-spatial"
-              style={{ width: `${progressPct}%` }}
-            />
+          {/* Wavy progress — M3 Expressive signature */}
+          <div className="mt-6">
+            <WavyProgress value={progressPct} />
           </div>
 
           <div
             key={phaseMsg}
-            className="m3-page-enter mt-4 text-[14px] text-m3-on-surface-variant"
+            className="m3-rise mt-4 text-[14px] text-m3-on-surface-variant"
           >
             {phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}
           </div>
 
-          <ol className="mt-6 space-y-2.5">
+          <ol className="mt-7 space-y-2.5">
             {PHASE_ORDER.map((p, i) => {
               const done = phaseIndex > i;
               const active = phaseIndex === i;
@@ -192,18 +198,18 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
                 >
                   <span
                     className={cn(
-                      "grid size-6 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
+                      "grid size-7 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
                       done && "bg-m3-primary text-m3-on-primary",
                       active && "bg-m3-primary-container text-m3-on-primary-container scale-110",
                       !done && !active && "bg-m3-surface-container text-m3-on-surface-variant",
                     )}
                   >
                     {done ? (
-                      <span className="ms text-[14px]" aria-hidden>check</span>
+                      <span className="ms text-[16px]" aria-hidden>check</span>
                     ) : active ? (
-                      <span className="ms text-[14px] animate-spin" aria-hidden>progress_activity</span>
+                      <span className="ms text-[16px] animate-spin" aria-hidden>progress_activity</span>
                     ) : (
-                      <span className="text-[11px] tabular-nums">{i + 1}</span>
+                      <span className="text-[12px] tabular-nums">{i + 1}</span>
                     )}
                   </span>
                   <span className={cn(active && "font-medium text-m3-on-surface")}>
@@ -215,7 +221,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
           </ol>
 
           {errorMsg && (
-            <div className="mt-6 flex items-start gap-2 rounded-2xl bg-m3-error-container p-4 text-[14px] text-m3-on-error-container">
+            <div className="mt-6 flex items-start gap-2.5 rounded-2xl bg-m3-error-container p-4 text-[14px] text-m3-on-error-container">
               <span className="ms" aria-hidden>error</span>
               <div>
                 <div className="font-medium">Generation failed</div>
@@ -229,10 +235,10 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     );
   }
 
-  // ============ Composer (idle state) ============
+  // ===== Composer (idle) =====
   return (
     <div className="m3-page-enter mx-auto w-full max-w-2xl">
-      <div className="relative rounded-3xl bg-m3-surface-container-low shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects focus-within:shadow-m3-3 focus-within:ring-1 focus-within:ring-m3-primary/30">
+      <div className="relative rounded-[36px] bg-m3-surface-container-low shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects focus-within:shadow-m3-3 focus-within:ring-1 focus-within:ring-m3-primary/30">
         <textarea
           ref={textareaRef}
           value={brief}
@@ -246,7 +252,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
               handleSubmit();
             }
           }}
-          className="block w-full resize-none bg-transparent px-6 pt-6 pb-2 text-[16px] leading-relaxed text-m3-on-surface placeholder:text-m3-on-surface-variant/80 focus:outline-none scrollbar-thin"
+          className="block w-full resize-none bg-transparent px-7 pt-7 pb-3 text-[16px] leading-relaxed text-m3-on-surface placeholder:text-m3-on-surface-variant/80 focus:outline-none scrollbar-thin"
         />
 
         <div className="flex items-center gap-2 px-4 pb-4 pt-2">
@@ -266,36 +272,38 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
               disabled={brief.trim().length < 30}
               aria-label="Design my architecture"
               className={cn(
-                "state-layer press grid size-12 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
+                "state-layer press m3-squircle-press grid size-14 place-items-center transition-all duration-m3-default-effects ease-m3-fast-spatial",
                 brief.trim().length < 30
                   ? "bg-m3-surface-container text-m3-on-surface-variant/60"
                   : "bg-m3-primary text-m3-on-primary shadow-m3-2 hover:shadow-m3-3",
               )}
             >
-              <span className="ms" aria-hidden>arrow_upward</span>
+              <span className="ms text-[24px]" aria-hidden>arrow_upward</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Suggestion chips beneath composer */}
-      <div className="m3-stagger mt-6 grid gap-2.5 sm:grid-cols-2">
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex.label}
-            type="button"
-            onClick={() => {
-              setBrief(ex.seed);
-              textareaRef.current?.focus();
-            }}
-            className="state-layer press group/ex flex items-center gap-3 rounded-2xl bg-m3-surface-container-low px-4 py-3 text-left transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-1"
-          >
-            <span className="grid size-9 shrink-0 place-items-center rounded-2xl bg-m3-tertiary-container text-m3-on-tertiary-container">
-              <span className="ms text-[20px]" aria-hidden>{ex.icon}</span>
-            </span>
-            <span className="text-[14px] text-m3-on-surface">{ex.label}</span>
-          </button>
-        ))}
+      {/* Examples */}
+      <div className="mt-7">
+        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+          Try one of these
+        </div>
+        <div className="m3-stagger mt-3 flex flex-wrap gap-2">
+          {EXAMPLES.map((ex) => (
+            <Chip
+              key={ex.label}
+              type="suggestion"
+              icon={ex.icon}
+              onClick={() => {
+                setBrief(ex.seed);
+                textareaRef.current?.focus();
+              }}
+            >
+              {ex.label}
+            </Chip>
+          ))}
+        </div>
       </div>
     </div>
   );

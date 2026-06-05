@@ -725,3 +725,305 @@
 .press:active {
   transform: scale(0.97);
 }
+/* ============================================================
+   M3 EXPRESSIVE — SIGNATURE PATTERNS
+   The patterns that make M3E distinct from M3:
+   - Wavy progress indicators
+   - Shape morph on press (squircle ⇆ blob)
+   - Spring physics on FAB
+   - Container scroll-snap carousels
+   - Ambient floating shapes
+   - Marquee-of-pills
+   ============================================================ */
+
+/* ---- Wavy linear progress (signature M3 Expressive component) ---- */
+@keyframes m3-wave-flow {
+  0%   { background-position: 0 50%; }
+  100% { background-position: 64px 50%; }
+}
+.m3-wavy {
+  position: relative;
+  height: 14px;
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 8px 50%,
+      hsl(var(--md-sys-color-secondary-container)) 0 4px,
+      transparent 4px) repeat-x,
+    hsl(var(--md-sys-color-surface-container));
+  background-size: 16px 14px;
+}
+.m3-wavy::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 8px 50%,
+      hsl(var(--md-sys-color-primary)) 0 4px,
+      transparent 4px);
+  background-size: 16px 14px;
+  background-repeat: repeat-x;
+  animation: m3-wave-flow 1.2s linear infinite;
+  clip-path: inset(0 calc(100% - var(--m3-wavy-pct, 0%)) 0 0 round var(--md-sys-shape-corner-full));
+  transition: clip-path 600ms var(--md-sys-motion-easing-expressive-default-spatial);
+}
+
+/* Indeterminate variant — full bar with sliding gradient pattern */
+.m3-wavy-indeterminate::before {
+  animation:
+    m3-wave-flow 1.2s linear infinite,
+    m3-wavy-indet 2.4s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
+  clip-path: none;
+}
+@keyframes m3-wavy-indet {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(40%); }
+  100% { transform: translateX(120%); }
+}
+
+/* ---- Shape morph on hover/press (M3E button + chip) ---- */
+@keyframes m3-shape-morph {
+  0%, 100% { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; }
+  50%      { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
+}
+.m3-blob {
+  animation: m3-shape-morph 7s ease-in-out infinite;
+}
+
+/* Squircle → circle press transform for FABs */
+.m3-squircle-press {
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  transition:
+    border-radius var(--md-sys-motion-duration-expressive-fast-effects)
+      var(--md-sys-motion-easing-expressive-fast-spatial),
+    transform var(--md-sys-motion-duration-expressive-fast-effects)
+      var(--md-sys-motion-easing-expressive-fast-spatial);
+}
+.m3-squircle-press:active {
+  border-radius: var(--md-sys-shape-corner-full);
+  transform: scale(0.95);
+}
+
+/* ---- Ambient floating shapes (used in hero / empty states) ---- */
+@keyframes m3-float-a {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33%      { transform: translate(40px, -30px) rotate(8deg); }
+  66%      { transform: translate(-20px, 24px) rotate(-6deg); }
+}
+@keyframes m3-float-b {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(-30px, -40px) rotate(-10deg); }
+}
+.m3-shape-a { animation: m3-float-a 18s ease-in-out infinite; }
+.m3-shape-b { animation: m3-float-b 22s ease-in-out infinite; }
+
+/* ---- Scroll-snap horizontal carousel (Material 3 hero carousel pattern) ---- */
+.m3-carousel {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 80%;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-inline: 24px;
+  scroll-padding-inline: 24px;
+}
+.m3-carousel::-webkit-scrollbar { display: none; }
+.m3-carousel > * {
+  scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+  .m3-carousel { grid-auto-columns: 38%; }
+}
+@media (min-width: 1100px) {
+  .m3-carousel { grid-auto-columns: 28%; }
+}
+
+/* M3 Expressive marquee — pills floating across (used in landing patterns row) */
+@keyframes m3-marquee-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.m3-marquee-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  animation: m3-marquee-x 40s linear infinite;
+}
+.m3-marquee-mask {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  overflow: hidden;
+}
+
+/* ---- M3 Expressive interactive list item ---- */
+.m3-list-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: var(--md-sys-shape-corner-large);
+  background-color: hsl(var(--md-sys-color-surface-container-low));
+  transition:
+    background-color var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects),
+    transform var(--md-sys-motion-duration-expressive-fast-effects)
+      var(--md-sys-motion-easing-expressive-fast-spatial);
+}
+.m3-list-item:hover {
+  background-color: hsl(var(--md-sys-color-surface-container));
+  transform: translateY(-1px);
+}
+.m3-list-item:active { transform: scale(0.99); }
+
+/* ---- Wavy underline for active segmented button ---- */
+@keyframes m3-underline-grow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.m3-underline-grow {
+  transform-origin: center;
+  animation: m3-underline-grow var(--md-sys-motion-duration-expressive-default-spatial)
+    var(--md-sys-motion-easing-expressive-default-spatial) both;
+}
+
+/* ---- M3 mesh gradient — used for atmospheric backdrops ---- */
+.m3-mesh {
+  background:
+    radial-gradient(at 12% 18%,  hsl(var(--md-sys-color-primary-container) / 0.85) 0,  transparent 45%),
+    radial-gradient(at 88% 22%,  hsl(var(--md-sys-color-tertiary-container) / 0.75) 0, transparent 50%),
+    radial-gradient(at 50% 92%,  hsl(var(--md-sys-color-secondary-container) / 0.85) 0, transparent 55%),
+    hsl(var(--md-sys-color-surface));
+}
+
+/* ---- Scroll-shrinking top app bar helper ---- */
+.m3-top-app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  backdrop-filter: blur(14px) saturate(180%);
+  background-color: hsl(var(--md-sys-color-surface) / 0.78);
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects),
+    border-color var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects);
+}
+.m3-top-app-bar[data-scrolled="true"] {
+  background-color: hsl(var(--md-sys-color-surface-container) / 0.92);
+  border-bottom-color: hsl(var(--md-sys-color-outline-variant) / 0.6);
+}
+
+/* ---- Number ticker (count-up reveal) ---- */
+@keyframes m3-ticker {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.m3-ticker > * {
+  display: inline-block;
+  animation: m3-ticker var(--md-sys-motion-duration-expressive-default-spatial)
+    var(--md-sys-motion-easing-expressive-fast-spatial) both;
+}
+
+/* ---- Hero "physics" tile — used in landing hero stack ---- */
+.m3-hero-tile {
+  transition:
+    transform var(--md-sys-motion-duration-expressive-default-spatial)
+      var(--md-sys-motion-easing-expressive-default-spatial),
+    box-shadow var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects);
+  will-change: transform;
+}
+.m3-hero-tile:hover {
+  transform: translateY(-6px) rotate(-1deg);
+  box-shadow: var(--md-sys-elevation-3);
+}
+
+/* ---- Reveal-from-bottom (used on scroll-triggered content) ---- */
+@keyframes m3-reveal-rise {
+  from { opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.m3-rise {
+  animation: m3-reveal-rise 700ms var(--md-sys-motion-easing-expressive-default-spatial) both;
+}
+
+/* ---- Bottom-bar (mobile) — M3E nav bar with pill indicator ---- */
+.m3-bottom-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background-color: hsl(var(--md-sys-color-surface-container-high) / 0.96);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--md-sys-elevation-3);
+}
+
+/* Bigger M3 Expressive stagger — used in bento grids */
+.m3-stagger > *:nth-child(11) { animation-delay: 540ms; }
+.m3-stagger > *:nth-child(12) { animation-delay: 590ms; }
+
+/* ---- Fancy outline (gradient border on hover) ---- */
+.m3-glow-border {
+  position: relative;
+  isolation: isolate;
+}
+.m3-glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    hsl(var(--md-sys-color-primary)),
+    hsl(var(--md-sys-color-tertiary)),
+    hsl(var(--md-sys-color-primary)));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-expressive-default-effects)
+    var(--md-sys-motion-easing-expressive-default-effects);
+}
+.m3-glow-border:hover::before { opacity: 1; }
+
+/* ---- Squircle clip (Material You "blobby" hero shape) ---- */
+.m3-squircle {
+  clip-path: path("M 0 100 C 0 25, 25 0, 100 0 S 200 25, 200 100 175 200, 100 200 0 175, 0 100");
+}
+
+/* ---- Tonal hover for icon buttons ---- */
+.m3-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--md-sys-shape-corner-full);
+  color: hsl(var(--md-sys-color-on-surface-variant));
+  transition:
+    background-color var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects),
+    color var(--md-sys-motion-duration-expressive-default-effects)
+      var(--md-sys-motion-easing-expressive-default-effects);
+}
+.m3-icon-btn:hover {
+  background-color: hsl(var(--md-sys-color-on-surface) / 0.08);
+  color: hsl(var(--md-sys-color-on-surface));
+}
+.m3-icon-btn:active {
+  background-color: hsl(var(--md-sys-color-on-surface) / 0.12);
+}
+
+/* ---- Snackbar — M3 styled */
+.m3-snackbar {
+  background-color: hsl(var(--md-sys-color-inverse-surface));
+  color: hsl(var(--md-sys-color-inverse-on-surface));
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  box-shadow: var(--md-sys-elevation-3);
+}

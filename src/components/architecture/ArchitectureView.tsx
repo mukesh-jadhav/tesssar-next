@@ -1,21 +1,35 @@
 "use client";
 
-import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 import { MermaidDiagram } from "./MermaidDiagram";
 import { ScaleExplorer } from "./ScaleExplorer";
 import type { Architecture, ArchComponent, Risk } from "@/types/architecture";
-import {
-  Layers, GitBranch, Box, Database, Shield, AlertTriangle, Activity, Coins,
-  CheckCircle2, Sparkles, Network, FileText, Map, ListChecks, Download,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { SegmentedButtons } from "@/components/m3/SegmentedButtons";
+import { Fab } from "@/components/m3/Fab";
+import { Chip } from "@/components/m3/Chip";
 
-const CATEGORY_COLOR: Record<ArchComponent["category"], string> = {
+/**
+ * Material 3 Expressive architecture report.
+ * - Sticky side anchor nav (lg+) with scroll-spy active state.
+ * - Horizontal pill nav (mobile).
+ * - Section cards on M3 surface tones; rounded-[28px].
+ * - Diagrams switched via M3 segmented chips.
+ */
+
+const SECTIONS = [
+  { id: "overview", label: "Overview", icon: "summarize" },
+  { id: "diagrams", label: "Diagrams", icon: "account_tree" },
+  { id: "components", label: "Components", icon: "category" },
+  { id: "data", label: "Data & APIs", icon: "database" },
+  { id: "scale", label: "Scale & Cost", icon: "ssid_chart" },
+  { id: "risks", label: "Risks", icon: "warning" },
+  { id: "security", label: "Security", icon: "shield" },
+  { id: "ops", label: "Operations", icon: "monitor_heart" },
+  { id: "roadmap", label: "Roadmap", icon: "rocket_launch" },
+] as const;
+
+const CATEGORY_TONE: Record<ArchComponent["category"], string> = {
   frontend: "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
   api: "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200",
   service: "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
@@ -33,11 +47,11 @@ const CATEGORY_COLOR: Record<ArchComponent["category"], string> = {
   other: "bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-200",
 };
 
-const RISK_COLOR: Record<Risk["impact"], string> = {
-  low: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
-  medium: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
-  high: "bg-orange-500/15 text-orange-700 dark:text-orange-300",
-  critical: "bg-red-500/15 text-red-700 dark:text-red-300",
+const RISK_TONE: Record<Risk["impact"], string> = {
+  low: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
+  medium: "bg-m3-secondary-container text-m3-on-secondary-container",
+  high: "bg-m3-tertiary-container text-m3-on-tertiary-container",
+  critical: "bg-m3-error-container text-m3-on-error-container",
 };
 
 export function ArchitectureView({
@@ -49,436 +63,507 @@ export function ArchitectureView({
   architectureId?: string;
   showDownload?: boolean;
 }) {
-  const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id);
+  const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
+  const [activeSection, setActiveSection] = useState<string>("overview");
+
+  // Scroll-spy for section nav
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    SECTIONS.forEach((s) => {
+      const el = document.getElementById(s.id);
+      if (!el) return;
+      const ob = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) setActiveSection(s.id);
+          }
+        },
+        { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
+      );
+      ob.observe(el);
+      observers.push(ob);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
+
   const currentDiagram = arch.diagrams.find((d) => d.id === activeDiagram) ?? arch.diagrams[0];
 
   return (
-    <div className="space-y-10">
-      {/* HEADER */}
-      <header className="space-y-5">
-        <div className="flex flex-wrap items-start justify-between gap-4 animate-reveal-up">
-          <div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+    <div className="relative mx-auto w-full max-w-[1440px] px-6 py-10 md:px-10 md:py-14 lg:px-14">
+      {/* Ambient backdrop */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden">
+        <div className="absolute left-[10%] top-10 size-[360px] rounded-full bg-m3-primary-container/45 blur-[110px] m3-shape-a" />
+        <div className="absolute right-[6%] top-20 size-[400px] rounded-full bg-m3-tertiary-container/45 blur-[120px] m3-shape-b" />
+      </div>
+
+      {/* HERO */}
+      <header className="m3-page-enter">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div className="max-w-3xl">
+            <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
               {arch.meta.domain}
             </div>
-            <h1 className="display mt-2 text-balance text-[clamp(2.5rem,5.5vw,3.75rem)]">
+            <h1 className="display mt-3 text-balance text-[clamp(2.5rem,5.5vw,3.75rem)] leading-[1.05]">
               {arch.meta.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground md:text-base">
+            <p className="mt-5 max-w-2xl text-balance text-[16px] leading-relaxed text-m3-on-surface-variant md:text-[17px]">
               {arch.meta.one_liner}
             </p>
           </div>
           {showDownload && architectureId && (
-            <Button asChild variant="outline" className="gap-2">
-              <a
-                href={`/api/architect/${architectureId}/pdf`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Download className="size-4" />
-                Download PDF
-              </a>
-            </Button>
+            <Fab
+              size="extended"
+              icon="download"
+              href={`/api/architect/${architectureId}/pdf`}
+              variant="surface"
+              className="!h-12 !rounded-2xl !text-[14px] !shadow-none border border-m3-outline-variant"
+            >
+              Download PDF
+            </Fab>
           )}
         </div>
-        <Card
-          className="animate-reveal-up"
-          style={{ animationDelay: "100ms", animationFillMode: "both" }}
-        >
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              <Sparkles className="size-3.5" />
-              Executive summary
-            </div>
-            <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">
-              {arch.executive_summary}
-            </p>
-          </CardContent>
-        </Card>
+
+        {/* Executive summary */}
+        <article className="m3-rise mt-8 overflow-hidden rounded-[32px] bg-m3-primary-container p-7 text-m3-on-primary-container">
+          <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] opacity-80">
+            <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
+            Executive summary
+          </div>
+          <p className="mt-4 text-[16px] leading-relaxed md:text-[17px]">
+            {arch.executive_summary}
+          </p>
+        </article>
       </header>
 
-      {/* TABS */}
-      <Tabs defaultValue="overview" className="w-full">
-        <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
-          <TabsList className="w-max min-w-full justify-start md:w-full">
-            <TabsTrigger value="overview" className="gap-1.5"><Layers className="size-3.5" /> Overview</TabsTrigger>
-            <TabsTrigger value="diagrams" className="gap-1.5"><GitBranch className="size-3.5" /> Diagrams</TabsTrigger>
-            <TabsTrigger value="components" className="gap-1.5"><Box className="size-3.5" /> Components</TabsTrigger>
-            <TabsTrigger value="data" className="gap-1.5"><Database className="size-3.5" /> Data &amp; APIs</TabsTrigger>
-            <TabsTrigger value="scale" className="gap-1.5"><Network className="size-3.5" /> Scale &amp; Cost</TabsTrigger>
-            <TabsTrigger value="risks" className="gap-1.5"><AlertTriangle className="size-3.5" /> Risks</TabsTrigger>
-            <TabsTrigger value="security" className="gap-1.5"><Shield className="size-3.5" /> Security</TabsTrigger>
-            <TabsTrigger value="ops" className="gap-1.5"><Activity className="size-3.5" /> Ops</TabsTrigger>
-            <TabsTrigger value="roadmap" className="gap-1.5"><Map className="size-3.5" /> Roadmap</TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* OVERVIEW */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <Section icon={<ListChecks className="size-4" />} title="Functional requirements">
-              <Bullets items={arch.requirements.functional} />
-            </Section>
-            <Section icon={<ListChecks className="size-4" />} title="Non-functional requirements">
-              <Bullets items={arch.requirements.non_functional} />
-            </Section>
-            <Section icon={<CheckCircle2 className="size-4" />} title="Assumptions">
-              <Bullets items={arch.requirements.assumptions} muted />
-            </Section>
-            <Section icon={<FileText className="size-4" />} title="Out of scope">
-              <Bullets items={arch.requirements.out_of_scope} muted />
-            </Section>
-          </div>
-          <Section icon={<Sparkles className="size-4" />} title="Applied cloud design patterns">
-            <div className="grid gap-3 md:grid-cols-2">
-              {arch.applied_patterns.map((p, i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="font-medium">{p.name}</div>
-                    <Badge variant="outline" className="text-[10px]">{p.category}</Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{p.why}</p>
-                  <div className="mt-2 text-xs text-brand">→ {p.where}</div>
-                </div>
-              ))}
+      <div className="mt-10 grid gap-10 lg:grid-cols-[220px_1fr]">
+        {/* Side anchor nav (lg+) */}
+        <nav className="hidden lg:block">
+          <div className="sticky top-6 flex flex-col gap-1 pr-2">
+            <div className="px-3 py-2 text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+              Report
             </div>
-          </Section>
-        </TabsContent>
-
-        {/* DIAGRAMS */}
-        <TabsContent value="diagrams" className="space-y-4">
-          <div className="grid gap-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[260px_1fr]">
-            <div className="space-y-1.5 lg:sticky lg:top-24 lg:self-start">
-              {arch.diagrams.map((d) => {
-                const active = activeDiagram === d.id;
-                return (
-                  <button
-                    key={d.id}
-                    onClick={() => setActiveDiagram(d.id)}
-                    className={`group/diag relative flex w-full items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all duration-200 ease-out-quart ${
-                      active
-                        ? "border-foreground/20 bg-card shadow-[0_1px_0_hsl(var(--border)),0_4px_10px_-4px_hsl(var(--foreground)/0.08)]"
-                        : "border-transparent hover:border-border hover:bg-card/60"
-                    }`}
-                  >
-                    <span
-                      aria-hidden
-                      className={`mt-1.5 h-px shrink-0 origin-left bg-foreground transition-all duration-300 ease-out-expo ${
-                        active ? "w-4" : "w-2 opacity-40"
-                      }`}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium leading-snug">{d.title}</div>
-                      <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-                        {d.kind.replace(/-/g, " ")}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <div className="space-y-4">
-              {currentDiagram && (
-                <div
-                  key={currentDiagram.id}
-                  className="space-y-4 animate-reveal-up"
+            {SECTIONS.map((s) => {
+              const active = activeSection === s.id;
+              return (
+                <a
+                  key={s.id}
+                  href={`#${s.id}`}
+                  className={cn(
+                    "state-layer flex items-center gap-3 rounded-full px-3 py-2 text-[13px] transition-colors duration-m3-default-effects ease-m3-default-effects",
+                    active
+                      ? "bg-m3-secondary-container text-m3-on-secondary-container font-medium"
+                      : "text-m3-on-surface-variant hover:text-m3-on-surface",
+                  )}
                 >
-                  <div>
-                    <h3 className="display text-[1.75rem] leading-tight">
-                      {currentDiagram.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                      {currentDiagram.description}
-                    </p>
-                  </div>
-                  <Card className="overflow-hidden">
-                    <CardContent className="p-4 md:p-6">
-                      <MermaidDiagram chart={currentDiagram.mermaid} className="min-h-[420px]" />
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </div>
+                  <span className={cn("ms text-[18px]", active && "ms-filled")} aria-hidden>{s.icon}</span>
+                  {s.label}
+                </a>
+              );
+            })}
           </div>
-        </TabsContent>
+        </nav>
 
-        {/* COMPONENTS */}
-        <TabsContent value="components" className="space-y-6">
-          <Section icon={<Box className="size-4" />} title={`${arch.components.length} components`}>
+        {/* Mobile pill nav */}
+        <nav className="lg:hidden -mx-6 px-6 pb-2 overflow-x-auto">
+          <div className="flex gap-2 w-max min-w-full">
+            {SECTIONS.map((s) => {
+              const active = activeSection === s.id;
+              return (
+                <a
+                  key={s.id}
+                  href={`#${s.id}`}
+                  className={cn(
+                    "state-layer flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] whitespace-nowrap",
+                    active
+                      ? "bg-m3-secondary-container border-transparent text-m3-on-secondary-container font-medium"
+                      : "border-m3-outline-variant text-m3-on-surface-variant",
+                  )}
+                >
+                  <span className={cn("ms text-[16px]", active && "ms-filled")} aria-hidden>{s.icon}</span>
+                  {s.label}
+                </a>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Content column */}
+        <div className="space-y-14 min-w-0">
+          {/* OVERVIEW */}
+          <Section id="overview" eyebrow="01" title="Overview" icon="summarize">
+            <div className="grid gap-3 md:grid-cols-2">
+              <SubCard title="Functional requirements" icon="checklist">
+                <Bullets items={arch.requirements.functional} tone="primary" />
+              </SubCard>
+              <SubCard title="Non-functional requirements" icon="speed">
+                <Bullets items={arch.requirements.non_functional} tone="tertiary" />
+              </SubCard>
+              <SubCard title="Assumptions" icon="psychology">
+                <Bullets items={arch.requirements.assumptions} tone="secondary" muted />
+              </SubCard>
+              <SubCard title="Out of scope" icon="block">
+                <Bullets items={arch.requirements.out_of_scope} tone="secondary" muted />
+              </SubCard>
+            </div>
+
+            <SubCard title="Applied cloud design patterns" icon="extension" className="mt-3">
+              <div className="grid gap-3 md:grid-cols-2">
+                {arch.applied_patterns.map((p, i) => (
+                  <div key={i} className="rounded-2xl bg-m3-surface p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-medium text-m3-on-surface">{p.name}</div>
+                      <span className="rounded-full bg-m3-secondary-container px-2.5 py-0.5 text-[10px] font-medium text-m3-on-secondary-container">
+                        {p.category}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-[13px] leading-relaxed text-m3-on-surface-variant">{p.why}</p>
+                    <div className="mt-2 inline-flex items-center gap-1 text-[12px] font-medium text-m3-primary">
+                      <span className="ms text-[14px]" aria-hidden>arrow_forward</span>
+                      {p.where}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SubCard>
+          </Section>
+
+          {/* DIAGRAMS */}
+          <Section id="diagrams" eyebrow="02" title="Diagrams" icon="account_tree">
+            <SegmentedButtons
+              segments={arch.diagrams.map((d) => ({
+                value: d.id,
+                label: d.kind.replace(/-/g, " "),
+              }))}
+              value={activeDiagram}
+              onChange={setActiveDiagram}
+              className="mb-5"
+            />
+            {currentDiagram && (
+              <div key={currentDiagram.id} className="m3-rise space-y-4">
+                <div>
+                  <h3 className="display text-[clamp(1.5rem,2.4vw,1.875rem)] leading-tight">
+                    {currentDiagram.title}
+                  </h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-m3-on-surface-variant">
+                    {currentDiagram.description}
+                  </p>
+                </div>
+                <div className="overflow-hidden rounded-[28px] bg-m3-surface p-4 md:p-6">
+                  <MermaidDiagram chart={currentDiagram.mermaid} className="min-h-[420px]" />
+                </div>
+              </div>
+            )}
+          </Section>
+
+          {/* COMPONENTS */}
+          <Section id="components" eyebrow="03" title={`${arch.components.length} components`} icon="category">
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
               {arch.components.map((c) => (
-                <div key={c.id} className="rounded-lg border p-4">
+                <div key={c.id} className="m3-list-item flex-col items-stretch !gap-2 !p-5">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="font-medium">{c.name}</div>
-                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${CATEGORY_COLOR[c.category]}`}>
+                    <div className="font-medium text-m3-on-surface">{c.name}</div>
+                    <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider", CATEGORY_TONE[c.category])}>
                       {c.category}
                     </span>
                   </div>
-                  <div className="mt-1 font-mono text-xs text-muted-foreground">{c.technology}</div>
-                  <p className="mt-3 text-sm">{c.responsibility}</p>
-                  <Separator className="my-3" />
-                  <div className="text-xs">
-                    <div className="font-medium uppercase tracking-wider text-muted-foreground">Scaling</div>
-                    <div className="mt-1">{c.scaling}</div>
+                  <div className="font-mono text-[11px] text-m3-on-surface-variant">{c.technology}</div>
+                  <p className="mt-1 text-[13px] leading-relaxed text-m3-on-surface">{c.responsibility}</p>
+                  <div className="mt-3 rounded-xl bg-m3-surface p-3">
+                    <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+                      Scaling
+                    </div>
+                    <div className="mt-1 text-[13px]">{c.scaling}</div>
                   </div>
                   {c.alternatives.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
+                    <div className="mt-2 flex flex-wrap gap-1">
                       {c.alternatives.map((a) => (
-                        <Badge key={a} variant="secondary" className="text-[10px]">{a}</Badge>
+                        <span key={a} className="rounded-full bg-m3-surface px-2 py-0.5 text-[10px] text-m3-on-surface-variant">
+                          {a}
+                        </span>
                       ))}
                     </div>
                   )}
                 </div>
               ))}
             </div>
+
+            <SubCard title="Tech stack rationale" icon="layers" className="mt-3">
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-m3-outline-variant/40 text-left text-[10px] uppercase tracking-[0.16em] text-m3-on-surface-variant">
+                      <th className="py-2 pr-4">Layer</th>
+                      <th className="py-2 pr-4">Choice</th>
+                      <th className="py-2 pr-4">Why</th>
+                      <th className="py-2">Alternatives</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {arch.tech_stack.map((t, i) => (
+                      <tr key={i} className="border-b border-m3-outline-variant/30 align-top">
+                        <td className="py-3 pr-4 font-medium">{t.layer}</td>
+                        <td className="py-3 pr-4 font-mono text-[12px]">{t.choice}</td>
+                        <td className="py-3 pr-4 text-m3-on-surface-variant">{t.rationale}</td>
+                        <td className="py-3">
+                          <div className="flex flex-wrap gap-1">
+                            {t.alternatives.map((a) => (
+                              <span key={a} className="rounded-full bg-m3-surface px-2 py-0.5 text-[10px]">{a}</span>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SubCard>
           </Section>
-          <Section icon={<Layers className="size-4" />} title="Tech stack rationale">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="py-2 pr-4">Layer</th>
-                  <th className="py-2 pr-4">Choice</th>
-                  <th className="py-2 pr-4">Why</th>
-                  <th className="py-2">Alternatives</th>
-                </tr>
-              </thead>
-              <tbody>
-                {arch.tech_stack.map((t, i) => (
-                  <tr key={i} className="border-b align-top">
-                    <td className="py-3 pr-4 font-medium">{t.layer}</td>
-                    <td className="py-3 pr-4 font-mono text-xs">{t.choice}</td>
-                    <td className="py-3 pr-4 text-muted-foreground">{t.rationale}</td>
-                    <td className="py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {t.alternatives.map((a) => (
-                          <Badge key={a} variant="outline" className="text-[10px]">{a}</Badge>
-                        ))}
+
+          {/* DATA */}
+          <Section id="data" eyebrow="04" title="Data & APIs" icon="database">
+            <SubCard title="Primary data flow" icon="account_tree">
+              <ol className="space-y-2">
+                {arch.data_flows.map((f) => (
+                  <li key={f.step} className="flex gap-4 rounded-2xl bg-m3-surface p-4">
+                    <div className="grid size-8 shrink-0 place-items-center rounded-full bg-m3-primary-container text-[12px] font-semibold text-m3-on-primary-container">
+                      {f.step}
+                    </div>
+                    <div className="flex-1 text-[13px]">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium">{f.from}</span>
+                        <span className="ms text-[16px] text-m3-on-surface-variant" aria-hidden>arrow_forward</span>
+                        <span className="font-medium">{f.to}</span>
+                        <span className="rounded-full bg-m3-secondary-container px-2 py-0.5 text-[10px] text-m3-on-secondary-container">{f.protocol}</span>
+                        {f.latency_budget_ms !== undefined && (
+                          <span className="rounded-full bg-m3-tertiary-container px-2 py-0.5 text-[10px] text-m3-on-tertiary-container">
+                            budget {f.latency_budget_ms}ms
+                          </span>
+                        )}
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Section>
-        </TabsContent>
-
-        {/* DATA */}
-        <TabsContent value="data" className="space-y-6">
-          <Section icon={<GitBranch className="size-4" />} title="Primary data flow">
-            <ol className="space-y-2">
-              {arch.data_flows.map((f) => (
-                <li key={f.step} className="flex gap-4 rounded-lg border p-3">
-                  <div className="grid size-7 shrink-0 place-items-center rounded-full bg-brand/10 text-xs font-semibold text-brand">
-                    {f.step}
-                  </div>
-                  <div className="flex-1 text-sm">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{f.from}</span>
-                      <span className="text-muted-foreground">→</span>
-                      <span className="font-medium">{f.to}</span>
-                      <Badge variant="outline" className="text-[10px]">{f.protocol}</Badge>
-                      {f.latency_budget_ms !== undefined && (
-                        <Badge variant="info" className="text-[10px]">budget {f.latency_budget_ms}ms</Badge>
-                      )}
+                      <div className="mt-1 text-m3-on-surface-variant">{f.action}</div>
+                      <div className="mt-1 font-mono text-[11px] text-m3-on-surface-variant">{f.payload}</div>
                     </div>
-                    <div className="mt-1 text-muted-foreground">{f.action}</div>
-                    <div className="mt-1 font-mono text-xs text-muted-foreground">{f.payload}</div>
+                  </li>
+                ))}
+              </ol>
+            </SubCard>
+
+            <SubCard title="Data model" icon="schema" className="mt-3">
+              <p className="mb-4 text-[13px] text-m3-on-surface-variant">{arch.data_model.storage_strategy}</p>
+              <div className="grid gap-3 md:grid-cols-2">
+                {arch.data_model.entities.map((e) => (
+                  <div key={e.name} className="rounded-2xl bg-m3-surface p-4">
+                    <div className="font-semibold text-m3-on-surface">{e.name}</div>
+                    <table className="mt-2 w-full text-[12px]">
+                      <tbody>
+                        {e.fields.map((f) => (
+                          <tr key={f.name} className="border-b border-m3-outline-variant/30 last:border-0">
+                            <td className="py-1.5 pr-2 font-mono">{f.name}</td>
+                            <td className="py-1.5 pr-2 text-m3-on-surface-variant">{f.type}</td>
+                            <td className="py-1.5 text-m3-on-surface-variant">{f.notes}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {e.relationships.length > 0 && (
+                      <div className="mt-2 text-[11px] font-medium text-m3-primary">
+                        {e.relationships.join(" · ")}
+                      </div>
+                    )}
                   </div>
-                </li>
-              ))}
-            </ol>
-          </Section>
-
-          <Section icon={<Database className="size-4" />} title="Data model">
-            <p className="mb-4 text-sm text-muted-foreground">{arch.data_model.storage_strategy}</p>
-            <div className="grid gap-3 md:grid-cols-2">
-              {arch.data_model.entities.map((e) => (
-                <div key={e.name} className="rounded-lg border p-4">
-                  <div className="font-semibold">{e.name}</div>
-                  <table className="mt-2 w-full text-xs">
-                    <tbody>
-                      {e.fields.map((f) => (
-                        <tr key={f.name} className="border-b last:border-0">
-                          <td className="py-1.5 pr-2 font-mono">{f.name}</td>
-                          <td className="py-1.5 pr-2 text-muted-foreground">{f.type}</td>
-                          <td className="py-1.5 text-muted-foreground">{f.notes}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {e.relationships.length > 0 && (
-                    <div className="mt-2 text-xs text-brand">
-                      {e.relationships.join(" · ")}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Section icon={<FileText className="size-4" />} title="API surface">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="py-2 pr-4">Method</th>
-                  <th className="py-2 pr-4">Path</th>
-                  <th className="py-2 pr-4">Purpose</th>
-                  <th className="py-2 pr-4">Auth</th>
-                  <th className="py-2">Rate limit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {arch.api_surface.map((a, i) => (
-                  <tr key={i} className="border-b">
-                    <td className="py-2 pr-4"><Badge variant="outline" className="font-mono text-[10px]">{a.method}</Badge></td>
-                    <td className="py-2 pr-4 font-mono text-xs">{a.path}</td>
-                    <td className="py-2 pr-4 text-muted-foreground">{a.purpose}</td>
-                    <td className="py-2 pr-4 text-xs">{a.auth}</td>
-                    <td className="py-2 text-xs text-muted-foreground">{a.rate_limit ?? "—"}</td>
-                  </tr>
                 ))}
-              </tbody>
-            </table>
-          </Section>
-        </TabsContent>
+              </div>
+            </SubCard>
 
-        {/* SCALE */}
-        <TabsContent value="scale" className="space-y-6">
-          <Section icon={<Network className="size-4" />} title="Scale explorer">
-            <ScaleExplorer profiles={arch.scale_profiles} />
+            <SubCard title="API surface" icon="api" className="mt-3">
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-m3-outline-variant/40 text-left text-[10px] uppercase tracking-[0.16em] text-m3-on-surface-variant">
+                      <th className="py-2 pr-4">Method</th>
+                      <th className="py-2 pr-4">Path</th>
+                      <th className="py-2 pr-4">Purpose</th>
+                      <th className="py-2 pr-4">Auth</th>
+                      <th className="py-2">Rate limit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {arch.api_surface.map((a, i) => (
+                      <tr key={i} className="border-b border-m3-outline-variant/30">
+                        <td className="py-2 pr-4">
+                          <span className="rounded-full bg-m3-primary-container px-2 py-0.5 font-mono text-[11px] text-m3-on-primary-container">
+                            {a.method}
+                          </span>
+                        </td>
+                        <td className="py-2 pr-4 font-mono text-[12px]">{a.path}</td>
+                        <td className="py-2 pr-4 text-m3-on-surface-variant">{a.purpose}</td>
+                        <td className="py-2 pr-4 text-[12px]">{a.auth}</td>
+                        <td className="py-2 text-[12px] text-m3-on-surface-variant">{a.rate_limit ?? "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SubCard>
           </Section>
-          <Section icon={<Coins className="size-4" />} title="Monthly cost breakdown (growth tier baseline)">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="py-2 pr-4">Service</th>
-                  <th className="py-2 pr-4">Estimated qty</th>
-                  <th className="py-2 pr-4 text-right">Monthly INR</th>
-                  <th className="py-2">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {arch.cost_breakdown.map((c, i) => (
-                  <tr key={i} className="border-b align-top">
-                    <td className="py-3 pr-4 font-medium">{c.service}</td>
-                    <td className="py-3 pr-4 text-xs text-muted-foreground">{c.estimated_qty}</td>
-                    <td className="py-3 pr-4 text-right font-mono text-xs">
-                      ₹{c.monthly_inr_low.toLocaleString("en-IN")} – ₹{c.monthly_inr_high.toLocaleString("en-IN")}
-                    </td>
-                    <td className="py-3 text-xs text-muted-foreground">{c.notes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </Section>
-        </TabsContent>
 
-        {/* RISKS */}
-        <TabsContent value="risks" className="space-y-3">
-          <Section icon={<AlertTriangle className="size-4" />} title={`${arch.risks.length} identified risks`}>
-            <div className="space-y-2">
+          {/* SCALE */}
+          <Section id="scale" eyebrow="05" title="Scale & Cost" icon="ssid_chart">
+            <SubCard title="Scale explorer" icon="tune">
+              <ScaleExplorer profiles={arch.scale_profiles} />
+            </SubCard>
+
+            <SubCard title="Monthly cost — growth tier baseline" icon="currency_rupee" className="mt-3">
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-m3-outline-variant/40 text-left text-[10px] uppercase tracking-[0.16em] text-m3-on-surface-variant">
+                      <th className="py-2 pr-4">Service</th>
+                      <th className="py-2 pr-4">Estimated qty</th>
+                      <th className="py-2 pr-4 text-right">Monthly INR</th>
+                      <th className="py-2">Notes</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {arch.cost_breakdown.map((c, i) => (
+                      <tr key={i} className="border-b border-m3-outline-variant/30 align-top">
+                        <td className="py-3 pr-4 font-medium">{c.service}</td>
+                        <td className="py-3 pr-4 text-[12px] text-m3-on-surface-variant">{c.estimated_qty}</td>
+                        <td className="py-3 pr-4 text-right font-mono text-[12px]">
+                          ₹{c.monthly_inr_low.toLocaleString("en-IN")} – ₹{c.monthly_inr_high.toLocaleString("en-IN")}
+                        </td>
+                        <td className="py-3 text-[12px] text-m3-on-surface-variant">{c.notes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </SubCard>
+          </Section>
+
+          {/* RISKS */}
+          <Section id="risks" eyebrow="06" title={`${arch.risks.length} identified risks`} icon="warning">
+            <div className="space-y-2.5">
               {arch.risks.map((r) => (
-                <div key={r.id} className="rounded-lg border p-4">
+                <div key={r.id} className="m3-list-item flex-col items-stretch !gap-2 !p-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="font-medium">{r.title}</div>
+                    <div className="font-medium text-m3-on-surface">{r.title}</div>
                     <div className="flex items-center gap-1.5">
-                      <span className={`rounded px-2 py-0.5 text-[10px] font-semibold uppercase ${RISK_COLOR[r.impact]}`}>
+                      <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase", RISK_TONE[r.impact])}>
                         {r.impact} impact
                       </span>
-                      <Badge variant="outline" className="text-[10px]">{r.likelihood} likelihood</Badge>
-                      <Badge variant="secondary" className="text-[10px]">{r.category}</Badge>
+                      <span className="rounded-full bg-m3-surface px-2 py-0.5 text-[10px] text-m3-on-surface-variant">
+                        {r.likelihood} likelihood
+                      </span>
+                      <span className="rounded-full bg-m3-secondary-container px-2 py-0.5 text-[10px] text-m3-on-secondary-container">
+                        {r.category}
+                      </span>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">{r.mitigation}</p>
+                  <p className="text-[13px] leading-relaxed text-m3-on-surface-variant">{r.mitigation}</p>
                   {r.cloud_pattern && (
-                    <div className="mt-2 text-xs text-brand">Pattern: {r.cloud_pattern}</div>
+                    <div className="inline-flex w-fit items-center gap-1 text-[11px] font-medium text-m3-primary">
+                      <span className="ms text-[14px]" aria-hidden>extension</span>
+                      Pattern: {r.cloud_pattern}
+                    </div>
                   )}
                 </div>
               ))}
             </div>
           </Section>
-        </TabsContent>
 
-        {/* SECURITY */}
-        <TabsContent value="security" className="space-y-6">
-          <Section icon={<Shield className="size-4" />} title="Security & compliance controls">
+          {/* SECURITY */}
+          <Section id="security" eyebrow="07" title="Security & compliance" icon="shield">
             <div className="grid gap-3 md:grid-cols-2">
               {arch.security.map((s, i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="flex items-center justify-between">
-                    <Badge variant="brand" className="text-[10px] uppercase">{s.area}</Badge>
-                    {s.gcp_service && <span className="font-mono text-xs text-muted-foreground">{s.gcp_service}</span>}
+                <div key={i} className="m3-list-item flex-col items-stretch !gap-2 !p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-m3-tertiary-container px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-m3-on-tertiary-container">
+                      {s.area}
+                    </span>
+                    {s.gcp_service && (
+                      <span className="font-mono text-[11px] text-m3-on-surface-variant">{s.gcp_service}</span>
+                    )}
                   </div>
-                  <div className="mt-2 font-medium">{s.control}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{s.implementation}</p>
+                  <div className="font-medium text-m3-on-surface">{s.control}</div>
+                  <p className="text-[13px] leading-relaxed text-m3-on-surface-variant">{s.implementation}</p>
                 </div>
               ))}
             </div>
           </Section>
-        </TabsContent>
 
-        {/* OPS */}
-        <TabsContent value="ops" className="space-y-6">
-          <Section icon={<Activity className="size-4" />} title="SLOs">
-            <div className="grid gap-3 md:grid-cols-3">
-              {arch.observability.slos.map((s, i) => (
-                <div key={i} className="rounded-lg border p-4">
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">{s.window}</div>
-                  <div className="mt-1 font-medium">{s.name}</div>
-                  <div className="mt-1 text-xl font-semibold text-brand">{s.target}</div>
-                </div>
-              ))}
-            </div>
-          </Section>
-          <Section icon={<AlertTriangle className="size-4" />} title="Alerts">
-            <div className="space-y-2">
-              {arch.observability.alerts.map((a, i) => (
-                <div key={i} className="flex items-start gap-3 rounded-lg border p-3">
-                  <Badge
-                    variant={a.severity === "critical" ? "destructive" : a.severity === "warning" ? "warning" : "info"}
-                    className="text-[10px] uppercase"
-                  >
-                    {a.severity}
-                  </Badge>
-                  <div className="flex-1 text-sm">
-                    <div className="font-medium">{a.name}</div>
-                    <div className="font-mono text-xs text-muted-foreground">{a.condition}</div>
+          {/* OPS */}
+          <Section id="ops" eyebrow="08" title="Operations" icon="monitor_heart">
+            <SubCard title="SLOs" icon="speed">
+              <div className="grid gap-3 md:grid-cols-3">
+                {arch.observability.slos.map((s, i) => (
+                  <div key={i} className="rounded-2xl bg-m3-surface p-4">
+                    <div className="text-[10px] uppercase tracking-[0.16em] text-m3-on-surface-variant">{s.window}</div>
+                    <div className="mt-1 font-medium">{s.name}</div>
+                    <div className="display mt-2 text-[22px] text-m3-primary">{s.target}</div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-          <div className="grid gap-6 md:grid-cols-3">
-            <Section title="Metrics"><Bullets items={arch.observability.metrics} /></Section>
-            <Section title="Logs"><Bullets items={arch.observability.logs} /></Section>
-            <Section title="Traces"><Bullets items={arch.observability.traces} /></Section>
-          </div>
-          <Section icon={<Map className="size-4" />} title="Deployment">
-            <dl className="grid gap-3 text-sm md:grid-cols-2">
-              <DDef k="Primary region" v={arch.deployment.primary_region} />
-              <DDef k="Additional regions" v={arch.deployment.additional_regions.join(", ") || "—"} />
-              <DDef k="IaC" v={arch.deployment.iac} />
-              <DDef k="CI/CD" v={arch.deployment.ci_cd} />
-              <DDef k="Rollout" v={arch.deployment.rollout_strategy} />
-              <DDef k="Rollback" v={arch.deployment.rollback_strategy} />
-            </dl>
-          </Section>
-        </TabsContent>
+                ))}
+              </div>
+            </SubCard>
 
-        {/* ROADMAP */}
-        <TabsContent value="roadmap" className="space-y-6">
-          <Section icon={<Map className="size-4" />} title="Build roadmap">
+            <SubCard title="Alerts" icon="notifications_active" className="mt-3">
+              <div className="space-y-2">
+                {arch.observability.alerts.map((a, i) => (
+                  <div key={i} className="flex items-start gap-3 rounded-2xl bg-m3-surface p-3.5">
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase",
+                        a.severity === "critical"
+                          ? "bg-m3-error-container text-m3-on-error-container"
+                          : a.severity === "warning"
+                            ? "bg-m3-tertiary-container text-m3-on-tertiary-container"
+                            : "bg-m3-secondary-container text-m3-on-secondary-container",
+                      )}
+                    >
+                      {a.severity}
+                    </span>
+                    <div className="flex-1 text-[13px]">
+                      <div className="font-medium text-m3-on-surface">{a.name}</div>
+                      <div className="font-mono text-[11px] text-m3-on-surface-variant">{a.condition}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SubCard>
+
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <SubCard title="Metrics" icon="bar_chart"><Bullets items={arch.observability.metrics} tone="primary" /></SubCard>
+              <SubCard title="Logs" icon="article"><Bullets items={arch.observability.logs} tone="secondary" /></SubCard>
+              <SubCard title="Traces" icon="route"><Bullets items={arch.observability.traces} tone="tertiary" /></SubCard>
+            </div>
+
+            <SubCard title="Deployment" icon="cloud_upload" className="mt-3">
+              <dl className="grid gap-3 md:grid-cols-2">
+                <DDef k="Primary region" v={arch.deployment.primary_region} />
+                <DDef k="Additional regions" v={arch.deployment.additional_regions.join(", ") || "—"} />
+                <DDef k="IaC" v={arch.deployment.iac} />
+                <DDef k="CI/CD" v={arch.deployment.ci_cd} />
+                <DDef k="Rollout" v={arch.deployment.rollout_strategy} />
+                <DDef k="Rollback" v={arch.deployment.rollback_strategy} />
+              </dl>
+            </SubCard>
+          </Section>
+
+          {/* ROADMAP */}
+          <Section id="roadmap" eyebrow="09" title="Roadmap" icon="rocket_launch">
             <ol className="space-y-3">
               {arch.roadmap.map((r, i) => (
-                <li key={i} className="rounded-lg border p-4">
+                <li key={i} className="m3-list-item flex-col items-stretch !gap-3 !p-5">
                   <div className="flex items-center justify-between">
-                    <div className="font-medium">{r.phase}</div>
-                    <Badge variant="brand" className="text-[10px]">{r.timeline}</Badge>
+                    <div className="font-medium text-m3-on-surface">{r.phase}</div>
+                    <span className="rounded-full bg-m3-primary-container px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-m3-on-primary-container">
+                      {r.timeline}
+                    </span>
                   </div>
-                  <ul className="mt-3 space-y-1.5">
+                  <ul className="space-y-1.5">
                     {r.milestones.map((m, j) => (
-                      <li key={j} className="flex gap-2 text-sm">
-                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-brand" />
+                      <li key={j} className="flex gap-2 text-[13px]">
+                        <span className="ms mt-0.5 text-[14px] text-m3-primary" aria-hidden>check_circle</span>
                         <span>{m}</span>
                       </li>
                     ))}
@@ -486,53 +571,99 @@ export function ArchitectureView({
                 </li>
               ))}
             </ol>
+            {arch.open_questions.length > 0 && (
+              <SubCard title="Open questions" icon="quiz" className="mt-3">
+                <Bullets items={arch.open_questions} tone="tertiary" muted />
+              </SubCard>
+            )}
           </Section>
-          <Section icon={<FileText className="size-4" />} title="Open questions to clarify with the team">
-            <Bullets items={arch.open_questions} muted />
-          </Section>
-        </TabsContent>
-      </Tabs>
 
-      <Card className="border-dashed">
-        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-6">
-          <div>
-            <div className="font-medium">Iterate on this design</div>
-            <div className="text-sm text-muted-foreground">
-              Refine the brief or design an entirely new system. Each run uses one credit.
+          {/* CTA */}
+          <section className="rounded-[32px] bg-m3-surface-container-high p-7">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <div className="font-medium text-m3-on-surface">Iterate on this design</div>
+                <div className="mt-1 text-[13px] text-m3-on-surface-variant">
+                  Refine the brief or design an entirely new system. Each run uses one credit.
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Chip type="assist" icon="history" href="/history">Library</Chip>
+                <Fab size="extended" icon="auto_awesome" href="/new" className="!h-12 !rounded-2xl !text-[14px]">
+                  New design
+                </Fab>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline"><Link href="/history">History</Link></Button>
-            <Button asChild><Link href="/new">New architecture →</Link></Button>
-          </div>
-        </CardContent>
-      </Card>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
 
+// ============ helpers ============
+
 function Section({
-  icon, title, children,
-}: { icon?: React.ReactNode; title: string; children: React.ReactNode }) {
+  id, eyebrow, title, icon, children,
+}: {
+  id: string;
+  eyebrow: string;
+  title: string;
+  icon: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-muted-foreground">
-          {icon}{title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
+    <section id={id} className="scroll-mt-24">
+      <div className="mb-5 flex items-center gap-3">
+        <span className="grid size-10 place-items-center rounded-2xl bg-m3-secondary-container text-m3-on-secondary-container">
+          <span className="ms text-[20px]" aria-hidden>{icon}</span>
+        </span>
+        <div>
+          <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+            {eyebrow}
+          </div>
+          <h2 className="display text-[clamp(1.5rem,2.6vw,2rem)] leading-tight">{title}</h2>
+        </div>
+      </div>
+      <div className="space-y-3">{children}</div>
+    </section>
   );
 }
 
-function Bullets({ items, muted = false }: { items: string[]; muted?: boolean }) {
+function SubCard({
+  title, icon, children, className,
+}: {
+  title: string;
+  icon?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <article className={cn("rounded-[28px] bg-m3-surface-container-low p-5 md:p-6", className)}>
+      <div className="mb-4 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+        {icon && <span className="ms text-[16px]" aria-hidden>{icon}</span>}
+        {title}
+      </div>
+      {children}
+    </article>
+  );
+}
+
+function Bullets({ items, tone, muted = false }: { items: string[]; tone?: "primary" | "tertiary" | "secondary"; muted?: boolean }) {
+  const dot =
+    muted
+      ? "bg-m3-on-surface-variant/50"
+      : tone === "tertiary"
+        ? "bg-m3-tertiary"
+        : tone === "secondary"
+          ? "bg-m3-secondary"
+          : "bg-m3-primary";
   return (
     <ul className="space-y-2">
       {items.map((it, i) => (
-        <li key={i} className="flex gap-2.5 text-sm">
-          <span className={`mt-1.5 size-1.5 shrink-0 rounded-full ${muted ? "bg-muted-foreground/40" : "bg-brand"}`} />
-          <span className={muted ? "text-muted-foreground" : ""}>{it}</span>
+        <li key={i} className="flex gap-2.5 text-[13px]">
+          <span className={cn("mt-1.5 size-1.5 shrink-0 rounded-full", dot)} />
+          <span className={muted ? "text-m3-on-surface-variant" : "text-m3-on-surface"}>{it}</span>
         </li>
       ))}
     </ul>
@@ -541,9 +672,9 @@ function Bullets({ items, muted = false }: { items: string[]; muted?: boolean })
 
 function DDef({ k, v }: { k: string; v: string }) {
   return (
-    <div className="rounded-lg border p-3">
-      <dt className="text-xs uppercase tracking-wider text-muted-foreground">{k}</dt>
-      <dd className="mt-1 font-medium">{v}</dd>
+    <div className="rounded-2xl bg-m3-surface p-4">
+      <dt className="text-[10px] uppercase tracking-[0.16em] text-m3-on-surface-variant">{k}</dt>
+      <dd className="mt-1 text-[14px] font-medium text-m3-on-surface">{v}</dd>
     </div>
   );
 }
