@@ -1,0 +1,53 @@
+# Cloud Build pipeline for Tessar
+#
+# Triggered on push to main. Builds the Docker image, pushes to Artifact
+# Registry, and deploys to Cloud Run with secrets bound from Secret Manager.
+
+substitutions:
+  _REGION: asia-south1
+  _SERVICE: tessar
+  _REPO: tessar
+  _IMAGE: asia-south1-docker.pkg.dev/${PROJECT_ID}/tessar/tessar
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    id: build
+    args:
+      - build
+      - --tag=${_IMAGE}:${SHORT_SHA}
+      - --tag=${_IMAGE}:latest
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    id: push
+    args: [push, --all-tags, "${_IMAGE}"]
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_IMAGE}:${SHORT_SHA}
+      - --region=${_REGION}
+      - --platform=managed
+      - --allow-unauthenticated
+      - --cpu=1
+      - --memory=1Gi
+      - --min-instances=0
+      - --max-instances=20
+      - --concurrency=80
+      - --timeout=300
+      - --port=8080
+      - --service-account=tessar-runtime@${PROJECT_ID}.iam.gserviceaccount.com
+      - --set-env-vars=GCP_PROJECT_ID=${PROJECT_ID},GCP_LOCATION=us-central1,VERTEX_MODEL=gemini-2.5-pro,NEXT_PUBLIC_APP_URL=https://tessar.app
+      - --set-secrets=FIREBASE_ADMIN_PROJECT_ID=tessar-fb-project:latest,FIREBASE_ADMIN_CLIENT_EMAIL=tessar-fb-email:latest,FIREBASE_ADMIN_PRIVATE_KEY=tessar-fb-key:latest,NEXT_PUBLIC_FIREBASE_API_KEY=tessar-fb-api-key:latest,NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tessar-fb-auth-domain:latest,NEXT_PUBLIC_FIREBASE_PROJECT_ID=tessar-fb-project:latest,NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tessar-fb-bucket:latest,NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=tessar-fb-sender:latest,NEXT_PUBLIC_FIREBASE_APP_ID=tessar-fb-app-id:latest,RAZORPAY_KEY_ID=tessar-rzp-key-id:latest,RAZORPAY_KEY_SECRET=tessar-rzp-key-secret:latest,RAZORPAY_WEBHOOK_SECRET=tessar-rzp-webhook-secret:latest,NEXT_PUBLIC_RAZORPAY_KEY_ID=tessar-rzp-key-id:latest,RESEND_API_KEY=tessar-resend-key:latest,RESEND_FROM_EMAIL=tessar-resend-from:latest,ADMIN_EMAILS=tessar-admin-emails:latest
+
+images:
+  - ${_IMAGE}:${SHORT_SHA}
+  - ${_IMAGE}:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
