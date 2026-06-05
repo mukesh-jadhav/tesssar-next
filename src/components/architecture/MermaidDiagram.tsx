@@ -23,7 +23,7 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
             startOnLoad: false,
             theme: "base",
             securityLevel: "loose",
-            fontFamily: "var(--font-geist-sans), system-ui, sans-serif",
+            fontFamily: "var(--font-sans), Roboto, system-ui, sans-serif",
             themeVariables: {
               primaryColor: "#fafafa",
               primaryTextColor: "#0a0a0a",

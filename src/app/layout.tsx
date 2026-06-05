@@ -1,16 +1,31 @@
 import type { Metadata } from "next";
-import { Instrument_Serif } from "next/font/google";
-import { GeistSans } from "geist/font/sans";
-import { GeistMono } from "geist/font/mono";
+import { Roboto_Flex, Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 
-const display = Instrument_Serif({
+// Material 3 — brand typeface (variable, used for display + headlines)
+const robotoFlex = Roboto_Flex({
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  axes: ["opsz", "wdth"],
   variable: "--font-display",
+  display: "swap",
+});
+
+// Material 3 — plain typeface (body, labels, UI)
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+// Material 3 — monospaced
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -35,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${display.variable}`}
+      className={`${roboto.variable} ${robotoMono.variable} ${robotoFlex.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">

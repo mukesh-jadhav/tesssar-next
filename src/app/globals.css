@@ -81,7 +81,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss02" 1, "cv11" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
     overflow-x: hidden;
   }
   ::selection {
@@ -129,16 +129,20 @@
     text-wrap: pretty;
   }
   .display {
-    font-family: var(--font-display), Georgia, "Times New Roman", serif;
-    font-weight: 400;
-    letter-spacing: -0.025em;
-    line-height: 0.98;
+    /* Material 3 brand typeface — Roboto Flex with width axis pushed slightly,
+       optical sizing on for large-size legibility. */
+    font-family: var(--font-display), "Roboto Flex", Roboto, system-ui, sans-serif;
+    font-weight: 500;
+    font-variation-settings: "wdth" 105, "opsz" 96;
+    letter-spacing: -0.018em;
+    line-height: 1;
   }
   .display-italic {
-    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    font-family: var(--font-display), "Roboto Flex", Roboto, sans-serif;
     font-style: italic;
-    font-weight: 400;
-    letter-spacing: -0.02em;
+    font-weight: 500;
+    font-variation-settings: "wdth" 100, "opsz" 96;
+    letter-spacing: -0.015em;
   }
 
   /* Brand accent helpers */

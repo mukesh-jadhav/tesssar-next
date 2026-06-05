@@ -53,15 +53,17 @@ export default async function LandingPage() {
 
             <h1 className="display text-balance text-[clamp(2.75rem,7.5vw,6rem)]">
               <TextReveal text="Your AI principal" delay={120} />{" "}
-              <span className="italic text-foreground/95">
+              <span className="text-foreground" style={{ fontVariationSettings: '"wdth" 125, "opsz" 96', fontWeight: 700 }}>
                 <TextReveal text="architect." delay={380} />
               </span>
               <br />
               <span
-                className="block animate-reveal-up text-muted-foreground/75 italic"
+                className="block animate-reveal-up text-muted-foreground/80"
                 style={{
                   animationDelay: "720ms",
                   animationFillMode: "both",
+                  fontWeight: 300,
+                  fontVariationSettings: '"wdth" 100, "opsz" 96',
                 }}
               >
                 In minutes, not weeks.
