@@ -1,33 +1,34 @@
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
 import { NewArchitectureForm } from "@/components/architecture/NewArchitectureForm";
-import { Badge } from "@/components/ui/badge";
-import { Coins } from "lucide-react";
-import Link from "next/link";
 
 export const metadata = { title: "New architecture" };
 
-export default async function NewArchitecturePage() {
+export default async function NewArchitecturePage({
+  searchParams,
+}: {
+  searchParams: { seed?: string };
+}) {
   const user = (await getSessionUser())!;
   const credits = await getBalance(user.uid);
+  const firstName =
+    (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-10 md:px-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Design a new system</h1>
-          <p className="mt-1 text-muted-foreground">
-            Describe what you want built. The architect handles the rest.
-          </p>
-        </div>
-        <Link href="/pricing">
-          <Badge variant="brand" className="gap-1.5 px-3 py-1.5">
-            <Coins className="size-3.5" />
-            {credits} {credits === 1 ? "credit" : "credits"}
-          </Badge>
-        </Link>
+    <div className="mx-auto flex w-full max-w-[920px] flex-col px-6 py-12 md:px-10 md:py-16">
+      <section className="m3-page-enter text-center">
+        <h1 className="display text-balance text-[clamp(2rem,4.8vw,3.5rem)] leading-[1.04]">
+          What can I <span className="hero-gradient">architect</span> for you{firstName !== "friend" ? `, ${firstName}` : ""}?
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-[16px] leading-relaxed text-m3-on-surface-variant">
+          Describe the system in plain English. I'll design it — diagrams,
+          scale tiers, INR cost estimates, risks, and the patterns that solve them.
+        </p>
+      </section>
+
+      <div className="mt-10">
+        <NewArchitectureForm credits={credits} seed={searchParams.seed} />
       </div>
-      <NewArchitectureForm credits={credits} />
     </div>
   );
 }

@@ -2,14 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, Loader2, AlertTriangle, Check } from "lucide-react";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type ProgressEvent =
   | { type: "init"; architectureId: string }
@@ -30,23 +24,35 @@ const PHASE_ORDER = [
 ] as const;
 
 const EXAMPLES = [
-  "Realtime collaborative whiteboard for design teams. Low-latency cursors, infinite canvas, version history, AI-assisted suggestions. 50K users in year 1, India + SEA. Free + Pro plans.",
-  "B2B logistics platform that ingests GPS pings from 100K trucks every 5 seconds, computes ETAs, dispatches alerts. India-first, integrates with TMS systems.",
-  "AI-powered customer support copilot for D2C brands. Reads ticket history, drafts replies, escalates to human, integrates with Shopify + WhatsApp Business API.",
-  "Privacy-preserving health records vault for Indian hospitals. ABDM compliant, end-to-end encrypted, consent-based sharing, audit log, mobile + web.",
-];
+  {
+    icon: "draw",
+    label: "Realtime collaborative whiteboard",
+    seed:
+      "Realtime collaborative whiteboard for design teams. Low-latency cursors, infinite canvas, version history, AI-assisted suggestions. 50K users in year 1, India + SEA. Free + Pro plans.",
+  },
+  {
+    icon: "local_shipping",
+    label: "B2B logistics with live GPS",
+    seed:
+      "B2B logistics platform that ingests GPS pings from 100K trucks every 5 seconds, computes ETAs, dispatches alerts. India-first, integrates with TMS systems.",
+  },
+  {
+    icon: "support_agent",
+    label: "AI customer support copilot",
+    seed:
+      "AI-powered customer support copilot for D2C brands. Reads ticket history, drafts replies, escalates to human, integrates with Shopify + WhatsApp Business API.",
+  },
+  {
+    icon: "health_and_safety",
+    label: "ABDM-compliant health records vault",
+    seed:
+      "Privacy-preserving health records vault for Indian hospitals. ABDM compliant, end-to-end encrypted, consent-based sharing, audit log, mobile + web.",
+  },
+] as const;
 
-const PLACEHOLDER_HINTS = [
-  "e.g. A realtime collaborative whiteboard for design teams…",
-  "e.g. An ABDM-compliant health records vault for Indian hospitals…",
-  "e.g. A B2B logistics platform ingesting 100K truck GPS pings every 5 seconds…",
-  "e.g. An AI support copilot that drafts replies from ticket history…",
-];
-
-export function NewArchitectureForm({ credits }: { credits: number }) {
+export function NewArchitectureForm({ credits, seed }: { credits: number; seed?: string }) {
   const router = useRouter();
-  const [brief, setBrief] = useState("");
-  const [placeholderIdx, setPlaceholderIdx] = useState(0);
+  const [brief, setBrief] = useState(seed ?? "");
   const [generating, setGenerating] = useState(false);
   const [phase, setPhase] = useState<string | null>(null);
   const [phaseMsg, setPhaseMsg] = useState<string>("");
@@ -54,22 +60,26 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Rotate placeholder hints
+  // Autosize textarea
   useEffect(() => {
-    if (brief.length > 0 || generating) return;
-    const i = setInterval(() => {
-      setPlaceholderIdx((p) => (p + 1) % PLACEHOLDER_HINTS.length);
-    }, 3600);
-    return () => clearInterval(i);
-  }, [brief.length, generating]);
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 320) + "px";
+  }, [brief]);
+
+  // Focus on seeded prompt
+  useEffect(() => {
+    if (seed && textareaRef.current) textareaRef.current.focus();
+  }, [seed]);
 
   const phaseIndex = phase
     ? PHASE_ORDER.indexOf(phase as (typeof PHASE_ORDER)[number])
     : -1;
-  const progress =
+  const progressPct =
     phaseIndex < 0
       ? generating
-        ? 3
+        ? 5
         : 0
       : Math.round(((phaseIndex + 1) / PHASE_ORDER.length) * 100);
 
@@ -99,7 +109,6 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
         const text = await res.text();
         throw new Error(text || "Failed to start generation");
       }
-
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
@@ -120,14 +129,12 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
           } catch {
             continue;
           }
-
           if (ev.type === "init") architectureId = ev.architectureId;
           else if (ev.type === "phase") {
             setPhase(ev.phase);
             setPhaseMsg(ev.message);
-          } else if (ev.type === "tokens") {
-            setTokens(ev.tokens);
-          } else if (ev.type === "complete" && architectureId) {
+          } else if (ev.type === "tokens") setTokens(ev.tokens);
+          else if (ev.type === "complete" && architectureId) {
             router.push(`/architecture/${architectureId}`);
             return;
           } else if (ev.type === "error") {
@@ -144,153 +151,152 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      {!generating ? (
-        <Card className="overflow-hidden">
-          <CardContent className="space-y-5 p-7">
-            <div className="flex items-start gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background">
-                <Sparkles className="size-4 text-foreground/80" />
-              </div>
-              <div className="flex-1">
-                <div className="font-medium tracking-tight">
-                  Describe the system you want to build
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Be as detailed or as loose as you like. The architect fills gaps with reasoned
-                  assumptions and surfaces them.
-                </p>
-              </div>
-            </div>
-            <div className="relative">
-              <Textarea
-                ref={textareaRef}
-                value={brief}
-                onChange={(e) => setBrief(e.target.value)}
-                placeholder=" "
-                className="min-h-[220px] resize-none text-[15px] leading-relaxed"
-                maxLength={8000}
-              />
-              {brief.length === 0 && (
-                <div
-                  key={placeholderIdx}
-                  className="pointer-events-none absolute left-3.5 top-3 animate-reveal-fade text-[15px] leading-relaxed text-muted-foreground/70"
-                >
-                  {PLACEHOLDER_HINTS[placeholderIdx]}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span className="tabular-nums">
-                {brief.length.toLocaleString("en-IN")} / 8,000 characters
-              </span>
-              <span>1 credit · refunded on failure</span>
-            </div>
-            <div>
-              <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                Try one of these
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {EXAMPLES.map((ex, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setBrief(ex)}
-                    className="rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-all duration-200 ease-out-quart hover:-translate-y-px hover:border-foreground/30 hover:bg-card hover:text-foreground"
-                  >
-                    Example {i + 1}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <Button
-              onClick={handleSubmit}
-              size="lg"
-              className="w-full gap-2"
-              disabled={brief.trim().length < 30}
-            >
-              Design my architecture
-              <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="overflow-hidden">
-          <CardContent className="space-y-6 p-7">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2.5">
-                <Loader2 className="size-4 animate-spin" />
-                <span className="text-sm font-medium tracking-tight">
-                  Designing your system…
-                </span>
-                <Badge
-                  variant="outline"
-                  className="ml-auto font-mono text-[10px] tabular-nums"
-                >
-                  ~{tokens.toLocaleString("en-IN")} tokens
-                </Badge>
-              </div>
-              <Progress value={progress} />
-              <div
-                key={phaseMsg}
-                className="animate-reveal-fade text-sm text-muted-foreground"
-              >
-                {phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}
-              </div>
-            </div>
+  if (generating) {
+    return (
+      <div className="m3-page-enter mx-auto max-w-2xl">
+        <div className="rounded-3xl bg-m3-surface-container-low p-7">
+          <div className="flex items-center gap-3">
+            <span className="ms text-m3-primary" aria-hidden>progress_activity</span>
+            <h2 className="text-[18px] font-medium tracking-tight">Designing your system…</h2>
+            <span className="ml-auto rounded-full bg-m3-surface-container px-3 py-1 font-mono text-[11px] tabular-nums text-m3-on-surface-variant">
+              ~{tokens.toLocaleString("en-IN")} tokens
+            </span>
+          </div>
 
-            <ol className="space-y-2.5">
-              {PHASE_ORDER.map((p, i) => {
-                const done = phaseIndex > i;
-                const active = phaseIndex === i;
-                return (
-                  <li
-                    key={p}
+          {/* M3 expressive linear progress */}
+          <div className="mt-5 h-1 overflow-hidden rounded-full bg-m3-secondary-container">
+            <div
+              className="h-full rounded-full bg-m3-primary transition-[width] duration-500 ease-m3-default-spatial"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+
+          <div
+            key={phaseMsg}
+            className="m3-page-enter mt-4 text-[14px] text-m3-on-surface-variant"
+          >
+            {phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}
+          </div>
+
+          <ol className="mt-6 space-y-2.5">
+            {PHASE_ORDER.map((p, i) => {
+              const done = phaseIndex > i;
+              const active = phaseIndex === i;
+              return (
+                <li
+                  key={p}
+                  className={cn(
+                    "flex items-center gap-3 text-[14px] transition-all duration-m3-default-effects ease-m3-default-effects",
+                    !done && !active && "opacity-45",
+                  )}
+                >
+                  <span
                     className={cn(
-                      "flex items-center gap-3 text-sm transition-all duration-300 ease-out-quart",
-                      !done && !active && "opacity-50",
+                      "grid size-6 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
+                      done && "bg-m3-primary text-m3-on-primary",
+                      active && "bg-m3-primary-container text-m3-on-primary-container scale-110",
+                      !done && !active && "bg-m3-surface-container text-m3-on-surface-variant",
                     )}
                   >
-                    <span
-                      className={cn(
-                        "grid size-5 place-items-center rounded-full border text-[10px] transition-all duration-300 ease-out-quart",
-                        done && "scale-100 border-foreground bg-foreground text-background",
-                        active && "scale-110 border-foreground bg-background text-foreground",
-                        !done && !active && "border-border text-muted-foreground",
-                      )}
-                    >
-                      {done ? <Check className="size-3" /> : i + 1}
-                    </span>
-                    <span
-                      className={cn(
-                        "transition-colors duration-300",
-                        active && "font-medium",
-                        done && "text-muted-foreground line-through decoration-foreground/20",
-                      )}
-                    >
-                      {phaseLabel(p)}
-                    </span>
-                    {active && (
-                      <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                    {done ? (
+                      <span className="ms text-[14px]" aria-hidden>check</span>
+                    ) : active ? (
+                      <span className="ms text-[14px] animate-spin" aria-hidden>progress_activity</span>
+                    ) : (
+                      <span className="text-[11px] tabular-nums">{i + 1}</span>
                     )}
-                  </li>
-                );
-              })}
-            </ol>
+                  </span>
+                  <span className={cn(active && "font-medium text-m3-on-surface")}>
+                    {phaseLabel(p)}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
 
-            {errorMsg && (
-              <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3.5 text-sm text-destructive">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                <div>
-                  <div className="font-medium">Generation failed</div>
-                  <div className="mt-0.5 text-xs">{errorMsg}</div>
-                  <div className="mt-1 text-xs opacity-80">Your credit has been refunded.</div>
-                </div>
+          {errorMsg && (
+            <div className="mt-6 flex items-start gap-2 rounded-2xl bg-m3-error-container p-4 text-[14px] text-m3-on-error-container">
+              <span className="ms" aria-hidden>error</span>
+              <div>
+                <div className="font-medium">Generation failed</div>
+                <div className="mt-0.5 text-[13px]">{errorMsg}</div>
+                <div className="mt-1 text-[12px] opacity-80">Your credit has been refunded.</div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ============ Composer (idle state) ============
+  return (
+    <div className="m3-page-enter mx-auto w-full max-w-2xl">
+      <div className="relative rounded-3xl bg-m3-surface-container-low shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects focus-within:shadow-m3-3 focus-within:ring-1 focus-within:ring-m3-primary/30">
+        <textarea
+          ref={textareaRef}
+          value={brief}
+          onChange={(e) => setBrief(e.target.value)}
+          placeholder="Describe the system you'd like to build…"
+          maxLength={8000}
+          rows={3}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+              e.preventDefault();
+              handleSubmit();
+            }
+          }}
+          className="block w-full resize-none bg-transparent px-6 pt-6 pb-2 text-[16px] leading-relaxed text-m3-on-surface placeholder:text-m3-on-surface-variant/80 focus:outline-none scrollbar-thin"
+        />
+
+        <div className="flex items-center gap-2 px-4 pb-4 pt-2">
+          <span className="rounded-full bg-m3-surface-container px-3 py-1 text-[11px] font-medium uppercase tracking-[0.06em] text-m3-on-surface-variant">
+            {brief.length.toLocaleString("en-IN")} / 8,000
+          </span>
+          <span className="text-[11px] text-m3-on-surface-variant">
+            1 credit · refunded on failure
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <kbd className="hidden rounded-md bg-m3-surface-container px-1.5 py-0.5 text-[10px] text-m3-on-surface-variant md:inline-block">
+              ⌘↵
+            </kbd>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={brief.trim().length < 30}
+              aria-label="Design my architecture"
+              className={cn(
+                "state-layer press grid size-12 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
+                brief.trim().length < 30
+                  ? "bg-m3-surface-container text-m3-on-surface-variant/60"
+                  : "bg-m3-primary text-m3-on-primary shadow-m3-2 hover:shadow-m3-3",
+              )}
+            >
+              <span className="ms" aria-hidden>arrow_upward</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestion chips beneath composer */}
+      <div className="m3-stagger mt-6 grid gap-2.5 sm:grid-cols-2">
+        {EXAMPLES.map((ex) => (
+          <button
+            key={ex.label}
+            type="button"
+            onClick={() => {
+              setBrief(ex.seed);
+              textareaRef.current?.focus();
+            }}
+            className="state-layer press group/ex flex items-center gap-3 rounded-2xl bg-m3-surface-container-low px-4 py-3 text-left transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-1"
+          >
+            <span className="grid size-9 shrink-0 place-items-center rounded-2xl bg-m3-tertiary-container text-m3-on-tertiary-container">
+              <span className="ms text-[20px]" aria-hidden>{ex.icon}</span>
+            </span>
+            <span className="text-[14px] text-m3-on-surface">{ex.label}</span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

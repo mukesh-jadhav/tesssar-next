@@ -5,49 +5,51 @@
 @layer base {
   :root {
     /* ============================================================
-       MATERIAL DESIGN 3 EXPRESSIVE — light theme baseline
-       Indigo primary, warm-neutral surfaces, tone-based.
+       MATERIAL 3 EXPRESSIVE — Tessar palette
+       Vibrant indigo-blue primary, warm-coral tertiary,
+       soft warm-neutral surfaces with a violet undertone.
+       Tuned to feel like Gemini / Material You Expressive.
        ============================================================ */
 
     /* --- M3 key colors --- */
-    --md-sys-color-primary: 258 53% 41%;
+    --md-sys-color-primary: 250 84% 54%;
     --md-sys-color-on-primary: 0 0% 100%;
-    --md-sys-color-primary-container: 258 100% 92%;
-    --md-sys-color-on-primary-container: 258 100% 11%;
+    --md-sys-color-primary-container: 250 100% 93%;
+    --md-sys-color-on-primary-container: 250 80% 14%;
 
-    --md-sys-color-secondary: 258 14% 38%;
+    --md-sys-color-secondary: 252 18% 44%;
     --md-sys-color-on-secondary: 0 0% 100%;
-    --md-sys-color-secondary-container: 258 30% 91%;
-    --md-sys-color-on-secondary-container: 258 30% 11%;
+    --md-sys-color-secondary-container: 252 60% 94%;
+    --md-sys-color-on-secondary-container: 252 30% 18%;
 
-    --md-sys-color-tertiary: 338 38% 41%;
+    --md-sys-color-tertiary: 14 92% 56%;
     --md-sys-color-on-tertiary: 0 0% 100%;
-    --md-sys-color-tertiary-container: 338 100% 92%;
-    --md-sys-color-on-tertiary-container: 338 100% 11%;
+    --md-sys-color-tertiary-container: 22 100% 90%;
+    --md-sys-color-on-tertiary-container: 14 80% 16%;
 
     --md-sys-color-error: 0 75% 42%;
     --md-sys-color-on-error: 0 0% 100%;
     --md-sys-color-error-container: 6 100% 92%;
     --md-sys-color-on-error-container: 0 100% 12%;
 
-    /* --- M3 surface tones --- */
-    --md-sys-color-surface: 290 16% 99%;
-    --md-sys-color-surface-dim: 290 6% 87%;
-    --md-sys-color-surface-bright: 290 16% 99%;
+    /* --- M3 surface tones — warm, slightly violet-tinted whites --- */
+    --md-sys-color-surface: 36 36% 99%;
+    --md-sys-color-surface-dim: 252 14% 88%;
+    --md-sys-color-surface-bright: 36 36% 99%;
     --md-sys-color-surface-container-lowest: 0 0% 100%;
-    --md-sys-color-surface-container-low: 290 16% 97%;
-    --md-sys-color-surface-container: 290 12% 94%;
-    --md-sys-color-surface-container-high: 290 10% 91%;
-    --md-sys-color-surface-container-highest: 290 8% 88%;
-    --md-sys-color-on-surface: 258 14% 11%;
-    --md-sys-color-on-surface-variant: 258 8% 30%;
-    --md-sys-color-outline: 258 6% 50%;
-    --md-sys-color-outline-variant: 258 10% 82%;
-    --md-sys-color-inverse-surface: 258 14% 18%;
-    --md-sys-color-inverse-on-surface: 290 16% 95%;
-    --md-sys-color-inverse-primary: 258 100% 82%;
-    --md-sys-color-scrim: 0 0% 0%;
-    --md-sys-color-shadow: 0 0% 0%;
+    --md-sys-color-surface-container-low: 252 30% 97%;
+    --md-sys-color-surface-container: 252 22% 95%;
+    --md-sys-color-surface-container-high: 252 18% 92%;
+    --md-sys-color-surface-container-highest: 252 14% 89%;
+    --md-sys-color-on-surface: 252 18% 12%;
+    --md-sys-color-on-surface-variant: 252 10% 32%;
+    --md-sys-color-outline: 252 8% 52%;
+    --md-sys-color-outline-variant: 252 18% 86%;
+    --md-sys-color-inverse-surface: 252 12% 16%;
+    --md-sys-color-inverse-on-surface: 252 30% 96%;
+    --md-sys-color-inverse-primary: 250 100% 84%;
+    --md-sys-color-scrim: 252 14% 4%;
+    --md-sys-color-shadow: 252 22% 8%;
 
     /* ============================================================
        Legacy aliases — kept so existing utilities keep working.
@@ -73,8 +75,8 @@
     --input: var(--md-sys-color-outline-variant);
     --ring: var(--md-sys-color-primary);
 
-    /* M3 Expressive uses a default lg radius of 16dp */
-    --radius: 1rem;
+    /* M3 Expressive — bigger default radius for hero surfaces */
+    --radius: 1.75rem;
 
     /* Brand accent — keep for legacy callsites */
     --brand: var(--md-sys-color-primary);
@@ -148,41 +150,41 @@
   }
 
   .dark {
-    --md-sys-color-primary: 258 100% 82%;
-    --md-sys-color-on-primary: 258 100% 18%;
-    --md-sys-color-primary-container: 258 50% 32%;
-    --md-sys-color-on-primary-container: 258 100% 92%;
+    --md-sys-color-primary: 250 100% 84%;
+    --md-sys-color-on-primary: 250 80% 18%;
+    --md-sys-color-primary-container: 250 60% 32%;
+    --md-sys-color-on-primary-container: 250 100% 92%;
 
-    --md-sys-color-secondary: 258 30% 80%;
-    --md-sys-color-on-secondary: 258 30% 20%;
-    --md-sys-color-secondary-container: 258 18% 32%;
-    --md-sys-color-on-secondary-container: 258 30% 92%;
+    --md-sys-color-secondary: 252 40% 82%;
+    --md-sys-color-on-secondary: 252 30% 20%;
+    --md-sys-color-secondary-container: 252 18% 32%;
+    --md-sys-color-on-secondary-container: 252 60% 94%;
 
-    --md-sys-color-tertiary: 338 100% 86%;
-    --md-sys-color-on-tertiary: 338 80% 16%;
-    --md-sys-color-tertiary-container: 338 45% 32%;
-    --md-sys-color-on-tertiary-container: 338 100% 92%;
+    --md-sys-color-tertiary: 22 100% 84%;
+    --md-sys-color-on-tertiary: 14 80% 18%;
+    --md-sys-color-tertiary-container: 14 60% 32%;
+    --md-sys-color-on-tertiary-container: 22 100% 92%;
 
     --md-sys-color-error: 6 100% 84%;
     --md-sys-color-on-error: 6 100% 18%;
     --md-sys-color-error-container: 6 80% 30%;
     --md-sys-color-on-error-container: 6 100% 92%;
 
-    --md-sys-color-surface: 258 8% 9%;
-    --md-sys-color-surface-dim: 258 8% 9%;
-    --md-sys-color-surface-bright: 258 6% 22%;
-    --md-sys-color-surface-container-lowest: 258 10% 5%;
-    --md-sys-color-surface-container-low: 258 8% 11%;
-    --md-sys-color-surface-container: 258 6% 14%;
-    --md-sys-color-surface-container-high: 258 5% 18%;
-    --md-sys-color-surface-container-highest: 258 5% 22%;
-    --md-sys-color-on-surface: 290 16% 92%;
-    --md-sys-color-on-surface-variant: 258 10% 75%;
-    --md-sys-color-outline: 258 6% 60%;
-    --md-sys-color-outline-variant: 258 6% 30%;
-    --md-sys-color-inverse-surface: 290 16% 92%;
-    --md-sys-color-inverse-on-surface: 258 14% 18%;
-    --md-sys-color-inverse-primary: 258 53% 41%;
+    --md-sys-color-surface: 252 14% 8%;
+    --md-sys-color-surface-dim: 252 14% 8%;
+    --md-sys-color-surface-bright: 252 10% 22%;
+    --md-sys-color-surface-container-lowest: 252 18% 5%;
+    --md-sys-color-surface-container-low: 252 14% 11%;
+    --md-sys-color-surface-container: 252 12% 14%;
+    --md-sys-color-surface-container-high: 252 10% 18%;
+    --md-sys-color-surface-container-highest: 252 8% 22%;
+    --md-sys-color-on-surface: 252 30% 92%;
+    --md-sys-color-on-surface-variant: 252 14% 78%;
+    --md-sys-color-outline: 252 8% 60%;
+    --md-sys-color-outline-variant: 252 8% 30%;
+    --md-sys-color-inverse-surface: 252 30% 92%;
+    --md-sys-color-inverse-on-surface: 252 14% 18%;
+    --md-sys-color-inverse-primary: 250 84% 54%;
   }
 }
 
@@ -261,6 +263,47 @@
     font-variation-settings: "wdth" 100, "opsz" 96;
     letter-spacing: -0.015em;
   }
+  /* M3 Expressive Hero gradient — Gemini-style multi-color sweep
+     on the key word in a hero headline. */
+  .hero-gradient {
+    background: linear-gradient(
+      92deg,
+      #4285f4 0%,
+      #7b6cf6 28%,
+      #c059c6 55%,
+      #f06292 78%,
+      #ff8a65 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% 100%;
+    animation: hero-gradient-shift 12s ease-in-out infinite;
+  }
+  @keyframes hero-gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Material Symbols Rounded — Google's official icon font */
+  .ms {
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: "liga";
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+  .ms-filled { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+  .ms-bold { font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 24; }
 
   /* Brand accent helpers */
   .text-brand {

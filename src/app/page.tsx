@@ -53,12 +53,20 @@ export default async function LandingPage() {
 
             <h1 className="display text-balance text-[clamp(2.75rem,7.5vw,6rem)]">
               <TextReveal text="Your AI principal" delay={120} />{" "}
-              <span className="text-foreground" style={{ fontVariationSettings: '"wdth" 125, "opsz" 96', fontWeight: 700 }}>
-                <TextReveal text="architect." delay={380} />
+              <span
+                className="hero-gradient inline-block animate-reveal-up"
+                style={{
+                  fontVariationSettings: '"wdth" 125, "opsz" 96',
+                  fontWeight: 700,
+                  animationDelay: "380ms",
+                  animationFillMode: "both",
+                }}
+              >
+                architect.
               </span>
               <br />
               <span
-                className="block animate-reveal-up text-muted-foreground/80"
+                className="block animate-reveal-up text-m3-on-surface-variant"
                 style={{
                   animationDelay: "720ms",
                   animationFillMode: "both",
@@ -113,6 +121,30 @@ export default async function LandingPage() {
               <span className="inline-flex items-center gap-1.5">
                 <Zap className="size-3.5" /> Refund on failure
               </span>
+            </Reveal>
+
+            {/* Suggestion chips — Gemini-style entry prompts */}
+            <Reveal
+              delay={1380}
+              className="mx-auto mt-10 flex max-w-3xl flex-wrap items-center justify-center gap-2.5"
+            >
+              {[
+                { icon: "rocket_launch", label: "B2B SaaS on Google Cloud" },
+                { icon: "smart_toy", label: "Add Gemini AI to my app" },
+                { icon: "storefront", label: "E-commerce backend (India)" },
+                { icon: "school", label: "EdTech with live classes" },
+              ].map((s) => (
+                <Link
+                  key={s.label}
+                  href={signedIn ? `/new?seed=${encodeURIComponent(s.label)}` : "/login"}
+                  className="state-layer press inline-flex items-center gap-2 rounded-full border border-m3-outline-variant bg-m3-surface-container-low/80 px-4 py-2 text-sm text-m3-on-surface backdrop-blur transition-all duration-m3-default-effects ease-m3-default-effects hover:-translate-y-px hover:border-m3-primary/40 hover:bg-m3-primary-container/40"
+                >
+                  <span className="ms text-[18px] text-m3-primary" aria-hidden>
+                    {s.icon}
+                  </span>
+                  {s.label}
+                </Link>
+              ))}
             </Reveal>
           </div>
 

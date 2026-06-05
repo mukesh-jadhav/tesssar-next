@@ -54,6 +54,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${roboto.variable} ${robotoMono.variable} ${robotoFlex.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Material Symbols — official Google icon font */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block"
+          rel="stylesheet"
+        />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <RouteProgress />
         {children}

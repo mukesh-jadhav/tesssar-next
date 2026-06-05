@@ -1,14 +1,39 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Plus, Coins, Sparkles, Clock } from "lucide-react";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { formatDate, truncate } from "@/lib/utils";
 import { getBalance } from "@/lib/credits/ledger";
-import { AnimatedCounter, Reveal, Stagger } from "@/components/motion";
+
+/** Gemini-style suggestion chips that route to the composer with a seed prompt. */
+const SUGGESTIONS = [
+  {
+    icon: "rocket_launch",
+    label: "Launch a B2B SaaS on Google Cloud",
+    seed:
+      "I'm building a B2B SaaS for Indian SMBs. Target 10k tenants, multi-region in India. Suggest a production-grade architecture on Google Cloud with cost estimates in INR.",
+  },
+  {
+    icon: "smart_toy",
+    label: "Add a Gemini-powered AI feature",
+    seed:
+      "I want to add a Gemini-powered AI chat feature to my existing app. 50k DAU, low latency, conversation memory. What's the right architecture on Vertex AI?",
+  },
+  {
+    icon: "storefront",
+    label: "Build a low-latency e-commerce backend",
+    seed:
+      "Design a low-latency e-commerce backend for India: 1M MAU, 100k peak concurrent at sale times, INR pricing. Recommend a Google Cloud architecture and risks.",
+  },
+  {
+    icon: "school",
+    label: "EdTech platform with live classes",
+    seed:
+      "EdTech platform with live classes, recorded content, quizzes. 500k students across India, peak 50k concurrent on live sessions. Architect it on Google Cloud.",
+  },
+] as const;
 
 export default async function DashboardPage() {
   const user = (await getSessionUser())!;
@@ -22,155 +47,152 @@ export default async function DashboardPage() {
     .get();
 
   const recent = recentSnap.docs.map((d) => d.data() as ArchitectureDoc);
+  const firstName =
+    (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] px-4 py-10 md:px-8 lg:px-12">
-      <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            Welcome back
-          </div>
-          <h1 className="mt-2 display text-balance text-[clamp(2rem,3.8vw,2.75rem)]">
-            {user.displayName ?? user.email}
-          </h1>
+    <div className="mx-auto flex w-full max-w-[1200px] flex-col px-6 py-10 md:px-10 md:py-16 lg:px-12">
+      {/* HERO greeting — M3 Expressive hero moment */}
+      <section className="m3-page-enter">
+        <p className="text-m3-on-surface-variant text-sm">
+          {greetingFor(new Date())}
+        </p>
+        <h1 className="display mt-2 text-balance text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.04]">
+          <span className="hero-gradient">{firstName}</span>
+        </h1>
+        <p className="mt-4 max-w-2xl text-[17px] leading-relaxed text-m3-on-surface-variant">
+          What system would you like to architect today? Describe it in plain English
+          and Tessar will design it — diagrams, scale tiers, INR costs, and risks.
+        </p>
+
+        {/* Suggestion chips */}
+        <div className="m3-stagger mt-8 grid gap-3 sm:grid-cols-2">
+          {SUGGESTIONS.map((s) => (
+            <Link
+              key={s.label}
+              href={`/new?seed=${encodeURIComponent(s.seed)}`}
+              className="state-layer press group/sug flex items-center gap-4 rounded-2xl bg-m3-surface-container-low p-4 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-1"
+            >
+              <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-m3-primary-container text-m3-on-primary-container">
+                <span className="ms text-[22px]" aria-hidden>
+                  {s.icon}
+                </span>
+              </span>
+              <span className="text-[15px] text-m3-on-surface">{s.label}</span>
+              <span
+                aria-hidden
+                className="ms ml-auto text-[20px] text-m3-on-surface-variant opacity-0 transition-all duration-m3-default-effects ease-m3-default-spatial group-hover/sug:translate-x-0.5 group-hover/sug:opacity-100"
+              >
+                arrow_forward
+              </span>
+            </Link>
+          ))}
         </div>
-        <Button asChild size="lg" className="gap-2">
-          <Link href="/new">
-            <Plus className="size-4" /> New architecture
-          </Link>
-        </Button>
-      </Reveal>
 
-      <Stagger step={80} className="grid gap-4 md:grid-cols-3">
-        <StatCard
-          icon={<Coins className="size-4" />}
-          label="Credits"
-          value={credits}
-          sub={credits > 0 ? "Each run = 1 credit" : "Top up to design more"}
-          cta={
-            credits === 0
-              ? { href: "/pricing", label: "Top up" }
-              : { href: "/new", label: "Start a run" }
-          }
-        />
-        <StatCard
-          icon={<Sparkles className="size-4" />}
-          label="Total architectures"
-          value={recentSnap.size}
-          sub="across all time"
-          cta={{ href: "/history", label: "View history" }}
-        />
-        <StatCard
-          icon={<Clock className="size-4" />}
-          label="Last run"
-          value={recent[0] ? formatDate(recent[0].createdAt) : "—"}
-          sub={recent[0]?.architecture?.meta.title ?? "No runs yet"}
-          isText
-          cta={recent[0] ? { href: `/architecture/${recent[0].id}`, label: "Open" } : undefined}
-        />
-      </Stagger>
-
-      <Reveal className="mt-12">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-semibold tracking-tight">Recent architectures</h2>
+        {/* Primary CTA — extended FAB style */}
+        <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
-            href="/history"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            href="/new"
+            className="state-layer press inline-flex h-14 items-center gap-2 rounded-2xl bg-m3-primary px-6 text-[15px] font-medium text-m3-on-primary shadow-m3-2 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-3"
           >
-            View all →
+            <span className="ms text-[20px]" aria-hidden>
+              edit_square
+            </span>
+            New architecture
           </Link>
+          <Link
+            href="/sample"
+            className="state-layer press inline-flex h-14 items-center gap-2 rounded-2xl border border-m3-outline px-6 text-[15px] font-medium text-m3-primary"
+          >
+            <span className="ms text-[20px]" aria-hidden>
+              auto_awesome
+            </span>
+            See a sample
+          </Link>
+          {credits === 0 && (
+            <Link
+              href="/pricing"
+              className="ml-auto inline-flex h-10 items-center gap-2 rounded-full bg-m3-tertiary-container px-4 text-[13px] font-medium text-m3-on-tertiary-container"
+            >
+              <span className="ms text-[18px]" aria-hidden>
+                diamond
+              </span>
+              Out of credits · top up
+            </Link>
+          )}
         </div>
-        {recent.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center gap-4 py-20 text-center">
-              <Sparkles className="size-8 text-foreground/40" />
-              <div>
-                <div className="font-medium">No architectures yet</div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Use your free credit to design your first system.
-                </p>
-              </div>
-              <Button asChild>
-                <Link href="/new">Design my architecture →</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <Stagger step={60} className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      </section>
+
+      {/* Recent runs */}
+      {recent.length > 0 && (
+        <section className="mt-20">
+          <div className="mb-5 flex items-end justify-between">
+            <div>
+              <h2 className="display text-[clamp(1.5rem,2.4vw,1.875rem)] leading-tight">
+                Recent
+              </h2>
+              <p className="mt-1 text-sm text-m3-on-surface-variant">
+                Your last {recent.length} architectures
+              </p>
+            </div>
+            <Link
+              href="/history"
+              className="state-layer press inline-flex h-10 items-center gap-1.5 rounded-full px-4 text-sm text-m3-primary"
+            >
+              View all
+              <span className="ms text-[18px]" aria-hidden>
+                arrow_forward
+              </span>
+            </Link>
+          </div>
+          <div className="m3-stagger grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {recent.map((a) => (
               <Link key={a.id} href={`/architecture/${a.id}`}>
-                <Card interactive className="h-full">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-base">
-                        {a.architecture?.meta.title ?? "Untitled"}
-                      </CardTitle>
-                      <Status status={a.status} />
-                    </div>
-                    <CardDescription>{truncate(a.prompt, 140)}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex items-center justify-between text-xs text-muted-foreground">
+                <Card interactive className="h-full p-5">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-[15px] font-medium leading-snug text-m3-on-surface">
+                      {a.architecture?.meta.title ?? "Untitled"}
+                    </h3>
+                    <Status status={a.status} />
+                  </div>
+                  <p className="mt-2 text-[13px] leading-relaxed text-m3-on-surface-variant">
+                    {truncate(a.prompt, 140)}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between text-[12px] text-m3-on-surface-variant">
                     <span>{formatDate(a.createdAt)}</span>
                     {a.architecture && (
-                      <Badge variant="outline" className="text-[10px]">
+                      <Badge variant="secondary" className="text-[11px]">
                         {a.architecture.meta.domain}
                       </Badge>
                     )}
-                  </CardContent>
+                  </div>
                 </Card>
               </Link>
             ))}
-          </Stagger>
-        )}
-      </Reveal>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  sub,
-  cta,
-  isText = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  sub: string;
-  cta?: { href: string; label: string };
-  isText?: boolean;
-}) {
-  return (
-    <Card className="card-lift">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {icon}
-          {label}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="display text-[clamp(2.25rem,4.2vw,3rem)] tabular-nums leading-none">
-          {isText || typeof value === "string" ? value : <AnimatedCounter value={value} />}
-        </div>
-        <div className="mt-2 text-sm text-muted-foreground">{sub}</div>
-        {cta && (
-          <Button asChild variant="link" className="mt-3 h-auto p-0 text-sm text-foreground">
-            <Link href={cta.href} className="group/cta gap-1">
-              {cta.label}
-              <ArrowRight className="size-3 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
-            </Link>
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
+function greetingFor(d: Date): string {
+  const h = d.getHours();
+  if (h < 5) return "Working late";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  if (h < 21) return "Good evening";
+  return "Good night";
 }
 
 function Status({ status }: { status: ArchitectureDoc["status"] }) {
-  if (status === "complete") return <Badge variant="success" className="text-[10px]">Complete</Badge>;
-  if (status === "running") return <Badge variant="info" className="text-[10px]">Running</Badge>;
-  if (status === "failed") return <Badge variant="destructive" className="text-[10px]">Failed</Badge>;
-  return <Badge variant="outline" className="text-[10px]">Pending</Badge>;
+  if (status === "complete")
+    return (
+      <Badge variant="secondary" className="bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200">
+        Complete
+      </Badge>
+    );
+  if (status === "running") return <Badge variant="tertiary">Running</Badge>;
+  if (status === "failed") return <Badge variant="destructive">Failed</Badge>;
+  return <Badge variant="outline">Pending</Badge>;
 }

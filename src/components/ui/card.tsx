@@ -4,15 +4,16 @@ import { cn } from "@/lib/utils";
 
 /**
  * Material 3 Expressive Card.
- *   - filled   → surface-container-highest, no border (default)
+ *   - filled   → surface-container-low, no border (default)
  *   - outlined → outline-variant border, surface
  *   - elevated → surface-container-low with M3 elevation
  *
- * Default radius is `lg` (16dp / shape-corner-large).
+ * Default radius is `xl` (28dp / shape-corner-extra-large) per M3 Expressive
+ * Card recommendations — large rounded "container" surfaces.
  * `interactive` adds hover lift + spring + state-layer.
  */
 const cardVariants = cva(
-  "text-m3-on-surface rounded-lg transition-[transform,box-shadow,background-color] duration-m3-default-effects ease-m3-default-effects",
+  "text-m3-on-surface rounded-xl transition-[transform,box-shadow,background-color] duration-m3-default-effects ease-m3-default-effects",
   {
     variants: {
       variant: {
