@@ -51,8 +51,9 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
+        display: ["var(--font-display)", "Georgia", "serif"],
       },
       transitionTimingFunction: {
         "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)",

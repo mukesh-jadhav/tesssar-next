@@ -51,12 +51,14 @@ export default async function LandingPage() {
               <span>Live · powered by Gemini 2.5 Pro on Vertex AI</span>
             </div>
 
-            <h1 className="display text-balance text-[clamp(2.5rem,7vw,5.5rem)] font-semibold">
+            <h1 className="display text-balance text-[clamp(2.75rem,7.5vw,6rem)]">
               <TextReveal text="Your AI principal" delay={120} />{" "}
-              <TextReveal text="architect." delay={380} />
+              <span className="italic text-foreground/95">
+                <TextReveal text="architect." delay={380} />
+              </span>
               <br />
               <span
-                className="block animate-reveal-up text-muted-foreground"
+                className="block animate-reveal-up text-muted-foreground/75 italic"
                 style={{
                   animationDelay: "720ms",
                   animationFillMode: "both",
@@ -253,7 +255,7 @@ export default async function LandingPage() {
             <Layers className="mx-auto size-7 text-foreground/60" />
           </Reveal>
           <Reveal delay={120}>
-            <h2 className="display mt-5 text-balance text-[clamp(2rem,5vw,3.5rem)] font-semibold">
+            <h2 className="display mt-5 text-balance text-[clamp(2.25rem,5.5vw,3.75rem)]">
               Stop guessing your architecture.
             </h2>
           </Reveal>

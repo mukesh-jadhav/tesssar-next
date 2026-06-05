@@ -10,12 +10,14 @@ export function Logo({
   return (
     <div
       className={cn(
-        "group/logo flex items-center gap-2.5 font-semibold tracking-tight",
+        "group/logo flex items-center gap-2.5",
         className,
       )}
     >
       <LogoMark className="size-[22px] text-foreground transition-transform duration-500 ease-out-quart group-hover/logo:rotate-[-6deg]" />
-      {showWordmark && <span className="text-[15px] leading-none">Tessar</span>}
+      {showWordmark && (
+        <span className="display text-[1.35rem] leading-none">Tessar</span>
+      )}
     </div>
   );
 }

@@ -12,7 +12,7 @@ export default async function NewArchitecturePage() {
   const credits = await getBalance(user.uid);
 
   return (
-    <div className="container max-w-3xl py-10">
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 md:px-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Design a new system</h1>

@@ -55,7 +55,7 @@ export default async function ArchitectureResultPage({
   const arch = Architecture.parse(doc.architecture);
 
   return (
-    <div className="container max-w-7xl py-10">
+    <div className="mx-auto w-full max-w-[1600px] px-4 py-8 md:px-8 lg:px-12">
       <ArchitectureView arch={arch} architectureId={doc.id} />
     </div>
   );

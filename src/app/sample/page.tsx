@@ -15,7 +15,7 @@ export default function SamplePage() {
     <div className="flex min-h-screen flex-col">
       <LandingHeader signedIn={false} />
       <main className="flex-1">
-        <div className="container max-w-7xl py-10 md:py-14">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-10 md:px-8 md:py-14 lg:px-12">
           <Reveal className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card/60 p-5 backdrop-blur">
             <div>
               <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">

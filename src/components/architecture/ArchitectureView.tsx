@@ -61,7 +61,7 @@ export function ArchitectureView({
             <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {arch.meta.domain}
             </div>
-            <h1 className="display mt-2 text-balance text-[clamp(2.25rem,5vw,3.5rem)] font-semibold">
+            <h1 className="display mt-2 text-balance text-[clamp(2.5rem,5.5vw,3.75rem)]">
               {arch.meta.title}
             </h1>
             <p className="mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground md:text-base">
@@ -99,17 +99,19 @@ export function ArchitectureView({
 
       {/* TABS */}
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="overview" className="gap-1.5"><Layers className="size-3.5" /> Overview</TabsTrigger>
-          <TabsTrigger value="diagrams" className="gap-1.5"><GitBranch className="size-3.5" /> Diagrams</TabsTrigger>
-          <TabsTrigger value="components" className="gap-1.5"><Box className="size-3.5" /> Components</TabsTrigger>
-          <TabsTrigger value="data" className="gap-1.5"><Database className="size-3.5" /> Data & APIs</TabsTrigger>
-          <TabsTrigger value="scale" className="gap-1.5"><Network className="size-3.5" /> Scale & Cost</TabsTrigger>
-          <TabsTrigger value="risks" className="gap-1.5"><AlertTriangle className="size-3.5" /> Risks</TabsTrigger>
-          <TabsTrigger value="security" className="gap-1.5"><Shield className="size-3.5" /> Security</TabsTrigger>
-          <TabsTrigger value="ops" className="gap-1.5"><Activity className="size-3.5" /> Ops</TabsTrigger>
-          <TabsTrigger value="roadmap" className="gap-1.5"><Map className="size-3.5" /> Roadmap</TabsTrigger>
-        </TabsList>
+        <div className="-mx-4 overflow-x-auto px-4 md:mx-0 md:overflow-visible md:px-0">
+          <TabsList className="w-max min-w-full justify-start md:w-full">
+            <TabsTrigger value="overview" className="gap-1.5"><Layers className="size-3.5" /> Overview</TabsTrigger>
+            <TabsTrigger value="diagrams" className="gap-1.5"><GitBranch className="size-3.5" /> Diagrams</TabsTrigger>
+            <TabsTrigger value="components" className="gap-1.5"><Box className="size-3.5" /> Components</TabsTrigger>
+            <TabsTrigger value="data" className="gap-1.5"><Database className="size-3.5" /> Data &amp; APIs</TabsTrigger>
+            <TabsTrigger value="scale" className="gap-1.5"><Network className="size-3.5" /> Scale &amp; Cost</TabsTrigger>
+            <TabsTrigger value="risks" className="gap-1.5"><AlertTriangle className="size-3.5" /> Risks</TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5"><Shield className="size-3.5" /> Security</TabsTrigger>
+            <TabsTrigger value="ops" className="gap-1.5"><Activity className="size-3.5" /> Ops</TabsTrigger>
+            <TabsTrigger value="roadmap" className="gap-1.5"><Map className="size-3.5" /> Roadmap</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* OVERVIEW */}
         <TabsContent value="overview" className="space-y-6">
@@ -145,7 +147,7 @@ export function ArchitectureView({
 
         {/* DIAGRAMS */}
         <TabsContent value="diagrams" className="space-y-4">
-          <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[260px_1fr]">
             <div className="space-y-1.5 lg:sticky lg:top-24 lg:self-start">
               {arch.diagrams.map((d) => {
                 const active = activeDiagram === d.id;
@@ -182,7 +184,7 @@ export function ArchitectureView({
                   className="space-y-4 animate-reveal-up"
                 >
                   <div>
-                    <h3 className="display text-2xl font-semibold tracking-tight">
+                    <h3 className="display text-[1.75rem] leading-tight">
                       {currentDiagram.title}
                     </h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -190,8 +192,8 @@ export function ArchitectureView({
                     </p>
                   </div>
                   <Card className="overflow-hidden">
-                    <CardContent className="p-6">
-                      <MermaidDiagram chart={currentDiagram.mermaid} />
+                    <CardContent className="p-4 md:p-6">
+                      <MermaidDiagram chart={currentDiagram.mermaid} className="min-h-[420px]" />
                     </CardContent>
                   </Card>
                 </div>

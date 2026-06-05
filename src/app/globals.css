@@ -129,8 +129,16 @@
     text-wrap: pretty;
   }
   .display {
-    letter-spacing: -0.04em;
-    line-height: 0.95;
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    line-height: 0.98;
+  }
+  .display-italic {
+    font-family: var(--font-display), Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
   }
 
   /* Brand accent helpers */

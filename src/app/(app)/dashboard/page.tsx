@@ -24,13 +24,13 @@ export default async function DashboardPage() {
   const recent = recentSnap.docs.map((d) => d.data() as ArchitectureDoc);
 
   return (
-    <div className="container py-12 md:py-16">
+    <div className="mx-auto w-full max-w-[1600px] px-4 py-10 md:px-8 lg:px-12">
       <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
             Welcome back
           </div>
-          <h1 className="mt-2 display text-balance text-[clamp(1.75rem,3.5vw,2.5rem)] font-semibold">
+          <h1 className="mt-2 display text-balance text-[clamp(2rem,3.8vw,2.75rem)]">
             {user.displayName ?? user.email}
           </h1>
         </div>
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <Stagger step={60} className="grid gap-3 md:grid-cols-2">
+          <Stagger step={60} className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {recent.map((a) => (
               <Link key={a.id} href={`/architecture/${a.id}`}>
                 <Card interactive className="h-full">
@@ -151,7 +151,7 @@ function StatCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="display text-[clamp(2rem,4vw,2.75rem)] font-semibold tabular-nums leading-none">
+        <div className="display text-[clamp(2.25rem,4.2vw,3rem)] tabular-nums leading-none">
           {isText || typeof value === "string" ? value : <AnimatedCounter value={value} />}
         </div>
         <div className="mt-2 text-sm text-muted-foreground">{sub}</div>

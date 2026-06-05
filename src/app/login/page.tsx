@@ -27,7 +27,7 @@ export default async function LoginPage({
             style={{ animationDelay: "100ms", animationFillMode: "both" }}
           >
             <div className="space-y-3">
-              <h1 className="display text-balance text-4xl font-semibold tracking-tight">
+              <h1 className="display text-balance text-[clamp(2.25rem,4vw,2.75rem)]">
                 Welcome to Tessar
               </h1>
               <p className="text-[15px] leading-relaxed text-muted-foreground">
@@ -72,7 +72,7 @@ export default async function LoginPage({
               </span>
               Trusted by Indian founders
             </div>
-            <p className="display text-balance text-[clamp(1.5rem,2.6vw,2rem)] font-medium leading-tight tracking-tight">
+            <p className="display text-balance text-[clamp(1.625rem,2.8vw,2.125rem)] leading-tight">
               “Tessar gave me a defensible architecture, cost model, and risk
               register in 4 minutes. It would have taken my team a week.”
             </p>

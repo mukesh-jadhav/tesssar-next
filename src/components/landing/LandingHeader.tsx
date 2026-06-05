@@ -5,11 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import { Logo } from "@/components/shared/Logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 export function LandingHeader({ signedIn }: { signedIn: boolean }) {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const lastY = useRef(0);
+  const pathname = usePathname();
 
   useEffect(() => {
     const onScroll = () => {
@@ -39,20 +41,35 @@ export function LandingHeader({ signedIn }: { signedIn: boolean }) {
         <Link href="/" className="transition-opacity hover:opacity-80">
           <Logo />
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-0.5 md:flex">
           {[
             { href: "/sample", label: "Sample" },
             { href: "/#how", label: "How it works" },
             { href: "/pricing", label: "Pricing" },
-          ].map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
-            >
-              {l.label}
-            </Link>
-          ))}
+          ].map((l) => {
+            const active =
+              pathname === l.href ||
+              (l.href !== "/" && pathname.startsWith(l.href));
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  "relative rounded-md px-3 py-1.5 text-sm transition-colors duration-200",
+                  active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {l.label}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "pointer-events-none absolute inset-x-3 -bottom-[15px] h-px origin-center bg-foreground transition-transform duration-300 ease-out-expo",
+                    active ? "scale-x-100" : "scale-x-0",
+                  )}
+                />
+              </Link>
+            );
+          })}
         </nav>
         <div className="flex items-center gap-2">
           {signedIn ? (

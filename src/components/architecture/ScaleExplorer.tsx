@@ -34,7 +34,7 @@ export function ScaleExplorer({ profiles }: { profiles: ScaleProfile[] }) {
               Drag to explore scale
             </div>
             <div className="mt-2 flex items-baseline gap-3">
-              <span className="display text-[clamp(1.75rem,3vw,2.25rem)] font-semibold tracking-tight">
+              <span className="display text-[clamp(2rem,3.2vw,2.5rem)] leading-none">
                 {meta.label}
               </span>
               <span className="text-sm text-muted-foreground">{meta.description}</span>

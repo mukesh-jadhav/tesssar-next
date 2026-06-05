@@ -9,7 +9,7 @@ export default async function PricingPage() {
   const user = await getSessionUser();
 
   return (
-    <div className="container max-w-6xl py-12">
+    <div className="mx-auto w-full max-w-[1400px] px-4 py-12 md:px-8 lg:px-12">
       <div className="mx-auto max-w-2xl text-center">
         <div className="text-xs font-medium uppercase tracking-wider text-brand">Pricing</div>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight">Pay per run.</h1>

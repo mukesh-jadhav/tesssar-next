@@ -152,7 +152,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
                   {pack.name}
                 </div>
                 <div className="mt-4 flex items-baseline gap-1">
-                  <span className="display text-[clamp(2.25rem,4vw,3rem)] font-semibold tabular-nums leading-none">
+                  <span className="display text-[clamp(2.5rem,4.2vw,3.25rem)] tabular-nums leading-none">
                     {formatINR(pack.pricePaise)}
                   </span>
                 </div>
