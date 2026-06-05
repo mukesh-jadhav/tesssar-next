@@ -144,7 +144,7 @@ export function ArchitectureView({
                 {currentDiagram.title}
               </h3>
               <div className="card-paper mt-6 overflow-hidden p-4 md:p-8">
-                <MermaidDiagram chart={currentDiagram.mermaid} className="min-h-[460px]" />
+                <MermaidDiagram chart={currentDiagram.mermaid} />
               </div>
             </div>
           )}
