@@ -14,3 +14,9 @@ coverage/
 firebase-debug.log
 gcp-key.json
 service-account*.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Local AI agent skills (workspace tooling, not app code)
+.agents/
