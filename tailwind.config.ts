@@ -96,9 +96,10 @@ const config: Config = {
         full: "var(--md-sys-shape-corner-full)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Roboto", "system-ui", "sans-serif"],
-        mono: ["var(--font-mono)", "Roboto Mono", "ui-monospace", "monospace"],
-        display: ["var(--font-display)", "Roboto Flex", "Roboto", "sans-serif"],
+        // M3 Expressive — Roboto Flex is the ONLY UI typeface.
+        sans: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
+        mono: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
       },
       // Material 3 type scale tokens (px → rem) — Major Second
       fontSize: {
@@ -144,14 +145,15 @@ const config: Config = {
         "m3-slow-spatial": "650ms",
       },
       boxShadow: {
-        "hover-card":
-          "0 1px 0 hsl(var(--border)), 0 12px 24px -8px hsl(var(--md-sys-color-shadow) / 0.08), 0 4px 8px -4px hsl(var(--md-sys-color-shadow) / 0.04)",
-        ring: "0 0 0 1px hsl(var(--foreground) / 0.08)",
-        "m3-1": "var(--md-sys-elevation-1)",
-        "m3-2": "var(--md-sys-elevation-2)",
-        "m3-3": "var(--md-sys-elevation-3)",
-        "m3-4": "var(--md-sys-elevation-4)",
-        "m3-5": "var(--md-sys-elevation-5)",
+        // M3 Expressive 3 — flat. All elevation collapses to none.
+        // Hierarchy comes from surface tones + borders, never shadows.
+        "hover-card": "none",
+        ring: "0 0 0 1px hsl(var(--md-sys-color-outline-variant))",
+        "m3-1": "none",
+        "m3-2": "none",
+        "m3-3": "none",
+        "m3-4": "none",
+        "m3-5": "none",
       },
       keyframes: {
         "accordion-down": {

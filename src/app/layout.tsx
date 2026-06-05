@@ -1,32 +1,16 @@
 import type { Metadata } from "next";
-import { Roboto_Flex, Roboto, Roboto_Mono } from "next/font/google";
+import { Roboto_Flex } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 import { RouteProgress } from "@/components/shared/RouteProgress";
 
-// Material 3 — brand typeface (variable, used for display + headlines)
+// Material 3 Expressive — single brand typeface. Roboto Flex is the official
+// M3 Expressive variable typeface and is the ONLY web font we ship for UI.
 const robotoFlex = Roboto_Flex({
   subsets: ["latin"],
   axes: ["opsz", "wdth"],
   variable: "--font-display",
-  display: "swap",
-});
-
-// Material 3 — plain typeface (body, labels, UI)
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-// Material 3 — monospaced
-const robotoMono = Roboto_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
   display: "swap",
 });
 
@@ -51,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${roboto.variable} ${robotoMono.variable} ${robotoFlex.variable}`}
+      className={robotoFlex.variable}
       suppressHydrationWarning
     >
       <head>

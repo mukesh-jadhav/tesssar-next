@@ -5,51 +5,50 @@
 @layer base {
   :root {
     /* ============================================================
-       MATERIAL 3 EXPRESSIVE — Tessar palette
-       Vibrant indigo-blue primary, warm-coral tertiary,
-       soft warm-neutral surfaces with a violet undertone.
-       Tuned to feel like Gemini / Material You Expressive.
+       MATERIAL 3 EXPRESSIVE 3 — Tessar palette (FLAT EDITION)
+       Neutral monochrome surfaces. A single forest-green accent
+       carries primary/CTA. No colored containers. No mesh.
        ============================================================ */
 
     /* --- M3 key colors --- */
-    --md-sys-color-primary: 250 84% 54%;
+    --md-sys-color-primary: 142 64% 24%;
     --md-sys-color-on-primary: 0 0% 100%;
-    --md-sys-color-primary-container: 250 100% 93%;
-    --md-sys-color-on-primary-container: 250 80% 14%;
+    --md-sys-color-primary-container: 0 0% 96%;
+    --md-sys-color-on-primary-container: 0 0% 8%;
 
-    --md-sys-color-secondary: 252 18% 44%;
+    --md-sys-color-secondary: 0 0% 24%;
     --md-sys-color-on-secondary: 0 0% 100%;
-    --md-sys-color-secondary-container: 252 60% 94%;
-    --md-sys-color-on-secondary-container: 252 30% 18%;
+    --md-sys-color-secondary-container: 0 0% 94%;
+    --md-sys-color-on-secondary-container: 0 0% 10%;
 
-    --md-sys-color-tertiary: 14 92% 56%;
+    --md-sys-color-tertiary: 142 64% 24%;
     --md-sys-color-on-tertiary: 0 0% 100%;
-    --md-sys-color-tertiary-container: 22 100% 90%;
-    --md-sys-color-on-tertiary-container: 14 80% 16%;
+    --md-sys-color-tertiary-container: 0 0% 94%;
+    --md-sys-color-on-tertiary-container: 0 0% 10%;
 
-    --md-sys-color-error: 0 75% 42%;
+    --md-sys-color-error: 0 70% 38%;
     --md-sys-color-on-error: 0 0% 100%;
-    --md-sys-color-error-container: 6 100% 92%;
-    --md-sys-color-on-error-container: 0 100% 12%;
+    --md-sys-color-error-container: 0 0% 96%;
+    --md-sys-color-on-error-container: 0 70% 30%;
 
-    /* --- M3 surface tones — warm, slightly violet-tinted whites --- */
-    --md-sys-color-surface: 36 36% 99%;
-    --md-sys-color-surface-dim: 252 14% 88%;
-    --md-sys-color-surface-bright: 36 36% 99%;
+    /* --- M3 surface tones — pure neutral grays --- */
+    --md-sys-color-surface: 0 0% 100%;
+    --md-sys-color-surface-dim: 0 0% 92%;
+    --md-sys-color-surface-bright: 0 0% 100%;
     --md-sys-color-surface-container-lowest: 0 0% 100%;
-    --md-sys-color-surface-container-low: 252 30% 97%;
-    --md-sys-color-surface-container: 252 22% 95%;
-    --md-sys-color-surface-container-high: 252 18% 92%;
-    --md-sys-color-surface-container-highest: 252 14% 89%;
-    --md-sys-color-on-surface: 252 18% 12%;
-    --md-sys-color-on-surface-variant: 252 10% 32%;
-    --md-sys-color-outline: 252 8% 52%;
-    --md-sys-color-outline-variant: 252 18% 86%;
-    --md-sys-color-inverse-surface: 252 12% 16%;
-    --md-sys-color-inverse-on-surface: 252 30% 96%;
-    --md-sys-color-inverse-primary: 250 100% 84%;
-    --md-sys-color-scrim: 252 14% 4%;
-    --md-sys-color-shadow: 252 22% 8%;
+    --md-sys-color-surface-container-low: 0 0% 98%;
+    --md-sys-color-surface-container: 0 0% 96%;
+    --md-sys-color-surface-container-high: 0 0% 94%;
+    --md-sys-color-surface-container-highest: 0 0% 92%;
+    --md-sys-color-on-surface: 0 0% 6%;
+    --md-sys-color-on-surface-variant: 0 0% 36%;
+    --md-sys-color-outline: 0 0% 60%;
+    --md-sys-color-outline-variant: 0 0% 89%;
+    --md-sys-color-inverse-surface: 0 0% 10%;
+    --md-sys-color-inverse-on-surface: 0 0% 96%;
+    --md-sys-color-inverse-primary: 142 60% 70%;
+    --md-sys-color-scrim: 0 0% 0%;
+    --md-sys-color-shadow: 0 0% 0%;
 
     /* ============================================================
        Legacy aliases — kept so existing utilities keep working.
@@ -130,23 +129,15 @@
     --dur-slow: var(--md-sys-motion-duration-expressive-default-spatial);
 
     /* ============================================================
-       M3 elevation levels — soft, tone-based shadows
+       M3 Expressive 3 is FLAT — no elevation shadows.
+       Tokens kept for compatibility but resolve to `none`.
+       Hierarchy: surface tones + 1px outlines.
        ============================================================ */
-    --md-sys-elevation-1:
-      0 1px 2px 0 hsl(var(--md-sys-color-shadow) / 0.30),
-      0 1px 3px 1px hsl(var(--md-sys-color-shadow) / 0.15);
-    --md-sys-elevation-2:
-      0 1px 2px 0 hsl(var(--md-sys-color-shadow) / 0.30),
-      0 2px 6px 2px hsl(var(--md-sys-color-shadow) / 0.15);
-    --md-sys-elevation-3:
-      0 1px 3px 0 hsl(var(--md-sys-color-shadow) / 0.30),
-      0 4px 8px 3px hsl(var(--md-sys-color-shadow) / 0.15);
-    --md-sys-elevation-4:
-      0 2px 3px 0 hsl(var(--md-sys-color-shadow) / 0.30),
-      0 6px 10px 4px hsl(var(--md-sys-color-shadow) / 0.15);
-    --md-sys-elevation-5:
-      0 4px 4px 0 hsl(var(--md-sys-color-shadow) / 0.30),
-      0 8px 12px 6px hsl(var(--md-sys-color-shadow) / 0.15);
+    --md-sys-elevation-1: none;
+    --md-sys-elevation-2: none;
+    --md-sys-elevation-3: none;
+    --md-sys-elevation-4: none;
+    --md-sys-elevation-5: none;
   }
 
   .dark {
@@ -248,41 +239,25 @@
     text-wrap: pretty;
   }
   .display {
-    /* Material 3 brand typeface — Roboto Flex with width axis pushed slightly,
-       optical sizing on for large-size legibility. */
-    font-family: var(--font-display), "Roboto Flex", Roboto, system-ui, sans-serif;
-    font-weight: 500;
-    font-variation-settings: "wdth" 105, "opsz" 96;
-    letter-spacing: -0.018em;
+    /* M3 Expressive 3 — bold Roboto Flex with widened axis.
+       Designed to match Google's flat hero typography. */
+    font-family: var(--font-display), "Roboto Flex", system-ui, sans-serif;
+    font-weight: 700;
+    font-variation-settings: "wdth" 100, "opsz" 144;
+    letter-spacing: -0.025em;
     line-height: 1;
   }
   .display-italic {
-    font-family: var(--font-display), "Roboto Flex", Roboto, sans-serif;
+    font-family: var(--font-display), "Roboto Flex", system-ui, sans-serif;
     font-style: italic;
-    font-weight: 500;
-    font-variation-settings: "wdth" 100, "opsz" 96;
-    letter-spacing: -0.015em;
+    font-weight: 600;
+    font-variation-settings: "wdth" 100, "opsz" 144;
+    letter-spacing: -0.02em;
   }
-  /* M3 Expressive Hero gradient — Gemini-style multi-color sweep
-     on the key word in a hero headline. */
+  /* Single-color accent for one key word in a hero headline.
+     Flat — no animation, no gradient. */
   .hero-gradient {
-    background: linear-gradient(
-      92deg,
-      #4285f4 0%,
-      #7b6cf6 28%,
-      #c059c6 55%,
-      #f06292 78%,
-      #ff8a65 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    background-size: 200% 100%;
-    animation: hero-gradient-shift 12s ease-in-out infinite;
-  }
-  @keyframes hero-gradient-shift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+    color: hsl(var(--md-sys-color-primary));
   }
 
   /* Material Symbols Rounded — Google's official icon font */
@@ -1027,3 +1002,46 @@
   border-radius: var(--md-sys-shape-corner-extra-small);
   box-shadow: var(--md-sys-elevation-3);
 }
+
+/* =====================================================================
+   M3 EXPRESSIVE 3 \u2014 FLAT OVERRIDES (final cascade)
+   Kill all decorative color + elevation. Hierarchy by surface + 1px border.
+   ===================================================================== */
+
+/* No mesh. No floating shapes. No blobs. */
+.m3-mesh,
+.m3-shape-a,
+.m3-shape-b,
+.m3-blob {
+  display: none !important;
+}
+
+/* No animated hero-tile elevation. */
+.m3-hero-tile {
+  box-shadow: none !important;
+  background: hsl(var(--md-sys-color-surface-container-low));
+  border: 1px solid hsl(var(--md-sys-color-outline-variant));
+}
+
+/* Bottom bar: flat pill with outline only. */
+.m3-bottom-bar {
+  box-shadow: none !important;
+  border: 1px solid hsl(var(--md-sys-color-outline-variant));
+  background: hsl(var(--md-sys-color-surface));
+}
+
+/* Elevation utilities collapse to nothing. */
+.elev-1, .elev-2, .elev-3, .elev-4, .elev-5 { box-shadow: none !important; }
+
+/* Strip every shadow Tailwind class might apply globally. */
+[class*="shadow-m3-"],
+[class*="shadow-hover-card"],
+.shadow,
+.shadow-sm,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+.shadow-2xl {
+  box-shadow: none !important;
+}
+

@@ -30,28 +30,28 @@ const SECTIONS = [
 ] as const;
 
 const CATEGORY_TONE: Record<ArchComponent["category"], string> = {
-  frontend: "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
-  api: "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200",
-  service: "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
-  worker: "bg-purple-100 text-purple-900 dark:bg-purple-950 dark:text-purple-200",
-  database: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  cache: "bg-orange-100 text-orange-900 dark:bg-orange-950 dark:text-orange-200",
-  queue: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  storage: "bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200",
-  cdn: "bg-cyan-100 text-cyan-900 dark:bg-cyan-950 dark:text-cyan-200",
-  auth: "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200",
-  observability: "bg-yellow-100 text-yellow-900 dark:bg-yellow-950 dark:text-yellow-200",
-  ml: "bg-pink-100 text-pink-900 dark:bg-pink-950 dark:text-pink-200",
-  edge: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  integration: "bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200",
-  other: "bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-200",
+  frontend: "bg-m3-surface-container text-m3-on-surface",
+  api: "bg-m3-surface-container text-m3-on-surface",
+  service: "bg-m3-surface-container text-m3-on-surface",
+  worker: "bg-m3-surface-container text-m3-on-surface",
+  database: "bg-m3-surface-container text-m3-on-surface",
+  cache: "bg-m3-surface-container text-m3-on-surface",
+  queue: "bg-m3-surface-container text-m3-on-surface",
+  storage: "bg-m3-surface-container text-m3-on-surface",
+  cdn: "bg-m3-surface-container text-m3-on-surface",
+  auth: "bg-m3-surface-container text-m3-on-surface",
+  observability: "bg-m3-surface-container text-m3-on-surface",
+  ml: "bg-m3-surface-container text-m3-on-surface",
+  edge: "bg-m3-surface-container text-m3-on-surface",
+  integration: "bg-m3-surface-container text-m3-on-surface",
+  other: "bg-m3-surface-container text-m3-on-surface",
 };
 
 const RISK_TONE: Record<Risk["impact"], string> = {
-  low: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  medium: "bg-m3-secondary-container text-m3-on-secondary-container",
-  high: "bg-m3-tertiary-container text-m3-on-tertiary-container",
-  critical: "bg-m3-error-container text-m3-on-error-container",
+  low: "bg-m3-surface-container text-m3-on-surface-variant",
+  medium: "bg-m3-surface-container text-m3-on-surface",
+  high: "bg-m3-on-surface text-m3-surface",
+  critical: "bg-m3-error text-m3-on-error",
 };
 
 export function ArchitectureView({
