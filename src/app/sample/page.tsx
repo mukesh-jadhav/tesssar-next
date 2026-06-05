@@ -12,35 +12,29 @@ export const metadata = {
 
 export default function SamplePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-m3-surface text-m3-on-surface">
+    <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
       <LandingTopBar signedIn={false} />
-      <main className="flex-1 pt-24">
-        <div className="mx-auto w-full max-w-[1440px] px-6 md:px-10 lg:px-14">
-          <div className="m3-page-enter mb-6 flex flex-wrap items-center justify-between gap-4 rounded-[28px] bg-m3-surface-container-low p-5 md:p-6">
-            <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-2xl bg-m3-primary-container text-m3-on-primary-container">
-                <span className="ms text-[20px]" aria-hidden>visibility</span>
+
+      <main className="pt-[120px] md:pt-[140px]">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          {/* Sample banner */}
+          <div className="m3-page-enter card-paper flex flex-wrap items-center justify-between gap-4 p-5 md:p-7">
+            <div className="flex items-center gap-4">
+              <span className="tag tag-accent">§ Sample report</span>
+              <span className="hidden sm:inline text-[14px] text-[hsl(var(--ink-2))]">
+                An imaginary product, fully designed — exactly what you&rsquo;d get.
               </span>
-              <div>
-                <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
-                  Sample report
-                </div>
-                <div className="mt-1 text-[14px] font-medium text-m3-on-surface">
-                  An imaginary product, fully designed — to show what Tessar produces.
-                </div>
-              </div>
             </div>
-            <Link
-              href="/login"
-              className="state-layer press m3-squircle-press inline-flex h-12 items-center gap-2 rounded-2xl bg-m3-primary px-5 text-[14px] font-medium text-m3-on-primary shadow-m3-2 hover:shadow-m3-3"
-            >
+            <Link href="/login" className="btn-pill-accent">
               Design yours
               <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
             </Link>
           </div>
         </div>
+
         <ArchitectureView arch={SAMPLE_ARCHITECTURE} showDownload={false} />
       </main>
+
       <Footer />
     </div>
   );

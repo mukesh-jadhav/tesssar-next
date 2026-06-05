@@ -7,39 +7,45 @@ export const metadata = { title: "New design" };
 export default async function NewArchitecturePage({
   searchParams,
 }: {
-  searchParams: { seed?: string };
+  searchParams: { seed?: string; prompt?: string };
 }) {
   const user = (await getSessionUser())!;
   const credits = await getBalance(user.uid);
   const firstName =
     (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
+  const seed = searchParams.seed ?? searchParams.prompt;
 
   return (
-    <div className="relative mx-auto flex w-full max-w-[960px] flex-col px-6 py-16 md:py-24">
-      {/* Ambient shapes */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden">
-        <div className="absolute left-[10%] top-10 size-72 rounded-full bg-m3-primary-container/45 blur-[100px] m3-shape-a" />
-        <div className="absolute right-[10%] top-32 size-80 rounded-full bg-m3-tertiary-container/45 blur-[110px] m3-shape-b" />
+    <div className="mx-auto w-full max-w-[1200px] px-6 py-14 md:px-12 md:py-20 lg:px-16">
+      {/* Masthead */}
+      <div className="rule-dots flex items-baseline justify-between pb-4">
+        <span className="tag tag-accent">§ New design</span>
+        <span className="eyebrow hidden md:inline">
+          Credits available · <span className="text-[hsl(var(--ink))] font-medium">{credits}</span>
+        </span>
       </div>
 
-      <section className="m3-page-enter text-center">
-        <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
-          New design
-        </div>
-        <h1 className="display mt-3 text-balance text-[clamp(2.25rem,5vw,3.75rem)] leading-[1.04]">
-          What can I{" "}
-          <span className="hero-gradient inline-block">architect</span>
-          {firstName !== "friend" ? `, ${firstName}` : ""}?
+      <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
+        <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
+          What can I<br />
+          <span className="serif font-normal italic accent">architect</span>
+          {firstName !== "friend" ? <>, {firstName}?</> : "?"}
         </h1>
-        <p className="mx-auto mt-5 max-w-xl text-[16px] leading-relaxed text-m3-on-surface-variant">
-          Describe the system in plain English. I&apos;ll design it — diagrams,
-          scale tiers, INR cost estimates, risks, and the patterns that solve
-          them.
-        </p>
+
+        <div className="flex flex-col justify-end gap-5 pb-3">
+          <p className="text-[17px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[42ch]">
+            Describe the system in plain English. I&apos;ll return a full
+            report — diagrams, scale tiers, INR cost estimates, risks, and the
+            patterns that solve them.
+          </p>
+          <p className="text-[13px] text-[hsl(var(--ink-3))]">
+            One credit per run · about four minutes · cancel any time.
+          </p>
+        </div>
       </section>
 
-      <div className="mt-10">
-        <NewArchitectureForm credits={credits} seed={searchParams.seed} />
+      <div className="mt-14">
+        <NewArchitectureForm credits={credits} seed={seed} />
       </div>
     </div>
   );

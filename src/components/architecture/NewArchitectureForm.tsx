@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { WavyProgress } from "@/components/m3/WavyProgress";
-import { Chip } from "@/components/m3/Chip";
 
 type ProgressEvent =
   | { type: "init"; architectureId: string }
@@ -27,25 +25,25 @@ const PHASE_ORDER = [
 
 const EXAMPLES = [
   {
-    icon: "draw",
+    n: "01",
     label: "Realtime collaborative whiteboard",
     seed:
       "Realtime collaborative whiteboard for design teams. Low-latency cursors, infinite canvas, version history, AI-assisted suggestions. 50K users in year 1, India + SEA. Free + Pro plans.",
   },
   {
-    icon: "local_shipping",
+    n: "02",
     label: "B2B logistics with live GPS",
     seed:
       "B2B logistics platform that ingests GPS pings from 100K trucks every 5 seconds, computes ETAs, dispatches alerts. India-first, integrates with TMS systems.",
   },
   {
-    icon: "support_agent",
+    n: "03",
     label: "AI customer support copilot",
     seed:
       "AI-powered customer support copilot for D2C brands. Reads ticket history, drafts replies, escalates to human, integrates with Shopify + WhatsApp Business API.",
   },
   {
-    icon: "health_and_safety",
+    n: "04",
     label: "ABDM-compliant health vault",
     seed:
       "Privacy-preserving health records vault for Indian hospitals. ABDM compliant, end-to-end encrypted, consent-based sharing, audit log, mobile + web.",
@@ -62,12 +60,11 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Autosize textarea
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 380) + "px";
+    el.style.height = Math.min(el.scrollHeight, 420) + "px";
   }, [brief]);
 
   useEffect(() => {
@@ -78,11 +75,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     ? PHASE_ORDER.indexOf(phase as (typeof PHASE_ORDER)[number])
     : -1;
   const progressPct =
-    phaseIndex < 0
-      ? generating
-        ? 5
-        : 0
-      : Math.round(((phaseIndex + 1) / PHASE_ORDER.length) * 100);
+    phaseIndex < 0 ? (generating ? 5 : 0) : Math.round(((phaseIndex + 1) / PHASE_ORDER.length) * 100);
 
   async function handleSubmit() {
     if (brief.trim().length < 30) {
@@ -125,16 +118,11 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
           const line = part.replace(/^data:\s*/, "").trim();
           if (!line) continue;
           let ev: ProgressEvent;
-          try {
-            ev = JSON.parse(line) as ProgressEvent;
-          } catch {
-            continue;
-          }
+          try { ev = JSON.parse(line) as ProgressEvent; } catch { continue; }
+
           if (ev.type === "init") architectureId = ev.architectureId;
-          else if (ev.type === "phase") {
-            setPhase(ev.phase);
-            setPhaseMsg(ev.message);
-          } else if (ev.type === "tokens") setTokens(ev.tokens);
+          else if (ev.type === "phase") { setPhase(ev.phase); setPhaseMsg(ev.message); }
+          else if (ev.type === "tokens") setTokens(ev.tokens);
           else if (ev.type === "complete" && architectureId) {
             router.push(`/architecture/${architectureId}`);
             return;
@@ -155,36 +143,39 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
   // ===== Generating panel =====
   if (generating) {
     return (
-      <div className="m3-page-enter mx-auto max-w-2xl">
-        <div className="rounded-[36px] bg-m3-surface-container-low p-8 shadow-m3-2">
-          <div className="flex items-center gap-3">
-            <span className="grid size-12 place-items-center rounded-2xl bg-m3-primary-container text-m3-on-primary-container">
-              <span className="ms text-[24px] animate-spin" aria-hidden>progress_activity</span>
-            </span>
-            <div>
-              <h2 className="display text-[22px] leading-tight">Designing your system</h2>
-              <p className="text-[13px] text-m3-on-surface-variant">
-                Gemini 2.5 Pro is reasoning through your brief.
-              </p>
-            </div>
-            <span className="ml-auto rounded-full bg-m3-surface-container px-3 py-1 font-mono text-[11px] tabular-nums text-m3-on-surface-variant">
-              ~{tokens.toLocaleString("en-IN")} tokens
+      <div className="m3-page-enter mx-auto max-w-3xl">
+        <div className="card-paper p-8 md:p-12">
+          <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
+            <span className="section-num">§ Generating</span>
+            <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))] uppercase tracking-wider">
+              {tokens.toLocaleString("en-IN")} tokens
             </span>
           </div>
 
-          {/* Wavy progress — M3 Expressive signature */}
-          <div className="mt-6">
-            <WavyProgress value={progressPct} />
-          </div>
+          <h2 className="display-tight mt-8 text-[clamp(2rem,4.5vw,3.5rem)] leading-[0.95] tracking-[-0.04em]">
+            Designing your<br />
+            <span className="serif font-normal italic accent">system…</span>
+          </h2>
 
-          <div
-            key={phaseMsg}
-            className="m3-rise mt-4 text-[14px] text-m3-on-surface-variant"
-          >
+          <p key={phaseMsg} className="m3-rise mt-5 text-[16px] text-[hsl(var(--ink-2))]">
             {phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}
+          </p>
+
+          {/* Progress bar */}
+          <div className="mt-10">
+            <div className="flex items-baseline justify-between text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
+              <span>Progress</span>
+              <span className="tabular-nums">{progressPct}%</span>
+            </div>
+            <div className="mt-2 h-[3px] w-full bg-[hsl(var(--paper-3))] overflow-hidden">
+              <div
+                className="h-full bg-[hsl(var(--ink))] transition-all duration-700"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
           </div>
 
-          <ol className="mt-7 space-y-2.5">
+          <ol className="mt-10 grid gap-2">
             {PHASE_ORDER.map((p, i) => {
               const done = phaseIndex > i;
               const active = phaseIndex === i;
@@ -192,27 +183,28 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
                 <li
                   key={p}
                   className={cn(
-                    "flex items-center gap-3 text-[14px] transition-all duration-m3-default-effects ease-m3-default-effects",
-                    !done && !active && "opacity-45",
+                    "grid grid-cols-[auto_auto_1fr] items-center gap-4 py-3 border-b border-[hsl(var(--line))] last:border-0 transition-all",
+                    !done && !active && "opacity-40",
                   )}
                 >
+                  <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <span
                     className={cn(
-                      "grid size-7 place-items-center rounded-full transition-all duration-m3-default-effects ease-m3-fast-spatial",
-                      done && "bg-m3-primary text-m3-on-primary",
-                      active && "bg-m3-primary-container text-m3-on-primary-container scale-110",
-                      !done && !active && "bg-m3-surface-container text-m3-on-surface-variant",
+                      "grid size-6 place-items-center rounded-full transition-all",
+                      done && "bg-[hsl(var(--ink))] text-[hsl(var(--paper))]",
+                      active && "bg-[hsl(var(--accent))] text-[hsl(var(--paper))] scale-110",
+                      !done && !active && "border border-[hsl(var(--line-2))]",
                     )}
                   >
                     {done ? (
-                      <span className="ms text-[16px]" aria-hidden>check</span>
+                      <span className="ms text-[14px]" aria-hidden>check</span>
                     ) : active ? (
-                      <span className="ms text-[16px] animate-spin" aria-hidden>progress_activity</span>
-                    ) : (
-                      <span className="text-[12px] tabular-nums">{i + 1}</span>
-                    )}
+                      <span className="ms text-[14px] animate-spin" aria-hidden>progress_activity</span>
+                    ) : null}
                   </span>
-                  <span className={cn(active && "font-medium text-m3-on-surface")}>
+                  <span className={cn("text-[15px]", active ? "font-medium text-[hsl(var(--ink))]" : "text-[hsl(var(--ink-2))]")}>
                     {phaseLabel(p)}
                   </span>
                 </li>
@@ -221,13 +213,10 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
           </ol>
 
           {errorMsg && (
-            <div className="mt-6 flex items-start gap-2.5 rounded-2xl bg-m3-error-container p-4 text-[14px] text-m3-on-error-container">
-              <span className="ms" aria-hidden>error</span>
-              <div>
-                <div className="font-medium">Generation failed</div>
-                <div className="mt-0.5 text-[13px]">{errorMsg}</div>
-                <div className="mt-1 text-[12px] opacity-80">Your credit has been refunded.</div>
-              </div>
+            <div className="mt-8 border border-[hsl(var(--bad))]/30 bg-[hsl(var(--bad))]/5 p-5 rounded-2xl text-[14px] text-[hsl(var(--bad))]">
+              <div className="font-medium">Generation failed</div>
+              <div className="mt-1 text-[hsl(var(--ink-2))]">{errorMsg}</div>
+              <div className="mt-2 text-[12px] text-[hsl(var(--ink-3))]">Your credit has been refunded.</div>
             </div>
           )}
         </div>
@@ -235,75 +224,85 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     );
   }
 
-  // ===== Composer (idle) =====
+  // ===== Composer =====
   return (
-    <div className="m3-page-enter mx-auto w-full max-w-2xl">
-      <div className="relative rounded-[36px] bg-m3-surface-container-low shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects focus-within:shadow-m3-3 focus-within:ring-1 focus-within:ring-m3-primary/30">
+    <div className="m3-page-enter mx-auto w-full max-w-3xl">
+      <div className="card-paper relative overflow-hidden p-6 md:p-8 transition-all focus-within:border-[hsl(var(--ink))]">
+        <div className="flex items-baseline justify-between pb-4 border-b border-[hsl(var(--line))]">
+          <span className="section-num">§ Brief</span>
+          <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))] uppercase tracking-wider">
+            {brief.length.toLocaleString("en-IN")} / 8,000
+          </span>
+        </div>
+
         <textarea
           ref={textareaRef}
           value={brief}
           onChange={(e) => setBrief(e.target.value)}
-          placeholder="Describe the system you'd like to build…"
+          placeholder="Describe the system you'd like to build in plain English. Audience, scale, geography, constraints — the more context, the sharper the design."
           maxLength={8000}
-          rows={3}
+          rows={4}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
               e.preventDefault();
               handleSubmit();
             }
           }}
-          className="block w-full resize-none bg-transparent px-7 pt-7 pb-3 text-[16px] leading-relaxed text-m3-on-surface placeholder:text-m3-on-surface-variant/80 focus:outline-none scrollbar-thin"
+          className="block w-full resize-none bg-transparent pt-6 pb-4 text-[17px] leading-[1.55] text-[hsl(var(--ink))] placeholder:text-[hsl(var(--ink-3))] focus:outline-none scrollbar-thin"
         />
 
-        <div className="flex items-center gap-2 px-4 pb-4 pt-2">
-          <span className="rounded-full bg-m3-surface-container px-3 py-1 text-[11px] font-medium uppercase tracking-[0.06em] text-m3-on-surface-variant">
-            {brief.length.toLocaleString("en-IN")} / 8,000
-          </span>
-          <span className="text-[11px] text-m3-on-surface-variant">
+        <div className="flex items-center justify-between gap-3 pt-4 border-t border-[hsl(var(--line))]">
+          <span className="text-[12px] text-[hsl(var(--ink-3))]">
             1 credit · refunded on failure
           </span>
-          <div className="ml-auto flex items-center gap-2">
-            <kbd className="hidden rounded-md bg-m3-surface-container px-1.5 py-0.5 text-[10px] text-m3-on-surface-variant md:inline-block">
+          <div className="flex items-center gap-3">
+            <kbd className="hidden md:inline-flex items-center rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2 py-1 text-[11px] font-mono text-[hsl(var(--ink-3))]">
               ⌘↵
             </kbd>
             <button
               type="button"
               onClick={handleSubmit}
               disabled={brief.trim().length < 30}
-              aria-label="Design my architecture"
               className={cn(
-                "state-layer press m3-squircle-press grid size-14 place-items-center transition-all duration-m3-default-effects ease-m3-fast-spatial",
+                "btn-pill press",
                 brief.trim().length < 30
-                  ? "bg-m3-surface-container text-m3-on-surface-variant/60"
-                  : "bg-m3-primary text-m3-on-primary shadow-m3-2 hover:shadow-m3-3",
+                  ? "!bg-[hsl(var(--paper-3))] !text-[hsl(var(--ink-3))] !border-[hsl(var(--paper-3))] cursor-not-allowed"
+                  : "btn-pill-accent",
               )}
             >
-              <span className="ms text-[24px]" aria-hidden>arrow_upward</span>
+              Design it
+              <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
             </button>
           </div>
         </div>
       </div>
 
       {/* Examples */}
-      <div className="mt-7">
-        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
-          Try one of these
+      <div className="mt-12">
+        <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-4">
+          <span className="section-num">§ Or try one of these</span>
         </div>
-        <div className="m3-stagger mt-3 flex flex-wrap gap-2">
+        <ul className="mt-2 divide-y divide-[hsl(var(--line))]">
           {EXAMPLES.map((ex) => (
-            <Chip
-              key={ex.label}
-              type="suggestion"
-              icon={ex.icon}
-              onClick={() => {
-                setBrief(ex.seed);
-                textareaRef.current?.focus();
-              }}
-            >
-              {ex.label}
-            </Chip>
+            <li key={ex.label}>
+              <button
+                type="button"
+                onClick={() => { setBrief(ex.seed); textareaRef.current?.focus(); }}
+                className="group w-full grid grid-cols-[auto_1fr_auto] items-center gap-6 py-5 text-left transition-colors hover:bg-[hsl(var(--paper-2))] px-2 -mx-2 rounded-2xl"
+              >
+                <span className="display text-[28px] tracking-[-0.04em] text-[hsl(var(--ink-3))] group-hover:text-[hsl(var(--accent))] transition-colors w-12">
+                  {ex.n}
+                </span>
+                <span className="display text-[clamp(1rem,1.8vw,1.4rem)] leading-tight tracking-[-0.02em]">
+                  {ex.label}
+                </span>
+                <span className="ms text-[20px] text-[hsl(var(--ink-3))] group-hover:text-[hsl(var(--ink))] group-hover:translate-x-1 transition-all" aria-hidden>
+                  north_east
+                </span>
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
     </div>
   );

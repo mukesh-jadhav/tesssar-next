@@ -30,7 +30,7 @@ export function GoogleSignInButton({ next = "/dashboard" }: { next?: string }) {
       onClick={handleClick}
       disabled={loading}
       className={cn(
-        "state-layer press m3-squircle-press group relative inline-flex h-14 w-full items-center justify-center gap-3 bg-m3-primary px-5 text-[15px] font-medium text-m3-on-primary shadow-m3-2 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-3",
+        "btn-pill btn-pill-lg w-full",
         loading && "opacity-60",
       )}
     >

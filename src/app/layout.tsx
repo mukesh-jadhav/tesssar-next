@@ -1,16 +1,41 @@
 import type { Metadata } from "next";
-import { Roboto_Flex } from "next/font/google";
+import { Bricolage_Grotesque, Manrope, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 import { RouteProgress } from "@/components/shared/RouteProgress";
 
-// Material 3 Expressive — single brand typeface. Roboto Flex is the official
-// M3 Expressive variable typeface and is the ONLY web font we ship for UI.
-const robotoFlex = Roboto_Flex({
+// Display — modern editorial sans with SOFT axis (rounded corners) and
+// variable width. The personality typeface of the whole product.
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  axes: ["opsz", "wdth"],
+  weight: ["400", "500", "600", "700", "800"],
   variable: "--font-display",
+  display: "swap",
+});
+
+// UI — rounded geometric workhorse (Manrope). Used for body, controls, labels.
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+// Mono — for eyebrows, tags, counters, code.
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
+// Editorial italic — used sparingly for pull quotes & magazine flourishes.
+const instrument = Instrument_Serif({
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
   display: "swap",
 });
 
@@ -35,17 +60,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={robotoFlex.variable}
+      className={`${bricolage.variable} ${manrope.variable} ${jetbrains.variable} ${instrument.variable}`}
       suppressHydrationWarning
     >
       <head>
-        {/* Material Symbols — official Google icon font */}
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen font-sans antialiased">
+      <body className="min-h-screen antialiased">
         <RouteProgress />
         {children}
         <CommandMenu />

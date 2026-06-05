@@ -1,78 +1,65 @@
 import Link from "next/link";
-import { Logo } from "./Logo";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-background">
-      <div className="container flex flex-col gap-8 py-14 md:flex-row md:items-start md:justify-between">
-        <div className="max-w-sm">
-          <Logo />
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            The AI principal architect for founders. Built on Google Cloud, designed for India.
-          </p>
+    <footer className="relative border-t border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
+      <div className="mx-auto w-full max-w-[1480px] px-6 pb-12 pt-20 md:px-12 lg:px-16">
+        {/* Big wordmark */}
+        <div className="display text-[clamp(4rem,16vw,16rem)] leading-[0.85] tracking-[-0.05em]">
+          Tessar<span className="accent">.</span>
         </div>
-        <div className="grid grid-cols-2 gap-12 text-sm sm:grid-cols-3">
-          <FooterCol
-            title="Product"
-            links={[
-              { href: "/sample", label: "Sample report" },
-              { href: "/pricing", label: "Pricing" },
-              { href: "/new", label: "Start a build" },
-            ]}
-          />
-          <FooterCol
-            title="Company"
-            links={[
-              { href: "mailto:hello@tessar.app", label: "Contact" },
-              { href: "/legal/terms", label: "Terms" },
-              { href: "/legal/privacy", label: "Privacy" },
-            ]}
-          />
-          <div>
-            <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Built with
-            </div>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>Vertex AI · Gemini 2.5 Pro</li>
-              <li>Cloud Run · Firestore</li>
-              <li>Razorpay</li>
-            </ul>
+
+        <div className="mt-14 grid gap-12 border-t border-[hsl(var(--line))] pt-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+          <div className="max-w-sm">
+            <p className="eyebrow">Manifesto</p>
+            <p className="mt-3 text-[15px] leading-relaxed text-[hsl(var(--ink-2))]">
+              We treat cloud architecture like editorial work. Decisions cite
+              sources. Components are named products. Costs are numbers, not
+              vibes.
+            </p>
           </div>
+
+          <FooterCol heading="Product">
+            <FooterLink href="/sample">Sample report</FooterLink>
+            <FooterLink href="/pricing">Pricing</FooterLink>
+            <FooterLink href="/new">Design a system</FooterLink>
+          </FooterCol>
+
+          <FooterCol heading="Resources">
+            <FooterLink href="/legal/terms">Terms</FooterLink>
+            <FooterLink href="/legal/privacy">Privacy</FooterLink>
+            <FooterLink href="mailto:hello@tessar.app">Contact</FooterLink>
+          </FooterCol>
+
+          <FooterCol heading="From">
+            <span className="text-[15px] text-[hsl(var(--ink-2))]">
+              Built in Bengaluru,<br />running on Google Cloud.
+            </span>
+          </FooterCol>
         </div>
-      </div>
-      <div className="border-t">
-        <div className="container py-5 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Tessar. All rights reserved.
+
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-[hsl(var(--line))] pt-6 text-[12px] text-[hsl(var(--ink-3))]">
+          <div>© {new Date().getFullYear()} Tessar. All rights reserved.</div>
+          <div className="font-mono uppercase tracking-wider">vol. 01 · issue 05</div>
         </div>
       </div>
     </footer>
   );
 }
 
-function FooterCol({
-  title,
-  links,
-}: {
-  title: string;
-  links: { href: string; label: string }[];
-}) {
+function FooterCol({ heading, children }: { heading: string; children: React.ReactNode }) {
   return (
-    <div>
-      <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        {title}
-      </div>
-      <ul className="space-y-2 text-muted-foreground">
-        {links.map((l) => (
-          <li key={l.href}>
-            <Link
-              href={l.href}
-              className="transition-colors duration-200 hover:text-foreground"
-            >
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
+    <div className="flex flex-col gap-3">
+      <p className="eyebrow">{heading}</p>
+      {children}
     </div>
+  );
+}
+
+function FooterLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link href={href} className="ulgrow text-[15px] text-[hsl(var(--ink))] w-fit">
+      {children}
+    </Link>
   );
 }

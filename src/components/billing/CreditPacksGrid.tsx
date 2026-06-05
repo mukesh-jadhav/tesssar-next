@@ -30,10 +30,7 @@ function useRazorpayScript() {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (window.Razorpay) {
-      setLoaded(true);
-      return;
-    }
+    if (window.Razorpay) { setLoaded(true); return; }
     const s = document.createElement("script");
     s.src = "https://checkout.razorpay.com/v1/checkout.js";
     s.async = true;
@@ -50,10 +47,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   const [loadingPackId, setLoadingPackId] = useState<string | null>(null);
 
   async function buyPack(pack: CreditPack) {
-    if (!signedIn) {
-      router.push("/login?next=/pricing");
-      return;
-    }
+    if (!signedIn) { router.push("/login?next=/pricing"); return; }
     if (!razorpayLoaded || !window.Razorpay) {
       toast.error("Razorpay still loading. Try again in a moment.");
       return;
@@ -67,11 +61,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
       });
       if (!res.ok) throw new Error(await res.text());
       const data = (await res.json()) as {
-        orderId: string;
-        amount: number;
-        currency: string;
-        keyId: string;
-        txId: string;
+        orderId: string; amount: number; currency: string; keyId: string; txId: string;
         user: { name: string; email: string };
       };
 
@@ -83,7 +73,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
         name: "Tessar",
         description: `${pack.name} — ${pack.credits} architecture ${pack.credits === 1 ? "run" : "runs"}`,
         prefill: { name: data.user.name, email: data.user.email },
-        theme: { color: "#5b3df6" },
+        theme: { color: "#E04F1E" },
         modal: { ondismiss: () => setLoadingPackId(null) },
         handler: async (resp) => {
           try {
@@ -111,88 +101,96 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   }
 
   return (
-    <div className="m3-stagger grid gap-4 md:grid-cols-3">
-      {CREDIT_PACKS.map((pack) => {
+    <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
+      {CREDIT_PACKS.map((pack, idx) => {
         const popular = pack.badge === "Most popular";
-        const tone = popular ? "primary" : pack.credits >= 10 ? "tertiary" : "secondary";
-        const toneSurface =
-          tone === "primary"
-            ? "bg-m3-primary text-m3-on-primary"
-            : tone === "tertiary"
-              ? "bg-m3-tertiary-container text-m3-on-tertiary-container"
-              : "bg-m3-secondary-container text-m3-on-secondary-container";
-        const accent =
-          tone === "primary"
-            ? "bg-m3-primary-container text-m3-on-primary-container"
-            : tone === "tertiary"
-              ? "bg-m3-tertiary text-m3-on-tertiary"
-              : "bg-m3-secondary text-m3-on-secondary";
-
         return (
           <article
             key={pack.id}
             className={cn(
-              "relative overflow-hidden rounded-[32px] p-7",
-              "transition-all duration-m3-default-effects ease-m3-default-effects",
-              "hover:-translate-y-1 hover:shadow-m3-3",
-              popular ? "bg-m3-surface-container-high shadow-m3-2" : "bg-m3-surface-container-low",
+              "relative flex flex-col bg-[hsl(var(--paper))] p-8 md:p-10 transition-colors",
+              popular ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))]" : "hover:bg-[hsl(var(--paper-2))]",
             )}
           >
-            {/* Floating decoration */}
-            <div
-              aria-hidden
-              className={cn(
-                "absolute -right-12 -top-12 size-44 rounded-[42%_58%_67%_33%/41%_44%_56%_59%] opacity-60 m3-blob",
-                accent,
+            <div className="flex items-baseline justify-between">
+              <span
+                className={cn(
+                  "display text-[40px] tracking-[-0.04em]",
+                  popular ? "text-[hsl(var(--paper))]/55" : "text-[hsl(var(--ink-3))]",
+                )}
+              >
+                {String(idx + 1).padStart(2, "0")}
+              </span>
+              {pack.badge && (
+                <span
+                  className={cn(
+                    "tag",
+                    popular
+                      ? "!bg-[hsl(var(--accent))] !border-[hsl(var(--accent))] !text-[hsl(var(--paper))]"
+                      : "tag-solid",
+                  )}
+                >
+                  {pack.badge}
+                </span>
               )}
-            />
+            </div>
 
-            {pack.badge && (
-              <div className="relative mb-4 inline-flex items-center gap-1.5 rounded-full bg-m3-on-surface px-3 py-1 text-[11px] font-medium text-m3-surface">
-                <span className="ms text-[14px]" aria-hidden>star</span>
-                {pack.badge}
-              </div>
-            )}
-
-            <div className="relative text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
+            <div
+              className={cn(
+                "eyebrow mt-8",
+                popular && "!text-[hsl(var(--paper))]/55",
+              )}
+            >
               {pack.name}
             </div>
-            <div className="relative mt-3 flex items-baseline gap-1">
-              <span className="display text-[clamp(2.5rem,4.2vw,3.25rem)] leading-none tabular-nums">
+
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="display text-[clamp(3rem,5.5vw,4.5rem)] leading-none tracking-[-0.04em] tabular-nums">
                 {formatINR(pack.pricePaise)}
               </span>
             </div>
-            <div className="relative mt-2 text-[13px] text-m3-on-surface-variant">
-              {pack.credits} {pack.credits === 1 ? "design" : "designs"} ·{" "}
-              {formatINR(pack.perRunPaise)} / design
+            <div
+              className={cn(
+                "mt-3 text-[13px] font-mono uppercase tracking-wider tabular-nums",
+                popular ? "text-[hsl(var(--paper))]/65" : "text-[hsl(var(--ink-3))]",
+              )}
+            >
+              {pack.credits} {pack.credits === 1 ? "design" : "designs"} · {formatINR(pack.perRunPaise)} each
             </div>
 
-            <p className="relative mt-5 text-[14px] leading-relaxed text-m3-on-surface-variant">
+            <p
+              className={cn(
+                "mt-5 text-[14px] leading-relaxed",
+                popular ? "text-[hsl(var(--paper))]/80" : "text-[hsl(var(--ink-2))]",
+              )}
+            >
               {pack.description}
             </p>
 
-            <ul className="relative my-7 space-y-2.5 text-[13px]">
-              <Feature>Full report — diagrams, tiers, costs, risks</Feature>
-              <Feature>Downloadable PDF for stakeholders</Feature>
-              <Feature>Permanent history &amp; versioning</Feature>
-              <Feature>Refund on agent failure</Feature>
+            <ul className="mt-7 mb-9 space-y-2.5 text-[13px]">
+              <Feature popular={popular}>Full report — diagrams, tiers, costs, risks</Feature>
+              <Feature popular={popular}>Downloadable PDF for stakeholders</Feature>
+              <Feature popular={popular}>Permanent history &amp; versioning</Feature>
+              <Feature popular={popular}>Refund on agent failure</Feature>
             </ul>
 
             <button
               onClick={() => buyPack(pack)}
               disabled={loadingPackId === pack.id}
               className={cn(
-                "state-layer press m3-squircle-press relative inline-flex h-12 w-full items-center justify-center gap-2 text-[14px] font-medium shadow-m3-1 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-2",
-                toneSurface,
+                "mt-auto w-full press",
+                popular
+                  ? "btn-pill btn-pill-accent"
+                  : "btn-pill",
                 loadingPackId === pack.id && "opacity-60",
               )}
             >
               {loadingPackId === pack.id ? (
-                <span className="ms animate-spin" aria-hidden>progress_activity</span>
+                <span className="ms text-[18px] animate-spin" aria-hidden>progress_activity</span>
               ) : (
                 <>
-                  <span className="ms text-[18px]" aria-hidden>shopping_bag</span>
                   Buy {pack.name}
+                  <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
                 </>
               )}
             </button>
@@ -203,11 +201,21 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   );
 }
 
-function Feature({ children }: { children: React.ReactNode }) {
+function Feature({ children, popular }: { children: React.ReactNode; popular: boolean }) {
   return (
     <li className="flex items-start gap-2.5">
-      <span className="ms mt-0.5 text-[16px] text-m3-primary" aria-hidden>check_circle</span>
-      <span className="text-m3-on-surface">{children}</span>
+      <span
+        className={cn(
+          "ms mt-0.5 text-[16px]",
+          popular ? "text-[hsl(var(--accent))]" : "text-[hsl(var(--ink))]",
+        )}
+        aria-hidden
+      >
+        check
+      </span>
+      <span className={popular ? "text-[hsl(var(--paper))]/85" : "text-[hsl(var(--ink))]"}>
+        {children}
+      </span>
     </li>
   );
 }

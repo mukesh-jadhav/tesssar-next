@@ -11,9 +11,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const credits = await getBalance(user.uid);
 
   return (
-    <div className="relative flex min-h-screen bg-m3-surface text-m3-on-surface">
+    <div className="grain relative flex min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
       <AppDrawer user={user} credits={credits} />
-      <div className="flex min-w-0 flex-1 flex-col pb-24 lg:pb-0">
+      <div className="flex min-w-0 flex-1 flex-col pb-28 lg:pb-0">
         <PageTransition>{children}</PageTransition>
       </div>
       <BottomBar />

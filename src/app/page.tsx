@@ -1,343 +1,263 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { LandingTopBar } from "@/components/landing/LandingTopBar";
-import { HeroStack } from "@/components/landing/HeroStack";
 import { Footer } from "@/components/shared/Footer";
-import { CreditPacksGrid } from "@/components/billing/CreditPacksGrid";
-import { Fab } from "@/components/m3/Fab";
-import { Chip } from "@/components/m3/Chip";
-import { Rise } from "@/components/m3/Rise";
+
+const SUGGESTIONS = [
+  "A real-time multiplayer whiteboard for 50k concurrent users",
+  "A WhatsApp-style chat app for 200M users with E2E encryption",
+  "An edge-deployed AI assistant under 200ms p95 latency",
+  "A multi-region payments ledger with strict consistency",
+  "A short-form video CDN serving 10B minutes per month",
+];
+
+const FEATURES = [
+  {
+    n: "01",
+    title: "Diagrams that ship.",
+    body: "Real Mermaid graphs of your topology, data flow, deployment, and request paths — copy-paste into your RFC.",
+    tag: "Diagrams",
+  },
+  {
+    n: "02",
+    title: "Named components.",
+    body: "Cloud Run, BigQuery, Pub/Sub, Memorystore — selected with reasons, not generic boxes labelled “service.”",
+    tag: "Components",
+  },
+  {
+    n: "03",
+    title: "Costs in numbers.",
+    body: "Per-scale-tier estimates with the actual SKUs driving the bill — so you argue with finance using receipts.",
+    tag: "FinOps",
+  },
+  {
+    n: "04",
+    title: "Risks, written down.",
+    body: "Likelihood × impact, with mitigations. Failure modes that get caught in design review — not on launch night.",
+    tag: "Risk",
+  },
+  {
+    n: "05",
+    title: "Security by default.",
+    body: "IAM boundaries, secret rotation, network egress, OWASP coverage — every report ships a threat model.",
+    tag: "Security",
+  },
+  {
+    n: "06",
+    title: "Scale, three tiers deep.",
+    body: "Starter, growth, and hyperscale. Each tier rewrites the architecture — different DBs, different patterns, different price.",
+    tag: "Scale",
+  },
+];
+
+const STEPS = [
+  {
+    k: "Describe",
+    t: "Say it in plain English.",
+    d: "“A booking platform like Cleartrip with 5M MAU.” That’s the brief. No forms, no questionnaires, no checklists.",
+  },
+  {
+    k: "Reason",
+    t: "Gemini 2.5 Pro thinks it through.",
+    d: "Patterns, trade-offs, scale math, SKU selection. It cites Google Cloud reference architectures along the way.",
+  },
+  {
+    k: "Read",
+    t: "Open the report.",
+    d: "Magazine-style. Skim the diagrams, dive into a component, jump to risks. Share the URL with your team.",
+  },
+];
 
 export default async function LandingPage() {
   const user = await getSessionUser();
   const signedIn = !!user;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-m3-surface text-m3-on-surface">
+    <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
       <LandingTopBar signedIn={signedIn} />
 
-      {/* HERO */}
-      <section className="relative pb-16 pt-32 md:pt-40 lg:pt-44">
-        {/* Ambient background shapes */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute left-[12%] top-32 size-[420px] rounded-full bg-m3-primary-container/55 blur-[110px] m3-shape-a" />
-          <div className="absolute right-[6%] top-[28%] size-[360px] rounded-full bg-m3-tertiary-container/60 blur-[100px] m3-shape-b" />
-          <div className="absolute -bottom-32 left-1/2 size-[520px] -translate-x-1/2 rounded-full bg-m3-secondary-container/45 blur-[120px]" />
-        </div>
-
-        <div className="mx-auto grid max-w-[1280px] gap-12 px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-8">
-          {/* Copy column */}
-          <div className="m3-page-enter relative z-10 flex flex-col justify-center">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-m3-outline-variant bg-m3-surface-container-lowest/80 px-3.5 py-1.5 text-[12px] text-m3-on-surface-variant backdrop-blur">
-              <span className="relative flex size-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/40" />
-                <span className="relative inline-flex size-1.5 rounded-full bg-emerald-500" />
-              </span>
-              Live · powered by Gemini 2.5 Pro on Vertex AI
+      {/* ───────────────────────── HERO ───────────────────────── */}
+      <section className="relative pt-[152px] md:pt-[176px] pb-24">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          {/* Issue header */}
+          <div className="rule-dots flex items-baseline justify-between pb-4">
+            <div className="flex items-center gap-3">
+              <span className="tag tag-accent">Vol. 01 · Issue 05</span>
+              <span className="eyebrow hidden sm:inline">The Architecture Quarterly</span>
             </div>
+            <span className="eyebrow hidden md:inline">Bengaluru · IST</span>
+          </div>
 
-            <h1 className="display mt-7 text-balance text-[clamp(2.75rem,7vw,5.5rem)] leading-[1.02]">
-              Design your{" "}
-              <span
-                className="hero-gradient inline-block"
-                style={{ fontVariationSettings: '"wdth" 125, "opsz" 96', fontWeight: 700 }}
-              >
-                cloud
-              </span>
-              <br />
-              system in <span className="display-italic text-m3-on-surface-variant">minutes.</span>
+          {/* Headline */}
+          <div className="mt-10 grid gap-10 lg:grid-cols-[1.45fr_1fr] lg:gap-16">
+            <h1 className="display-tight text-balance text-[clamp(3.4rem,11.5vw,11rem)] leading-[0.86] tracking-[-0.045em]">
+              Cloud<br />
+              architecture,<br />
+              <span className="serif font-normal">written</span>{" "}
+              <span className="accent">in minutes.</span>
             </h1>
 
-            <p className="mt-7 max-w-xl text-balance text-[17px] leading-relaxed text-m3-on-surface-variant md:text-[19px]">
-              Describe what you want to build. Tessar designs the full system —
-              diagrams, scale tiers, costs in INR, risks, and the cloud patterns
-              that solve them.
-            </p>
-
-            <div className="mt-10 flex flex-wrap items-center gap-3">
-              <Fab
-                size="extended"
-                icon={signedIn ? "rocket_launch" : "arrow_forward"}
-                href={signedIn ? "/new" : "/login"}
-                variant="primary"
-                className="!h-14 !rounded-2xl !text-[15px]"
-              >
-                {signedIn ? "Design my system" : "Start with 1 free run"}
-              </Fab>
-              <Fab
-                size="extended"
-                icon="auto_stories"
-                href="/sample"
-                variant="surface"
-                className="!h-14 !rounded-2xl !text-[15px] !shadow-none border border-m3-outline-variant"
-              >
-                See a sample
-              </Fab>
-            </div>
-
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-2 text-[12px] text-m3-on-surface-variant">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="ms text-[16px]" aria-hidden>verified</span>
-                Built on Google Cloud
-              </span>
-              <span className="size-0.5 rounded-full bg-m3-outline" />
-              <span className="inline-flex items-center gap-1.5">
-                <span className="ms text-[16px]" aria-hidden>diamond</span>
-                INR pricing, India-first
-              </span>
-              <span className="size-0.5 rounded-full bg-m3-outline" />
-              <span className="inline-flex items-center gap-1.5">
-                <span className="ms text-[16px]" aria-hidden>bolt</span>
-                Refund on failure
-              </span>
-            </div>
-          </div>
-
-          {/* Visual column */}
-          <div className="relative m3-page-enter" style={{ animationDelay: "180ms" }}>
-            <HeroStack />
-          </div>
-        </div>
-
-        {/* Suggestion chip row */}
-        <div className="mx-auto mt-16 max-w-[1280px] px-6 lg:px-8">
-          <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
-            Try designing
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2.5">
-            {[
-              { icon: "rocket_launch", label: "B2B SaaS on Google Cloud" },
-              { icon: "smart_toy", label: "Gemini-powered AI feature" },
-              { icon: "storefront", label: "E-commerce backend (India)" },
-              { icon: "school", label: "EdTech with live classes" },
-              { icon: "local_shipping", label: "Logistics with live GPS" },
-              { icon: "health_and_safety", label: "ABDM-compliant health vault" },
-            ].map((s) => (
-              <Chip
-                key={s.label}
-                type="suggestion"
-                icon={s.icon}
-                href={signedIn ? `/new?seed=${encodeURIComponent(s.label)}` : "/login"}
-              >
-                {s.label}
-              </Chip>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PATTERNS MARQUEE */}
-      <section className="border-y border-m3-outline-variant/40 bg-m3-surface-container-low/50 py-10">
-        <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-          <div className="text-center text-[11px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
-            Every report references industry patterns
-          </div>
-        </div>
-        <div className="m3-marquee-mask mt-6">
-          <div className="m3-marquee-track">
-            {[...Array(2)].flatMap((_, k) =>
-              [
-                "Saga", "Sharding", "Circuit Breaker", "Bulkhead", "CQRS",
-                "Event Sourcing", "Outbox", "Sidecar", "Strangler Fig",
-                "Cache-Aside", "Throttling", "Retry with Backoff",
-                "Materialized View", "Choreography", "Gateway Aggregation",
-                "Leader Election", "Competing Consumers", "Pub-Sub",
-              ].map((p, i) => (
-                <span
-                  key={`${k}-${i}`}
-                  className="inline-flex shrink-0 items-center gap-2 rounded-full border border-m3-outline-variant bg-m3-surface-container-lowest px-4 py-2 text-[13px] font-medium text-m3-on-surface"
-                >
-                  <span className="ms text-[16px] text-m3-primary" aria-hidden>category</span>
-                  {p}
+            <div className="flex flex-col justify-end gap-6 pb-2">
+              <p className="text-[18px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[40ch]">
+                Describe your system in plain English. Get a production-grade
+                report — diagrams, components, costs, risks, security, and
+                three scale tiers — ready for your design review.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link href={signedIn ? "/new" : "/login?next=/new"} className="btn-pill-accent btn-pill-lg">
+                  Start designing
+                  <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
+                </Link>
+                <Link href="/sample" className="btn-pill-ghost btn-pill-lg">
+                  Read a sample
+                </Link>
+              </div>
+              <div className="flex items-center gap-4 pt-2 text-[13px] text-[hsl(var(--ink-3))]">
+                <span className="flex items-center gap-2">
+                  <span className="size-1.5 rounded-full bg-emerald-600" />
+                  Live · Gemini 2.5 Pro on Vertex AI
                 </span>
-              )),
-            )}
+                <span className="opacity-40">·</span>
+                <span>No card required</span>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* WHAT YOU GET — bento grid */}
-      <section id="features" className="py-24 md:py-32">
-        <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-          <SectionEyebrow>What you get</SectionEyebrow>
-          <Rise>
-            <h2 className="display mt-3 max-w-3xl text-balance text-[clamp(2rem,4.5vw,3.25rem)] leading-tight">
-              Every angle of the system.
-              <br />
-              <span className="text-m3-on-surface-variant">Beautifully presented.</span>
-            </h2>
-          </Rise>
-
-          <Rise delay={120} className="mt-14 grid grid-cols-1 gap-3 md:grid-cols-6 md:grid-rows-[auto_auto]">
-            {/* Hero card */}
-            <BentoTile
-              className="md:col-span-4 md:row-span-2"
-              eyebrow="Six diagrams"
-              title="Mermaid diagrams that explain the system, not just decorate it."
-              body="C4 Context · C4 Container · Deployment · Sequence · Data Flow · ER. All interactive, all exportable."
-              icon="account_tree"
-              tone="primary"
-              size="lg"
-            />
-            <BentoTile
-              className="md:col-span-2"
-              eyebrow="Four scale tiers"
-              title="Startup → Hyperscale."
-              body="Drag the slider, watch the architecture and the cost adapt."
-              icon="ssid_chart"
-              tone="tertiary"
-            />
-            <BentoTile
-              className="md:col-span-2"
-              eyebrow="Cost in INR"
-              title="Line-item monthly estimates."
-              body="Every GCP service, every tier. No surprises at the board."
-              icon="currency_rupee"
-              tone="secondary"
-            />
-            <BentoTile
-              className="md:col-span-2"
-              eyebrow="Security"
-              title="IAM → incident response."
-              body="Identity, network, data, secrets, supply chain — mapped to GCP."
-              icon="shield"
-              tone="primary"
-            />
-            <BentoTile
-              className="md:col-span-2"
-              eyebrow="Patterns"
-              title="Named, applied, justified."
-              body="Sharding, saga, circuit breaker, bulkhead — used where they belong."
-              icon="extension"
-              tone="tertiary"
-            />
-            <BentoTile
-              className="md:col-span-2"
-              eyebrow="Export"
-              title="One-click PDF."
-              body="Beautifully structured. Investor- and engineering-ready."
-              icon="picture_as_pdf"
-              tone="secondary"
-            />
-          </Rise>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS — three-step scrollytelling */}
-      <section id="how" className="border-t border-m3-outline-variant/40 py-24 md:py-32">
-        <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-          <SectionEyebrow>How it works</SectionEyebrow>
-          <Rise>
-            <h2 className="display mt-3 max-w-3xl text-balance text-[clamp(2rem,4.5vw,3.25rem)] leading-tight">
-              Three steps from a sentence
-              <br />
-              <span className="text-m3-on-surface-variant">to a defensible system.</span>
-            </h2>
-          </Rise>
-
-          <div className="mt-16 grid gap-5 md:grid-cols-3">
-            {[
-              {
-                num: "01",
-                icon: "edit_note",
-                title: "Describe",
-                body:
-                  "Write a paragraph or a page. The architect fills gaps with reasoned assumptions and surfaces them.",
-                tone: "primary" as const,
-              },
-              {
-                num: "02",
-                icon: "auto_awesome",
-                title: "Generate",
-                body:
-                  "Gemini 2.5 Pro reasons through requirements, components, diagrams, scale, cost, risks, and security — live.",
-                tone: "tertiary" as const,
-              },
-              {
-                num: "03",
-                icon: "task_alt",
-                title: "Decide",
-                body:
-                  "Tour the result, drag the scale slider, download the PDF, share with your team.",
-                tone: "secondary" as const,
-              },
-            ].map((s, i) => (
-              <Rise key={s.num} delay={i * 120}>
-                <article className="relative h-full overflow-hidden rounded-[32px] bg-m3-surface-container-low p-7 transition-shadow duration-m3-default-effects ease-m3-default-effects hover:shadow-m3-2">
-                  <div className="flex items-center justify-between">
-                    <span className="display text-[44px] leading-none text-m3-on-surface-variant/50">
-                      {s.num}
-                    </span>
-                    <span
-                      className={
-                        "grid size-12 place-items-center rounded-2xl " +
-                        (s.tone === "primary"
-                          ? "bg-m3-primary-container text-m3-on-primary-container"
-                          : s.tone === "tertiary"
-                            ? "bg-m3-tertiary-container text-m3-on-tertiary-container"
-                            : "bg-m3-secondary-container text-m3-on-secondary-container")
-                      }
+          {/* Suggestion ticker */}
+          <div className="mt-20 border-y border-[hsl(var(--line))] py-6">
+            <div className="flex items-center gap-4">
+              <span className="section-num shrink-0">§ Try saying</span>
+              <div className="marquee overflow-hidden">
+                <div className="marquee-track flex items-center gap-8 will-change-transform">
+                  {[...SUGGESTIONS, ...SUGGESTIONS].map((s, i) => (
+                    <Link
+                      key={i}
+                      href={signedIn ? `/new?prompt=${encodeURIComponent(s)}` : "/login?next=/new"}
+                      className="shrink-0 text-[18px] md:text-[22px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] ulgrow"
                     >
-                      <span className="ms text-[26px]" aria-hidden>{s.icon}</span>
-                    </span>
-                  </div>
-                  <h3 className="display mt-7 text-[28px] leading-tight">{s.title}</h3>
-                  <p className="mt-3 text-[15px] leading-relaxed text-m3-on-surface-variant">
-                    {s.body}
-                  </p>
-                </article>
-              </Rise>
-            ))}
+                      “{s}.”
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* PRICING */}
-      <section id="pricing" className="border-t border-m3-outline-variant/40 bg-m3-surface-container-low/40 py-24 md:py-32">
-        <div className="mx-auto max-w-[1280px] px-6 lg:px-8">
-          <SectionEyebrow>Pricing</SectionEyebrow>
-          <Rise>
-            <h2 className="display mt-3 max-w-3xl text-balance text-[clamp(2rem,4.5vw,3.25rem)] leading-tight">
-              Pay per run.
-              <br />
-              <span className="text-m3-on-surface-variant">No subscriptions.</span>
-            </h2>
-          </Rise>
-          <Rise delay={120} className="mt-14">
-            <CreditPacksGrid signedIn={signedIn} />
-          </Rise>
+      {/* ───────────────────────── FEATURE ASYMMETRIC ───────────────────────── */}
+      <section id="why" className="relative pb-32">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          <div className="grid gap-10 lg:grid-cols-[1fr_2.4fr] lg:gap-20">
+            <div className="lg:sticky lg:top-32 lg:self-start">
+              <p className="section-num">§ Inside every report</p>
+              <h2 className="display mt-5 text-[clamp(2.4rem,5vw,4.2rem)] leading-[0.95] tracking-[-0.035em]">
+                Six chapters,<br />no fluff.
+              </h2>
+              <p className="mt-6 text-[16px] text-[hsl(var(--ink-2))] max-w-[36ch]">
+                Each report follows the same structure — so engineers, finance,
+                and security teams know exactly where to look.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))]">
+              {FEATURES.map((f) => (
+                <article
+                  key={f.n}
+                  className="group bg-[hsl(var(--paper))] p-8 md:p-10 transition-colors hover:bg-[hsl(var(--paper-2))]"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <span className="display text-[44px] tracking-[-0.04em] text-[hsl(var(--ink-3))] group-hover:text-[hsl(var(--accent))] transition-colors">
+                      {f.n}
+                    </span>
+                    <span className="tag">{f.tag}</span>
+                  </div>
+                  <h3 className="display mt-6 text-[28px] leading-[1.05] tracking-[-0.02em]">{f.title}</h3>
+                  <p className="mt-3 text-[15px] leading-relaxed text-[hsl(var(--ink-2))]">{f.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="relative overflow-hidden border-t border-m3-outline-variant/40 py-32 md:py-40">
-        <div aria-hidden className="absolute inset-0 -z-10 m3-mesh opacity-80" />
-        <div aria-hidden className="absolute left-[10%] top-[30%] size-32 rounded-[42%_58%_67%_33%/41%_44%_56%_59%] bg-m3-primary opacity-40 m3-shape-a" />
-        <div aria-hidden className="absolute right-[12%] bottom-[20%] size-40 rounded-full bg-m3-tertiary opacity-30 m3-shape-b" />
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <Rise>
-            <h2 className="display text-balance text-[clamp(2.25rem,5.5vw,4rem)] leading-[1.05]">
-              Stop guessing.
-              <br />
-              <span className="hero-gradient">Start architecting.</span>
+      {/* ───────────────────────── BIG PULL QUOTE ───────────────────────── */}
+      <section className="relative border-y border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] py-28">
+        <div className="mx-auto max-w-[1480px] px-6 md:px-12 lg:px-16">
+          <p className="section-num">§ Editor’s note</p>
+          <p className="display mt-6 text-[clamp(2rem,5vw,4.5rem)] leading-[1.05] tracking-[-0.035em] max-w-[22ch]">
+            <span className="serif font-normal italic">“Most architecture diagrams</span>{" "}
+            are wishful thinking with arrows. Tessar writes the{" "}
+            <span className="accent">receipts.”</span>
+          </p>
+          <p className="mt-6 eyebrow">— A staff engineer, somewhere in production</p>
+        </div>
+      </section>
+
+      {/* ───────────────────────── HOW IT WORKS ───────────────────────── */}
+      <section id="how" className="relative py-32">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
+            <p className="section-num">§ How it works</p>
+            <p className="eyebrow hidden md:inline">Three steps · about four minutes</p>
+          </div>
+
+          <ol className="mt-12 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li key={s.k} className="bg-[hsl(var(--paper))] p-10">
+                <div className="flex items-center gap-3">
+                  <span className="display text-[64px] leading-none tracking-[-0.04em]">{i + 1}</span>
+                  <span className="tag tag-solid">{s.k}</span>
+                </div>
+                <h3 className="display mt-8 text-[26px] leading-[1.1] tracking-[-0.02em]">{s.t}</h3>
+                <p className="mt-3 text-[15px] leading-relaxed text-[hsl(var(--ink-2))]">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* ───────────────────────── STATS STRIP ───────────────────────── */}
+      <section className="relative border-y border-[hsl(var(--line))] py-16">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          <div className="grid grid-cols-2 gap-10 md:grid-cols-4">
+            <Stat n="~4 min" k="Median report" />
+            <Stat n="3×" k="Scale tiers" />
+            <Stat n="14" k="Component categories" />
+            <Stat n="Gemini 2.5" k="Pro · Vertex AI" />
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────────────────── CLOSING CTA ───────────────────────── */}
+      <section className="relative py-32">
+        <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-16">
+          <div className="card-ink relative overflow-hidden p-12 md:p-20">
+            <div aria-hidden className="pointer-events-none absolute -right-32 -top-32 size-[420px] rounded-full bg-[hsl(var(--accent))]/30 blur-[120px]" />
+            <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/55">§ Next issue</p>
+            <h2 className="display mt-5 text-[clamp(2.6rem,7vw,6rem)] leading-[0.95] tracking-[-0.04em] text-[hsl(var(--paper))]">
+              Your system,<br />in print.
             </h2>
-          </Rise>
-          <Rise delay={120}>
-            <p className="mx-auto mt-5 max-w-xl text-balance text-[17px] leading-relaxed text-m3-on-surface-variant">
-              A principal-grade design in the time it takes to make coffee.
+            <p className="mt-6 max-w-[50ch] text-[17px] leading-relaxed text-[hsl(var(--paper))]/75">
+              Skip the whiteboard photo. Skip the half-finished Figma. Start
+              your next design review with a publishable architecture report.
             </p>
-          </Rise>
-          <Rise delay={220} className="mt-10 flex justify-center">
-            <Fab
-              size="extended"
-              icon={signedIn ? "rocket_launch" : "arrow_forward"}
-              href={signedIn ? "/new" : "/login"}
-              variant="primary"
-              className="!h-16 !rounded-3xl !px-8 !text-[16px]"
-            >
-              {signedIn ? "Start a new architecture" : "Start free"}
-            </Fab>
-          </Rise>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Link
+                href={signedIn ? "/new" : "/login?next=/new"}
+                className="btn-pill-accent btn-pill-lg"
+              >
+                Design something
+                <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
+              </Link>
+              <Link
+                href="/pricing"
+                className="btn-pill btn-pill-lg !bg-transparent !text-[hsl(var(--paper))] !border !border-[hsl(var(--paper))]/30 hover:!bg-[hsl(var(--paper))]/10"
+              >
+                See pricing
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -346,75 +266,11 @@ export default async function LandingPage() {
   );
 }
 
-function SectionEyebrow({ children }: { children: React.ReactNode }) {
+function Stat({ n, k }: { n: string; k: string }) {
   return (
-    <Rise>
-      <div className="inline-flex items-center gap-2 rounded-full border border-m3-outline-variant bg-m3-surface-container-lowest px-3.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-m3-on-surface-variant">
-        <span className="ms text-[14px] text-m3-primary" aria-hidden>auto_awesome</span>
-        {children}
-      </div>
-    </Rise>
-  );
-}
-
-function BentoTile({
-  className,
-  eyebrow,
-  title,
-  body,
-  icon,
-  tone,
-  size = "md",
-}: {
-  className?: string;
-  eyebrow: string;
-  title: string;
-  body: string;
-  icon: string;
-  tone: "primary" | "tertiary" | "secondary";
-  size?: "md" | "lg";
-}) {
-  const toneSurface =
-    tone === "primary"
-      ? "bg-m3-primary-container text-m3-on-primary-container"
-      : tone === "tertiary"
-        ? "bg-m3-tertiary-container text-m3-on-tertiary-container"
-        : "bg-m3-secondary-container text-m3-on-secondary-container";
-
-  return (
-    <article
-      className={
-        "group relative overflow-hidden rounded-[32px] bg-m3-surface-container-low p-7 " +
-        "transition-all duration-m3-default-effects ease-m3-default-effects " +
-        "hover:-translate-y-1 hover:shadow-m3-3 " +
-        (className ?? "")
-      }
-    >
-      {/* Floating accent shape */}
-      <div
-        aria-hidden
-        className={
-          "absolute -right-10 -top-10 size-40 rounded-[42%_58%_67%_33%/41%_44%_56%_59%] opacity-50 transition-transform duration-m3-default-spatial ease-m3-default-spatial group-hover:scale-110 group-hover:rotate-12 " +
-          toneSurface
-        }
-      />
-      <div className={"relative grid size-12 place-items-center rounded-2xl " + toneSurface}>
-        <span className="ms text-[26px]" aria-hidden>{icon}</span>
-      </div>
-      <div className="relative mt-6 text-[10px] font-medium uppercase tracking-[0.18em] text-m3-on-surface-variant">
-        {eyebrow}
-      </div>
-      <h3
-        className={
-          "display relative mt-2 leading-tight " +
-          (size === "lg" ? "text-[clamp(1.75rem,2.8vw,2.25rem)]" : "text-[clamp(1.25rem,2vw,1.5rem)]")
-        }
-      >
-        {title}
-      </h3>
-      <p className={"relative mt-3 text-m3-on-surface-variant " + (size === "lg" ? "text-[16px] leading-relaxed" : "text-[14px] leading-relaxed")}>
-        {body}
-      </p>
-    </article>
+    <div>
+      <div className="display text-[clamp(2.6rem,5vw,4.4rem)] leading-none tracking-[-0.035em]">{n}</div>
+      <div className="mt-3 eyebrow">{k}</div>
+    </div>
   );
 }

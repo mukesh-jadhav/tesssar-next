@@ -2,137 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   TESSAR — EDITORIAL DESIGN SYSTEM
+   ─────────────────────────────────────────────────────────────────────────────
+   Inspired by: editorial print (NYT Magazine, MIT Tech Review), modern product
+   (Linear, Vercel, Stripe Press), and the warmth of a Moleskine notebook.
+   ============================================================================ */
+
 @layer base {
   :root {
-    /* ============================================================
-       MATERIAL 3 EXPRESSIVE 3 — Tessar palette (FLAT EDITION)
-       Neutral monochrome surfaces. A single forest-green accent
-       carries primary/CTA. No colored containers. No mesh.
-       ============================================================ */
+    --paper:           42 40% 96%;
+    --paper-2:         42 30% 93%;
+    --paper-3:         40 20% 89%;
+    --ink:             220 14% 9%;
+    --ink-2:           220 10% 26%;
+    --ink-3:           220  6% 46%;
+    --line:            36 18% 82%;
+    --line-2:          36 14% 75%;
+    --card:            42 50% 99%;
 
-    /* --- M3 key colors --- */
-    --md-sys-color-primary: 142 64% 24%;
-    --md-sys-color-on-primary: 0 0% 100%;
-    --md-sys-color-primary-container: 0 0% 96%;
-    --md-sys-color-on-primary-container: 0 0% 8%;
+    --accent:          14 82% 52%;
+    --accent-ink:      14 78% 28%;
+    --accent-paper:    18 92% 92%;
 
-    --md-sys-color-secondary: 0 0% 24%;
-    --md-sys-color-on-secondary: 0 0% 100%;
-    --md-sys-color-secondary-container: 0 0% 94%;
-    --md-sys-color-on-secondary-container: 0 0% 10%;
+    --good:            148 50% 32%;
+    --warn:            32 92% 46%;
+    --bad:             4 72% 48%;
 
-    --md-sys-color-tertiary: 142 64% 24%;
-    --md-sys-color-on-tertiary: 0 0% 100%;
-    --md-sys-color-tertiary-container: 0 0% 94%;
-    --md-sys-color-on-tertiary-container: 0 0% 10%;
-
-    --md-sys-color-error: 0 70% 38%;
-    --md-sys-color-on-error: 0 0% 100%;
-    --md-sys-color-error-container: 0 0% 96%;
-    --md-sys-color-on-error-container: 0 70% 30%;
-
-    /* --- M3 surface tones — pure neutral grays --- */
-    --md-sys-color-surface: 0 0% 100%;
-    --md-sys-color-surface-dim: 0 0% 92%;
-    --md-sys-color-surface-bright: 0 0% 100%;
-    --md-sys-color-surface-container-lowest: 0 0% 100%;
-    --md-sys-color-surface-container-low: 0 0% 98%;
-    --md-sys-color-surface-container: 0 0% 96%;
-    --md-sys-color-surface-container-high: 0 0% 94%;
-    --md-sys-color-surface-container-highest: 0 0% 92%;
-    --md-sys-color-on-surface: 0 0% 6%;
-    --md-sys-color-on-surface-variant: 0 0% 36%;
-    --md-sys-color-outline: 0 0% 60%;
-    --md-sys-color-outline-variant: 0 0% 89%;
-    --md-sys-color-inverse-surface: 0 0% 10%;
-    --md-sys-color-inverse-on-surface: 0 0% 96%;
-    --md-sys-color-inverse-primary: 142 60% 70%;
+    /* Map legacy M3 tokens to new palette */
+    --md-sys-color-surface: var(--paper);
+    --md-sys-color-surface-dim: var(--paper-2);
+    --md-sys-color-surface-bright: var(--card);
+    --md-sys-color-surface-container-lowest: var(--card);
+    --md-sys-color-surface-container-low: var(--paper);
+    --md-sys-color-surface-container: var(--paper-2);
+    --md-sys-color-surface-container-high: var(--paper-3);
+    --md-sys-color-surface-container-highest: var(--paper-3);
+    --md-sys-color-on-surface: var(--ink);
+    --md-sys-color-on-surface-variant: var(--ink-2);
+    --md-sys-color-outline: var(--line-2);
+    --md-sys-color-outline-variant: var(--line);
+    --md-sys-color-primary: var(--accent);
+    --md-sys-color-on-primary: 42 50% 99%;
+    --md-sys-color-primary-container: var(--accent-paper);
+    --md-sys-color-on-primary-container: var(--accent-ink);
+    --md-sys-color-secondary: var(--ink);
+    --md-sys-color-on-secondary: var(--paper);
+    --md-sys-color-secondary-container: var(--paper-2);
+    --md-sys-color-on-secondary-container: var(--ink);
+    --md-sys-color-tertiary: var(--accent);
+    --md-sys-color-on-tertiary: var(--paper);
+    --md-sys-color-tertiary-container: var(--paper-2);
+    --md-sys-color-on-tertiary-container: var(--ink);
+    --md-sys-color-error: var(--bad);
+    --md-sys-color-on-error: var(--paper);
+    --md-sys-color-error-container: var(--paper-2);
+    --md-sys-color-on-error-container: var(--bad);
+    --md-sys-color-inverse-surface: var(--ink);
+    --md-sys-color-inverse-on-surface: var(--paper);
+    --md-sys-color-inverse-primary: var(--accent-paper);
     --md-sys-color-scrim: 0 0% 0%;
     --md-sys-color-shadow: 0 0% 0%;
 
-    /* ============================================================
-       Legacy aliases — kept so existing utilities keep working.
-       Backed by the M3 tokens above.
-       ============================================================ */
-    --background: var(--md-sys-color-surface);
-    --foreground: var(--md-sys-color-on-surface);
-    --card: var(--md-sys-color-surface-container-low);
-    --card-foreground: var(--md-sys-color-on-surface);
-    --popover: var(--md-sys-color-surface-container);
-    --popover-foreground: var(--md-sys-color-on-surface);
-    --primary: var(--md-sys-color-primary);
-    --primary-foreground: var(--md-sys-color-on-primary);
-    --secondary: var(--md-sys-color-secondary-container);
-    --secondary-foreground: var(--md-sys-color-on-secondary-container);
-    --muted: var(--md-sys-color-surface-container);
-    --muted-foreground: var(--md-sys-color-on-surface-variant);
-    --accent: var(--md-sys-color-secondary-container);
-    --accent-foreground: var(--md-sys-color-on-secondary-container);
-    --destructive: var(--md-sys-color-error);
-    --destructive-foreground: var(--md-sys-color-on-error);
-    --border: var(--md-sys-color-outline-variant);
-    --input: var(--md-sys-color-outline-variant);
-    --ring: var(--md-sys-color-primary);
+    /* Legacy aliases */
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --card-foreground: var(--ink);
+    --popover: var(--card);
+    --popover-foreground: var(--ink);
+    --primary: var(--accent);
+    --primary-foreground: 42 50% 99%;
+    --secondary: var(--paper-2);
+    --secondary-foreground: var(--ink);
+    --muted: var(--paper-2);
+    --muted-foreground: var(--ink-3);
+    --accent-foreground: var(--accent-ink);
+    --destructive: var(--bad);
+    --destructive-foreground: 42 50% 99%;
+    --border: var(--line);
+    --input: var(--line);
+    --ring: var(--accent);
+    --radius: 1.25rem;
+    --brand: var(--accent);
+    --brand-soft: var(--accent-paper);
 
-    /* M3 Expressive — bigger default radius for hero surfaces */
-    --radius: 1.75rem;
-
-    /* Brand accent — keep for legacy callsites */
-    --brand: var(--md-sys-color-primary);
-    --brand-soft: var(--md-sys-color-primary-container);
-
-    /* ============================================================
-       M3 SHAPE — corner radius scale (Expressive update)
-       ============================================================ */
+    /* Shape scale */
     --md-sys-shape-corner-none: 0px;
-    --md-sys-shape-corner-extra-small: 4px;
-    --md-sys-shape-corner-small: 8px;
-    --md-sys-shape-corner-medium: 12px;
-    --md-sys-shape-corner-large: 16px;
-    --md-sys-shape-corner-large-increased: 20px;
+    --md-sys-shape-corner-extra-small: 6px;
+    --md-sys-shape-corner-small: 10px;
+    --md-sys-shape-corner-medium: 14px;
+    --md-sys-shape-corner-large: 20px;
+    --md-sys-shape-corner-large-increased: 24px;
     --md-sys-shape-corner-extra-large: 28px;
-    --md-sys-shape-corner-extra-large-increased: 32px;
+    --md-sys-shape-corner-extra-large-increased: 36px;
     --md-sys-shape-corner-extra-extra-large: 48px;
     --md-sys-shape-corner-full: 9999px;
 
-    /* ============================================================
-       M3 EXPRESSIVE motion physics — web-equivalent cubic-béziers
-       Source: m3.material.io/styles/motion/overview/specs
-       ============================================================ */
-    --md-sys-motion-easing-expressive-fast-spatial: cubic-bezier(0.42, 1.67, 0.21, 0.90);
-    --md-sys-motion-easing-expressive-default-spatial: cubic-bezier(0.38, 1.21, 0.22, 1.00);
-    --md-sys-motion-easing-expressive-slow-spatial: cubic-bezier(0.39, 1.29, 0.35, 0.98);
-    --md-sys-motion-easing-expressive-fast-effects: cubic-bezier(0.31, 0.94, 0.34, 1.00);
-    --md-sys-motion-easing-expressive-default-effects: cubic-bezier(0.34, 0.80, 0.34, 1.00);
-    --md-sys-motion-easing-expressive-slow-effects: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+    /* Motion */
+    --ease-out-quart:   cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring:      cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-soft-spring: cubic-bezier(0.22, 1.4, 0.36, 1);
+    --dur-fast:  160ms;
+    --dur-base:  240ms;
+    --dur-slow:  420ms;
 
-    --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-    --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
-    --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
-    --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-expressive-fast-spatial: var(--ease-spring);
+    --md-sys-motion-easing-expressive-default-spatial: var(--ease-soft-spring);
+    --md-sys-motion-easing-expressive-slow-spatial: var(--ease-out-expo);
+    --md-sys-motion-easing-expressive-fast-effects: var(--ease-out-quart);
+    --md-sys-motion-easing-expressive-default-effects: var(--ease-out-quart);
+    --md-sys-motion-easing-expressive-slow-effects: var(--ease-out-expo);
+    --md-sys-motion-easing-standard: var(--ease-out-quart);
+    --md-sys-motion-easing-emphasized: var(--ease-out-expo);
     --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
     --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+    --md-sys-motion-duration-expressive-fast-spatial: var(--dur-fast);
+    --md-sys-motion-duration-expressive-default-spatial: var(--dur-base);
+    --md-sys-motion-duration-expressive-slow-spatial: var(--dur-slow);
+    --md-sys-motion-duration-expressive-fast-effects: var(--dur-fast);
+    --md-sys-motion-duration-expressive-default-effects: var(--dur-base);
+    --md-sys-motion-duration-expressive-slow-effects: var(--dur-slow);
 
-    --md-sys-motion-duration-expressive-fast-spatial: 350ms;
-    --md-sys-motion-duration-expressive-default-spatial: 500ms;
-    --md-sys-motion-duration-expressive-slow-spatial: 650ms;
-    --md-sys-motion-duration-expressive-fast-effects: 150ms;
-    --md-sys-motion-duration-expressive-default-effects: 200ms;
-    --md-sys-motion-duration-expressive-slow-effects: 300ms;
-
-    /* Legacy motion aliases — wired into M3 expressive equivalents */
-    --ease-out-quart: var(--md-sys-motion-easing-expressive-default-effects);
-    --ease-out-expo: var(--md-sys-motion-easing-expressive-default-spatial);
-    --ease-spring: var(--md-sys-motion-easing-expressive-fast-spatial);
-    --dur-fast: var(--md-sys-motion-duration-expressive-fast-effects);
-    --dur-base: var(--md-sys-motion-duration-expressive-default-effects);
-    --dur-slow: var(--md-sys-motion-duration-expressive-default-spatial);
-
-    /* ============================================================
-       M3 Expressive 3 is FLAT — no elevation shadows.
-       Tokens kept for compatibility but resolve to `none`.
-       Hierarchy: surface tones + 1px outlines.
-       ============================================================ */
     --md-sys-elevation-1: none;
     --md-sys-elevation-2: none;
     --md-sys-elevation-3: none;
@@ -140,908 +131,302 @@
     --md-sys-elevation-5: none;
   }
 
-  .dark {
-    --md-sys-color-primary: 250 100% 84%;
-    --md-sys-color-on-primary: 250 80% 18%;
-    --md-sys-color-primary-container: 250 60% 32%;
-    --md-sys-color-on-primary-container: 250 100% 92%;
-
-    --md-sys-color-secondary: 252 40% 82%;
-    --md-sys-color-on-secondary: 252 30% 20%;
-    --md-sys-color-secondary-container: 252 18% 32%;
-    --md-sys-color-on-secondary-container: 252 60% 94%;
-
-    --md-sys-color-tertiary: 22 100% 84%;
-    --md-sys-color-on-tertiary: 14 80% 18%;
-    --md-sys-color-tertiary-container: 14 60% 32%;
-    --md-sys-color-on-tertiary-container: 22 100% 92%;
-
-    --md-sys-color-error: 6 100% 84%;
-    --md-sys-color-on-error: 6 100% 18%;
-    --md-sys-color-error-container: 6 80% 30%;
-    --md-sys-color-on-error-container: 6 100% 92%;
-
-    --md-sys-color-surface: 252 14% 8%;
-    --md-sys-color-surface-dim: 252 14% 8%;
-    --md-sys-color-surface-bright: 252 10% 22%;
-    --md-sys-color-surface-container-lowest: 252 18% 5%;
-    --md-sys-color-surface-container-low: 252 14% 11%;
-    --md-sys-color-surface-container: 252 12% 14%;
-    --md-sys-color-surface-container-high: 252 10% 18%;
-    --md-sys-color-surface-container-highest: 252 8% 22%;
-    --md-sys-color-on-surface: 252 30% 92%;
-    --md-sys-color-on-surface-variant: 252 14% 78%;
-    --md-sys-color-outline: 252 8% 60%;
-    --md-sys-color-outline-variant: 252 8% 30%;
-    --md-sys-color-inverse-surface: 252 30% 92%;
-    --md-sys-color-inverse-on-surface: 252 14% 18%;
-    --md-sys-color-inverse-primary: 250 84% 54%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-  html {
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    scroll-behavior: smooth;
-  }
+  * { border-color: hsl(var(--border)); }
+  html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    background-color: hsl(var(--paper));
+    color: hsl(var(--ink));
+    font-family: var(--font-ui), "Manrope", system-ui, sans-serif;
+    font-feature-settings: "ss01" 1, "cv11" 1, "kern" 1;
+    font-size: 15px;
+    line-height: 1.55;
     overflow-x: hidden;
   }
-  ::selection {
-    background: hsl(var(--foreground));
-    color: hsl(var(--background));
+  ::selection { background: hsl(var(--ink)); color: hsl(var(--paper)); }
+  :focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display), "Bricolage Grotesque", "Manrope", system-ui, sans-serif;
+    font-weight: 600; letter-spacing: -0.02em; line-height: 1.05;
   }
-
-  /* Focus ring — visible, refined */
-  :focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
+  hr { border-color: hsl(var(--line)); }
 }
 
 @layer utilities {
-  /* Backgrounds */
-  .grid-bg {
-    background-image:
-      linear-gradient(to right, hsl(var(--border) / 0.55) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--border) / 0.55) 1px, transparent 1px);
-    background-size: 72px 72px;
-  }
-  .radial-fade {
-    mask-image: radial-gradient(ellipse 80% 60% at center 40%, black 30%, transparent 75%);
-  }
-  .noise {
-    position: relative;
-  }
-  .noise::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.025;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
-  }
-
-  /* Typography helpers */
-  .text-balance {
-    text-wrap: balance;
-  }
-  .text-pretty {
-    text-wrap: pretty;
-  }
   .display {
-    /* M3 Expressive 3 — bold Roboto Flex with widened axis.
-       Designed to match Google's flat hero typography. */
-    font-family: var(--font-display), "Roboto Flex", system-ui, sans-serif;
-    font-weight: 700;
-    font-variation-settings: "wdth" 100, "opsz" 144;
-    letter-spacing: -0.025em;
-    line-height: 1;
-  }
-  .display-italic {
-    font-family: var(--font-display), "Roboto Flex", system-ui, sans-serif;
-    font-style: italic;
+    font-family: var(--font-display), "Bricolage Grotesque", "Manrope", system-ui, sans-serif;
     font-weight: 600;
-    font-variation-settings: "wdth" 100, "opsz" 144;
+    font-variation-settings: "wdth" 100, "opsz" 96, "SOFT" 100;
+    letter-spacing: -0.028em;
+    line-height: 0.96;
+  }
+  .display-tight {
+    font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
+    font-weight: 700;
+    font-variation-settings: "wdth" 75, "opsz" 96, "SOFT" 50;
+    letter-spacing: -0.04em;
+    line-height: 0.92;
+  }
+  .display-wide {
+    font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
+    font-weight: 500;
+    font-variation-settings: "wdth" 200, "opsz" 96, "SOFT" 100;
     letter-spacing: -0.02em;
   }
-  /* Single-color accent for one key word in a hero headline.
-     Flat — no animation, no gradient. */
-  .hero-gradient {
-    color: hsl(var(--md-sys-color-primary));
+  .serif {
+    font-family: "Instrument Serif", "EB Garamond", Georgia, serif;
+    font-weight: 400; font-style: italic; letter-spacing: -0.01em;
+  }
+  .text-balance { text-wrap: balance; }
+  .text-pretty  { text-wrap: pretty; }
+
+  .eyebrow {
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: hsl(var(--ink-3));
   }
 
-  /* Material Symbols Rounded — Google's official icon font */
+  .accent { color: hsl(var(--accent)); }
+  .hero-gradient { color: hsl(var(--accent)); }
+
+  .grain { position: relative; isolation: isolate; }
+  .grain::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .rule-dots {
+    background-image: radial-gradient(circle, hsl(var(--ink-3)) 1px, transparent 1px);
+    background-size: 16px 16px;
+    background-repeat: repeat-x;
+    background-position: left center;
+  }
+
+  /* Material Symbols Rounded */
   .ms {
     font-family: "Material Symbols Rounded";
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: normal;
-    text-transform: none;
-    display: inline-block;
-    white-space: nowrap;
-    word-wrap: normal;
-    direction: ltr;
+    font-weight: normal; font-style: normal;
+    font-size: 22px; line-height: 1;
+    letter-spacing: normal; text-transform: none;
+    display: inline-block; white-space: nowrap; word-wrap: normal; direction: ltr;
     -webkit-font-feature-settings: "liga";
+    font-feature-settings: "liga";
     -webkit-font-smoothing: antialiased;
     font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
   }
-  .ms-filled { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
-  .ms-bold { font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 24; }
+  .ms-filled { font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24; }
+  .ms-bold   { font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 24; }
 
-  /* Brand accent helpers */
-  .text-brand {
-    color: hsl(var(--brand));
-  }
-  .bg-brand {
-    background-color: hsl(var(--brand));
-  }
-  .bg-brand-soft {
-    background-color: hsl(var(--brand-soft));
-  }
-  .ring-brand {
-    --tw-ring-color: hsl(var(--brand));
-  }
-  .border-brand {
-    border-color: hsl(var(--brand));
-  }
-
-  /* Scrollbar */
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: hsl(var(--border));
-    border-radius: 4px;
-  }
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.4);
-  }
-
-  /* Card lift */
-  .card-lift {
-    transition:
-      transform var(--dur-base) var(--ease-out-quart),
-      box-shadow var(--dur-base) var(--ease-out-quart),
-      border-color var(--dur-base) var(--ease-out-quart);
-  }
-  .card-lift:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 1px 0 hsl(var(--border)),
-      0 12px 24px -8px hsl(240 12% 6% / 0.08),
-      0 4px 8px -4px hsl(240 12% 6% / 0.04);
-    border-color: hsl(var(--foreground) / 0.18);
-  }
-
-  /* ============================================================
-     M3 STATE LAYER — semi-transparent overlay used by buttons,
-     chips, list items, etc., to communicate hover/focus/press.
-     Usage: add `.state-layer` to any interactive element.
-     ============================================================ */
-  .state-layer {
-    position: relative;
-    isolation: isolate;
-  }
+  /* State layer + press */
+  .state-layer { position: relative; isolation: isolate; overflow: hidden; }
   .state-layer::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background-color: currentColor;
-    opacity: 0;
-    transition: opacity var(--md-sys-motion-duration-expressive-fast-effects)
-      var(--md-sys-motion-easing-expressive-default-effects);
+    content: ""; position: absolute; inset: 0;
+    background: currentColor; opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-out-quart);
     pointer-events: none;
-    z-index: 0;
   }
-  .state-layer > * {
-    position: relative;
-    z-index: 1;
+  .state-layer:hover::after  { opacity: 0.05; }
+  .state-layer:active::after { opacity: 0.10; }
+  .press { transition: transform var(--dur-fast) var(--ease-soft-spring); }
+  .press:active { transform: scale(0.97); }
+
+  /* Motion */
+  @keyframes page-enter {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  .state-layer:hover::after { opacity: 0.08; }
-  .state-layer:focus-visible::after { opacity: 0.10; }
-  .state-layer:active::after { opacity: 0.12; }
+  .m3-page-enter { animation: page-enter 600ms var(--ease-soft-spring) both; }
 
-  /* ============================================================
-     M3 SHAPE — radius utilities matching shape tokens
-     ============================================================ */
-  .shape-none { border-radius: var(--md-sys-shape-corner-none); }
-  .shape-xs { border-radius: var(--md-sys-shape-corner-extra-small); }
-  .shape-sm { border-radius: var(--md-sys-shape-corner-small); }
-  .shape-md { border-radius: var(--md-sys-shape-corner-medium); }
-  .shape-lg { border-radius: var(--md-sys-shape-corner-large); }
-  .shape-lg-inc { border-radius: var(--md-sys-shape-corner-large-increased); }
-  .shape-xl { border-radius: var(--md-sys-shape-corner-extra-large); }
-  .shape-xl-inc { border-radius: var(--md-sys-shape-corner-extra-large-increased); }
-  .shape-xxl { border-radius: var(--md-sys-shape-corner-extra-extra-large); }
-  .shape-full { border-radius: var(--md-sys-shape-corner-full); }
+  @keyframes reveal-rise {
+    from { opacity: 0; transform: translateY(20px); filter: blur(6px); }
+    to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  }
+  .m3-rise { animation: reveal-rise 700ms var(--ease-soft-spring) both; }
 
-  /* ============================================================
-     M3 ELEVATION — surface shadows by level
-     ============================================================ */
-  .elev-0 { box-shadow: none; }
-  .elev-1 { box-shadow: var(--md-sys-elevation-1); }
-  .elev-2 { box-shadow: var(--md-sys-elevation-2); }
-  .elev-3 { box-shadow: var(--md-sys-elevation-3); }
-  .elev-4 { box-shadow: var(--md-sys-elevation-4); }
-  .elev-5 { box-shadow: var(--md-sys-elevation-5); }
+  .m3-stagger > * { animation: reveal-rise 600ms var(--ease-soft-spring) both; }
+  .m3-stagger > *:nth-child(1)  { animation-delay:   0ms; }
+  .m3-stagger > *:nth-child(2)  { animation-delay:  60ms; }
+  .m3-stagger > *:nth-child(3)  { animation-delay: 120ms; }
+  .m3-stagger > *:nth-child(4)  { animation-delay: 180ms; }
+  .m3-stagger > *:nth-child(5)  { animation-delay: 240ms; }
+  .m3-stagger > *:nth-child(6)  { animation-delay: 300ms; }
+  .m3-stagger > *:nth-child(7)  { animation-delay: 360ms; }
+  .m3-stagger > *:nth-child(8)  { animation-delay: 420ms; }
+  .m3-stagger > *:nth-child(9)  { animation-delay: 480ms; }
+  .m3-stagger > *:nth-child(10) { animation-delay: 540ms; }
+  .m3-stagger > *:nth-child(11) { animation-delay: 600ms; }
+  .m3-stagger > *:nth-child(12) { animation-delay: 660ms; }
 
-  /* ============================================================
-     M3 SURFACE container utilities
-     ============================================================ */
-  .surface { background-color: hsl(var(--md-sys-color-surface)); color: hsl(var(--md-sys-color-on-surface)); }
-  .surface-container-lowest { background-color: hsl(var(--md-sys-color-surface-container-lowest)); }
-  .surface-container-low { background-color: hsl(var(--md-sys-color-surface-container-low)); }
-  .surface-container { background-color: hsl(var(--md-sys-color-surface-container)); }
-  .surface-container-high { background-color: hsl(var(--md-sys-color-surface-container-high)); }
-  .surface-container-highest { background-color: hsl(var(--md-sys-color-surface-container-highest)); }
+  /* Marquee */
+  @keyframes marquee-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+  }
+  .marquee-track { animation: marquee-x 40s linear infinite; will-change: transform; }
+  .marquee-mask { mask-image: linear-gradient(90deg, transparent 0, #000 8%, #000 92%, transparent 100%); }
+
+  /* Underline link */
+  .ulgrow { position: relative; }
+  .ulgrow::after {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 1px; background: currentColor;
+    transform: scaleX(0); transform-origin: left;
+    transition: transform var(--dur-base) var(--ease-out-expo);
+  }
+  .ulgrow:hover::after { transform: scaleX(1); }
+
+  /* Squircle press */
+  .squircle-press { border-radius: 9999px; transition: border-radius var(--dur-fast) var(--ease-soft-spring); }
+  .squircle-press:active { border-radius: 14px; }
+  .m3-squircle-press { border-radius: inherit; transition: border-radius var(--dur-fast) var(--ease-soft-spring); }
+  .m3-squircle-press:active { border-radius: 14px; }
+
+  /* Icon button */
+  .m3-icon-btn {
+    display: inline-grid; place-items: center;
+    width: 40px; height: 40px;
+    border-radius: 9999px;
+    color: hsl(var(--ink));
+    transition: background-color var(--dur-fast) var(--ease-out-quart);
+  }
+  .m3-icon-btn:hover { background: hsl(var(--paper-2)); }
+  .m3-icon-btn:active { background: hsl(var(--paper-3)); }
+
+  /* Bottom bar */
+  .m3-bottom-bar {
+    position: fixed; bottom: 16px;
+    left: 50%; transform: translateX(-50%);
+    z-index: 40;
+    display: flex; gap: 4px; padding: 6px;
+    border-radius: 9999px;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--line));
+  }
+
+  /* List item */
+  .m3-list-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; border-radius: 16px;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--line));
+    transition: background-color var(--dur-fast) var(--ease-out-quart),
+                border-color var(--dur-fast) var(--ease-out-quart);
+  }
+  .m3-list-item:hover { background: hsl(var(--paper-2)); border-color: hsl(var(--line-2)); }
+
+  /* Hero tile */
+  .m3-hero-tile { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 28px; }
+
+  /* Wavy progress */
+  @keyframes wave-flow { from { background-position: 0 0; } to { background-position: 28px 0; } }
+  .m3-wavy {
+    height: 8px; border-radius: 9999px;
+    background: hsl(var(--paper-3));
+    overflow: hidden; position: relative;
+  }
+  .m3-wavy::after {
+    content: ""; position: absolute; inset: 0;
+    width: var(--m3-wavy-pct, 0%);
+    background-image: linear-gradient(90deg, hsl(var(--accent)) 50%, hsl(var(--accent-ink)) 50%);
+    background-size: 28px 100%;
+    animation: wave-flow 1.4s linear infinite;
+    transition: width var(--dur-slow) var(--ease-out-expo);
+  }
+  .m3-wavy-indeterminate::after {
+    width: 40% !important;
+    animation: wave-flow 1.4s linear infinite, indet 1.8s var(--ease-soft-spring) infinite;
+  }
+  @keyframes indet { 0% { transform: translateX(-50%); } 100% { transform: translateX(200%); } }
+
+  /* Kill legacy ornaments */
+  .m3-mesh, .m3-shape-a, .m3-shape-b, .m3-blob { display: none !important; }
+
+  /* Flat: kill all shadows */
+  [class*="shadow-m3-"], .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; }
+  .elev-1, .elev-2, .elev-3, .elev-4, .elev-5 { box-shadow: none !important; }
 }
 
 @layer components {
-  /* Button shine sweep */
-  .btn-shine {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
+  /* PILL BUTTONS */
+  .btn-pill {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 52px; padding: 0 24px;
+    border-radius: 9999px;
+    background: hsl(var(--ink));
+    color: hsl(var(--paper));
+    font-family: var(--font-ui), "Manrope", system-ui, sans-serif;
+    font-weight: 600; font-size: 15px; letter-spacing: -0.005em;
+    border: 1px solid hsl(var(--ink));
+    transition: transform var(--dur-fast) var(--ease-soft-spring),
+                background-color var(--dur-fast) var(--ease-out-quart);
+    white-space: nowrap;
   }
-  .btn-shine::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      105deg,
-      transparent 30%,
-      hsl(var(--background) / 0.18) 50%,
-      transparent 70%
-    );
-    transform: translateX(-120%);
-    transition: transform 700ms var(--ease-out-expo);
-    pointer-events: none;
+  .btn-pill:hover { background: hsl(var(--ink-2)); }
+  .btn-pill:active { transform: scale(0.97); }
+  .btn-pill-accent { background: hsl(var(--accent)); border-color: hsl(var(--accent)); color: hsl(var(--paper)); }
+  .btn-pill-accent:hover { background: hsl(var(--accent-ink)); }
+  .btn-pill-ghost { background: transparent; color: hsl(var(--ink)); border-color: hsl(var(--line-2)); }
+  .btn-pill-ghost:hover { background: hsl(var(--paper-2)); }
+  .btn-pill-sm { height: 42px; padding: 0 18px; font-size: 14px; }
+  .btn-pill-lg { height: 60px; padding: 0 30px; font-size: 16px; }
+
+  /* TAG */
+  .tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 30px; padding: 0 12px;
+    border-radius: 9999px;
+    border: 1px solid hsl(var(--line));
+    background: hsl(var(--card));
+    color: hsl(var(--ink-2));
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; white-space: nowrap;
   }
-  .btn-shine:hover::before {
-    transform: translateX(120%);
+  .tag-solid { background: hsl(var(--ink)); border-color: hsl(var(--ink)); color: hsl(var(--paper)); }
+  .tag-accent { background: hsl(var(--accent-paper)); border-color: hsl(var(--accent-paper)); color: hsl(var(--accent-ink)); }
+
+  /* CARDS */
+  .card-paper { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 24px; }
+  .card-inset { background: hsl(var(--paper-2)); border: 1px solid hsl(var(--line)); border-radius: 20px; }
+  .card-ink   { background: hsl(var(--ink));   border: 1px solid hsl(var(--ink));   border-radius: 24px; color: hsl(var(--paper)); }
+
+  /* SECTION NUMBER */
+  .section-num {
+    font-family: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px; font-weight: 500; letter-spacing: 0.18em;
+    color: hsl(var(--ink-3));
   }
-}
 
-/* Mermaid styling overrides */
-.mermaid-host svg {
-  max-width: 100% !important;
-  height: auto !important;
-}
-
-/* ====== Motion primitives (CSS-only) ====== */
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
+  /* INPUT */
+  .input-pill {
+    width: 100%; height: 54px; padding: 0 22px;
+    border-radius: 9999px;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--line-2));
+    color: hsl(var(--ink));
+    font-family: var(--font-ui), Manrope, system-ui, sans-serif;
+    font-size: 15px;
+    transition: border-color var(--dur-fast) var(--ease-out-quart);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .input-pill::placeholder { color: hsl(var(--ink-3)); }
+  .input-pill:focus { outline: none; border-color: hsl(var(--ink)); }
+
+  /* LINK */
+  .link-ink { color: hsl(var(--ink)); text-decoration: none; position: relative; }
+  .link-ink::after {
+    content: ""; position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 1px; background: currentColor; opacity: 0.4;
+    transition: opacity var(--dur-fast) var(--ease-out-quart);
   }
+  .link-ink:hover::after { opacity: 1; }
 }
-@keyframes reveal-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes reveal-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-@keyframes shimmer-sweep {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-@keyframes pulse-soft {
-  0%,
-  100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.03);
-  }
-}
-@keyframes orbit {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes marquee-x {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-}
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  50% {
-    transform: translate(20px, -10px) scale(1.05);
-  }
-}
-
-.animate-reveal-up {
-  animation: reveal-up var(--dur-slow) var(--ease-out-expo) both;
-}
-.animate-reveal-fade {
-  animation: reveal-fade var(--dur-slow) var(--ease-out-quart) both;
-}
-.animate-reveal-scale {
-  animation: reveal-scale var(--dur-slow) var(--ease-out-expo) both;
-}
-.animate-pulse-soft {
-  animation: pulse-soft 2.6s var(--ease-out-quart) infinite;
-}
-.animate-orbit {
-  animation: orbit 18s linear infinite;
-}
-.animate-marquee {
-  animation: marquee-x 32s linear infinite;
-}
-.animate-blink {
-  animation: blink 1s steps(1) infinite;
-}
-.animate-drift {
-  animation: drift 12s var(--ease-out-quart) infinite;
-}
-
-/* Reveal-on-scroll: element is hidden until [data-revealed=true] is set by IO */
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(18px);
-  transition:
-    opacity var(--dur-slow) var(--ease-out-expo),
-    transform var(--dur-slow) var(--ease-out-expo);
-  will-change: opacity, transform;
-}
-[data-reveal="true"] {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Animated tab indicator (Radix data-state hook) */
-[data-state="active"].tab-trigger > .tab-trigger-indicator {
-  opacity: 1;
-  transform: scaleX(1);
-}
-
-/* Respect reduced motion globally */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-    scroll-behavior: auto !important;
-  }
-  [data-reveal] {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-
-/* ============================================================
-   M3 EXPRESSIVE — page transitions + loading patterns
-   ============================================================ */
-
-/* Page enter — spring scale + slide, used by app-route layouts */
-@keyframes m3-page-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(0.985);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-.m3-page-enter {
-  animation: m3-page-enter var(--md-sys-motion-duration-expressive-default-spatial)
-    var(--md-sys-motion-easing-expressive-default-spatial) both;
-  will-change: opacity, transform;
-}
-
-/* Container-transform — used when a card morphs into a detail surface */
-@keyframes m3-container-transform-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.9) translateY(20px);
-    border-radius: var(--md-sys-shape-corner-extra-large);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    border-radius: var(--md-sys-shape-corner-large);
-  }
-}
-.m3-container-transform-in {
-  animation: m3-container-transform-in var(--md-sys-motion-duration-expressive-slow-spatial)
-    var(--md-sys-motion-easing-expressive-default-spatial) both;
-}
-
-/* Breathing skeleton — pulse with subtle scale instead of just opacity */
-@keyframes m3-breathe {
-  0%, 100% {
-    opacity: 0.55;
-  }
-  50% {
-    opacity: 0.85;
-  }
-}
-.m3-breathe {
-  animation: m3-breathe 1.6s var(--md-sys-motion-easing-expressive-default-effects) infinite;
-}
-
-/* Wavy loading indicator (M3 Expressive linear progress) */
-@keyframes m3-progress-indeterminate {
-  0% { transform: translateX(-100%) scaleX(0.35); }
-  40% { transform: translateX(0%) scaleX(0.6); }
-  100% { transform: translateX(120%) scaleX(0.35); }
-}
-.m3-progress-track {
-  position: relative;
-  overflow: hidden;
-  background-color: hsl(var(--md-sys-color-secondary-container));
-  border-radius: var(--md-sys-shape-corner-full);
-}
-.m3-progress-bar {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  width: 100%;
-  background-color: hsl(var(--md-sys-color-primary));
-  border-radius: var(--md-sys-shape-corner-full);
-  transform-origin: left;
-  animation: m3-progress-indeterminate 1.8s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
-}
-
-/* Route-top progress (linear) — used by RouteProgress component */
-@keyframes m3-route-bar {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.m3-route-bar {
-  position: fixed;
-  inset-block-start: 0;
-  inset-inline: 0;
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    hsl(var(--md-sys-color-primary)),
-    hsl(var(--md-sys-color-tertiary)),
-    transparent
-  );
-  z-index: 60;
-  animation: m3-route-bar 1.2s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
-}
-
-/* Staggered children — apply with .m3-stagger and child :nth selectors */
-.m3-stagger > * {
-  opacity: 0;
-  transform: translateY(8px);
-  animation: m3-page-enter var(--md-sys-motion-duration-expressive-default-spatial)
-    var(--md-sys-motion-easing-expressive-default-spatial) both;
-}
-.m3-stagger > *:nth-child(1) { animation-delay: 40ms; }
-.m3-stagger > *:nth-child(2) { animation-delay: 90ms; }
-.m3-stagger > *:nth-child(3) { animation-delay: 140ms; }
-.m3-stagger > *:nth-child(4) { animation-delay: 190ms; }
-.m3-stagger > *:nth-child(5) { animation-delay: 240ms; }
-.m3-stagger > *:nth-child(6) { animation-delay: 290ms; }
-.m3-stagger > *:nth-child(7) { animation-delay: 340ms; }
-.m3-stagger > *:nth-child(8) { animation-delay: 390ms; }
-.m3-stagger > *:nth-child(9) { animation-delay: 440ms; }
-.m3-stagger > *:nth-child(10) { animation-delay: 490ms; }
-
-/* FAB pop-in — bouncy entrance */
-@keyframes m3-fab-in {
-  0% { opacity: 0; transform: scale(0.4); }
-  60% { opacity: 1; transform: scale(1.08); }
-  100% { transform: scale(1); }
-}
-.m3-fab-in {
-  animation: m3-fab-in var(--md-sys-motion-duration-expressive-default-spatial)
-    var(--md-sys-motion-easing-expressive-fast-spatial) both;
-}
-
-/* Ripple-ish press feedback — used on .state-layer with .press */
-.press {
-  transition: transform var(--md-sys-motion-duration-expressive-fast-effects)
-    var(--md-sys-motion-easing-expressive-default-effects);
-}
-.press:active {
-  transform: scale(0.97);
-}
-/* ============================================================
-   M3 EXPRESSIVE — SIGNATURE PATTERNS
-   The patterns that make M3E distinct from M3:
-   - Wavy progress indicators
-   - Shape morph on press (squircle ⇆ blob)
-   - Spring physics on FAB
-   - Container scroll-snap carousels
-   - Ambient floating shapes
-   - Marquee-of-pills
-   ============================================================ */
-
-/* ---- Wavy linear progress (signature M3 Expressive component) ---- */
-@keyframes m3-wave-flow {
-  0%   { background-position: 0 50%; }
-  100% { background-position: 64px 50%; }
-}
-.m3-wavy {
-  position: relative;
-  height: 14px;
-  border-radius: var(--md-sys-shape-corner-full);
-  overflow: hidden;
-  background:
-    radial-gradient(circle at 8px 50%,
-      hsl(var(--md-sys-color-secondary-container)) 0 4px,
-      transparent 4px) repeat-x,
-    hsl(var(--md-sys-color-surface-container));
-  background-size: 16px 14px;
-}
-.m3-wavy::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 8px 50%,
-      hsl(var(--md-sys-color-primary)) 0 4px,
-      transparent 4px);
-  background-size: 16px 14px;
-  background-repeat: repeat-x;
-  animation: m3-wave-flow 1.2s linear infinite;
-  clip-path: inset(0 calc(100% - var(--m3-wavy-pct, 0%)) 0 0 round var(--md-sys-shape-corner-full));
-  transition: clip-path 600ms var(--md-sys-motion-easing-expressive-default-spatial);
-}
-
-/* Indeterminate variant — full bar with sliding gradient pattern */
-.m3-wavy-indeterminate::before {
-  animation:
-    m3-wave-flow 1.2s linear infinite,
-    m3-wavy-indet 2.4s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
-  clip-path: none;
-}
-@keyframes m3-wavy-indet {
-  0%   { transform: translateX(-100%); }
-  60%  { transform: translateX(40%); }
-  100% { transform: translateX(120%); }
-}
-
-/* ---- Shape morph on hover/press (M3E button + chip) ---- */
-@keyframes m3-shape-morph {
-  0%, 100% { border-radius: 38% 62% 63% 37% / 41% 44% 56% 59%; }
-  50%      { border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%; }
-}
-.m3-blob {
-  animation: m3-shape-morph 7s ease-in-out infinite;
-}
-
-/* Squircle → circle press transform for FABs */
-.m3-squircle-press {
-  border-radius: var(--md-sys-shape-corner-extra-large);
-  transition:
-    border-radius var(--md-sys-motion-duration-expressive-fast-effects)
-      var(--md-sys-motion-easing-expressive-fast-spatial),
-    transform var(--md-sys-motion-duration-expressive-fast-effects)
-      var(--md-sys-motion-easing-expressive-fast-spatial);
-}
-.m3-squircle-press:active {
-  border-radius: var(--md-sys-shape-corner-full);
-  transform: scale(0.95);
-}
-
-/* ---- Ambient floating shapes (used in hero / empty states) ---- */
-@keyframes m3-float-a {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  33%      { transform: translate(40px, -30px) rotate(8deg); }
-  66%      { transform: translate(-20px, 24px) rotate(-6deg); }
-}
-@keyframes m3-float-b {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50%      { transform: translate(-30px, -40px) rotate(-10deg); }
-}
-.m3-shape-a { animation: m3-float-a 18s ease-in-out infinite; }
-.m3-shape-b { animation: m3-float-b 22s ease-in-out infinite; }
-
-/* ---- Scroll-snap horizontal carousel (Material 3 hero carousel pattern) ---- */
-.m3-carousel {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 80%;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  padding-inline: 24px;
-  scroll-padding-inline: 24px;
-}
-.m3-carousel::-webkit-scrollbar { display: none; }
-.m3-carousel > * {
-  scroll-snap-align: start;
-}
-@media (min-width: 768px) {
-  .m3-carousel { grid-auto-columns: 38%; }
-}
-@media (min-width: 1100px) {
-  .m3-carousel { grid-auto-columns: 28%; }
-}
-
-/* M3 Expressive marquee — pills floating across (used in landing patterns row) */
-@keyframes m3-marquee-x { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.m3-marquee-track {
-  display: flex;
-  gap: 10px;
-  width: max-content;
-  animation: m3-marquee-x 40s linear infinite;
-}
-.m3-marquee-mask {
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  overflow: hidden;
-}
-
-/* ---- M3 Expressive interactive list item ---- */
-.m3-list-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-radius: var(--md-sys-shape-corner-large);
-  background-color: hsl(var(--md-sys-color-surface-container-low));
-  transition:
-    background-color var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects),
-    transform var(--md-sys-motion-duration-expressive-fast-effects)
-      var(--md-sys-motion-easing-expressive-fast-spatial);
-}
-.m3-list-item:hover {
-  background-color: hsl(var(--md-sys-color-surface-container));
-  transform: translateY(-1px);
-}
-.m3-list-item:active { transform: scale(0.99); }
-
-/* ---- Wavy underline for active segmented button ---- */
-@keyframes m3-underline-grow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-.m3-underline-grow {
-  transform-origin: center;
-  animation: m3-underline-grow var(--md-sys-motion-duration-expressive-default-spatial)
-    var(--md-sys-motion-easing-expressive-default-spatial) both;
-}
-
-/* ---- M3 mesh gradient — used for atmospheric backdrops ---- */
-.m3-mesh {
-  background:
-    radial-gradient(at 12% 18%,  hsl(var(--md-sys-color-primary-container) / 0.85) 0,  transparent 45%),
-    radial-gradient(at 88% 22%,  hsl(var(--md-sys-color-tertiary-container) / 0.75) 0, transparent 50%),
-    radial-gradient(at 50% 92%,  hsl(var(--md-sys-color-secondary-container) / 0.85) 0, transparent 55%),
-    hsl(var(--md-sys-color-surface));
-}
-
-/* ---- Scroll-shrinking top app bar helper ---- */
-.m3-top-app-bar {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  backdrop-filter: blur(14px) saturate(180%);
-  background-color: hsl(var(--md-sys-color-surface) / 0.78);
-  border-bottom: 1px solid transparent;
-  transition:
-    background-color var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects),
-    border-color var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects);
-}
-.m3-top-app-bar[data-scrolled="true"] {
-  background-color: hsl(var(--md-sys-color-surface-container) / 0.92);
-  border-bottom-color: hsl(var(--md-sys-color-outline-variant) / 0.6);
-}
-
-/* ---- Number ticker (count-up reveal) ---- */
-@keyframes m3-ticker {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.m3-ticker > * {
-  display: inline-block;
-  animation: m3-ticker var(--md-sys-motion-duration-expressive-default-spatial)
-    var(--md-sys-motion-easing-expressive-fast-spatial) both;
-}
-
-/* ---- Hero "physics" tile — used in landing hero stack ---- */
-.m3-hero-tile {
-  transition:
-    transform var(--md-sys-motion-duration-expressive-default-spatial)
-      var(--md-sys-motion-easing-expressive-default-spatial),
-    box-shadow var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects);
-  will-change: transform;
-}
-.m3-hero-tile:hover {
-  transform: translateY(-6px) rotate(-1deg);
-  box-shadow: var(--md-sys-elevation-3);
-}
-
-/* ---- Reveal-from-bottom (used on scroll-triggered content) ---- */
-@keyframes m3-reveal-rise {
-  from { opacity: 0; transform: translateY(40px) scale(0.97); filter: blur(6px); }
-  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-}
-.m3-rise {
-  animation: m3-reveal-rise 700ms var(--md-sys-motion-easing-expressive-default-spatial) both;
-}
-
-/* ---- Bottom-bar (mobile) — M3E nav bar with pill indicator ---- */
-.m3-bottom-bar {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 40;
-  display: flex;
-  gap: 4px;
-  padding: 8px;
-  border-radius: var(--md-sys-shape-corner-full);
-  background-color: hsl(var(--md-sys-color-surface-container-high) / 0.96);
-  backdrop-filter: blur(16px) saturate(180%);
-  box-shadow: var(--md-sys-elevation-3);
-}
-
-/* Bigger M3 Expressive stagger — used in bento grids */
-.m3-stagger > *:nth-child(11) { animation-delay: 540ms; }
-.m3-stagger > *:nth-child(12) { animation-delay: 590ms; }
-
-/* ---- Fancy outline (gradient border on hover) ---- */
-.m3-glow-border {
-  position: relative;
-  isolation: isolate;
-}
-.m3-glow-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg,
-    hsl(var(--md-sys-color-primary)),
-    hsl(var(--md-sys-color-tertiary)),
-    hsl(var(--md-sys-color-primary)));
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity var(--md-sys-motion-duration-expressive-default-effects)
-    var(--md-sys-motion-easing-expressive-default-effects);
-}
-.m3-glow-border:hover::before { opacity: 1; }
-
-/* ---- Squircle clip (Material You "blobby" hero shape) ---- */
-.m3-squircle {
-  clip-path: path("M 0 100 C 0 25, 25 0, 100 0 S 200 25, 200 100 175 200, 100 200 0 175, 0 100");
-}
-
-/* ---- Tonal hover for icon buttons ---- */
-.m3-icon-btn {
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--md-sys-shape-corner-full);
-  color: hsl(var(--md-sys-color-on-surface-variant));
-  transition:
-    background-color var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects),
-    color var(--md-sys-motion-duration-expressive-default-effects)
-      var(--md-sys-motion-easing-expressive-default-effects);
-}
-.m3-icon-btn:hover {
-  background-color: hsl(var(--md-sys-color-on-surface) / 0.08);
-  color: hsl(var(--md-sys-color-on-surface));
-}
-.m3-icon-btn:active {
-  background-color: hsl(var(--md-sys-color-on-surface) / 0.12);
-}
-
-/* ---- Snackbar — M3 styled */
-.m3-snackbar {
-  background-color: hsl(var(--md-sys-color-inverse-surface));
-  color: hsl(var(--md-sys-color-inverse-on-surface));
-  border-radius: var(--md-sys-shape-corner-extra-small);
-  box-shadow: var(--md-sys-elevation-3);
-}
-
-/* =====================================================================
-   M3 EXPRESSIVE 3 \u2014 FLAT OVERRIDES (final cascade)
-   Kill all decorative color + elevation. Hierarchy by surface + 1px border.
-   ===================================================================== */
-
-/* No mesh. No floating shapes. No blobs. */
-.m3-mesh,
-.m3-shape-a,
-.m3-shape-b,
-.m3-blob {
-  display: none !important;
-}
-
-/* No animated hero-tile elevation. */
-.m3-hero-tile {
-  box-shadow: none !important;
-  background: hsl(var(--md-sys-color-surface-container-low));
-  border: 1px solid hsl(var(--md-sys-color-outline-variant));
-}
-
-/* Bottom bar: flat pill with outline only. */
-.m3-bottom-bar {
-  box-shadow: none !important;
-  border: 1px solid hsl(var(--md-sys-color-outline-variant));
-  background: hsl(var(--md-sys-color-surface));
-}
-
-/* Elevation utilities collapse to nothing. */
-.elev-1, .elev-2, .elev-3, .elev-4, .elev-5 { box-shadow: none !important; }
-
-/* Strip every shadow Tailwind class might apply globally. */
-[class*="shadow-m3-"],
-[class*="shadow-hover-card"],
-.shadow,
-.shadow-sm,
-.shadow-md,
-.shadow-lg,
-.shadow-xl,
-.shadow-2xl {
-  box-shadow: none !important;
-}
-

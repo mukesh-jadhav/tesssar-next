@@ -96,10 +96,10 @@ const config: Config = {
         full: "var(--md-sys-shape-corner-full)",
       },
       fontFamily: {
-        // M3 Expressive — Roboto Flex is the ONLY UI typeface.
-        sans: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
-        mono: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "Roboto Flex", "system-ui", "sans-serif"],
+        sans:    ["var(--font-ui)", "Manrope", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "Bricolage Grotesque", "Manrope", "system-ui", "sans-serif"],
+        mono:    ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
+        serif:   ["var(--font-serif)", "Instrument Serif", "Georgia", "serif"],
       },
       // Material 3 type scale tokens (px → rem) — Major Second
       fontSize: {

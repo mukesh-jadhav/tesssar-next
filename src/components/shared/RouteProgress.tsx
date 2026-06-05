@@ -3,21 +3,32 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-/**
- * Material 3 Expressive route-change indicator.
- * Shows a thin, animated linear bar at the top of the viewport whenever
- * the pathname changes, then fades out.
- */
+// Editorial route-change rule: 2px accent line scrubbing across the viewport.
+// Always rendered (opacity toggled) to avoid mount/unmount reconciliation
+// collisions with sibling portals (sonner toaster, radix dialogs).
 export function RouteProgress() {
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
+  const [active, setActive] = useState(false);
 
   useEffect(() => {
-    setVisible(true);
-    const t = window.setTimeout(() => setVisible(false), 700);
+    setActive(true);
+    const t = window.setTimeout(() => setActive(false), 700);
     return () => window.clearTimeout(t);
   }, [pathname]);
 
-  if (!visible) return null;
-  return <div aria-hidden className="m3-route-bar" />;
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none fixed inset-x-0 top-0 z-[100] h-[2px] overflow-hidden"
+      style={{ opacity: active ? 1 : 0, transition: "opacity 200ms ease" }}
+    >
+      <div
+        className="h-full bg-[hsl(var(--accent))]"
+        style={{
+          width: active ? "100%" : "0%",
+          transition: active ? "width 650ms cubic-bezier(.2,.7,.2,1)" : "none",
+        }}
+      />
+    </div>
+  );
 }
