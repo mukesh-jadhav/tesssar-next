@@ -4,38 +4,55 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
+    /* Surfaces — warm-neutral, not pure white */
+    --background: 40 14% 99%;
+    --foreground: 240 12% 6%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
+    --card-foreground: 240 12% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 4%;
-    --primary: 240 10% 4%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 4%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 10% 4%;
-    --destructive: 0 84% 60%;
+    --popover-foreground: 240 12% 6%;
+
+    /* Primary = foreground (monochrome-first) */
+    --primary: 240 12% 6%;
+    --primary-foreground: 40 14% 99%;
+
+    --secondary: 240 6% 96%;
+    --secondary-foreground: 240 12% 6%;
+    --muted: 240 6% 96%;
+    --muted-foreground: 240 5% 42%;
+    --accent: 240 6% 96%;
+    --accent-foreground: 240 12% 6%;
+
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
+
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 240 10% 4%;
+    --ring: 240 12% 6%;
     --radius: 0.75rem;
-    --brand: 217 91% 60%; /* electric blue accent */
+
+    /* Brand accent — used sparingly, deeper/more architectural */
+    --brand: 232 70% 52%;
+    --brand-soft: 232 90% 96%;
+
+    /* Motion tokens */
+    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 180ms;
+    --dur-base: 260ms;
+    --dur-slow: 500ms;
   }
 
   .dark {
-    --background: 240 10% 4%;
+    --background: 240 10% 5%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 6%;
+    --card: 240 10% 7%;
     --card-foreground: 0 0% 98%;
-    --popover: 240 10% 6%;
+    --popover: 240 10% 7%;
     --popover-foreground: 0 0% 98%;
     --primary: 0 0% 98%;
-    --primary-foreground: 240 10% 4%;
+    --primary-foreground: 240 12% 6%;
     --secondary: 240 4% 12%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 12%;
@@ -47,7 +64,8 @@
     --border: 240 4% 16%;
     --input: 240 4% 16%;
     --ring: 0 0% 83%;
-    --brand: 217 91% 60%;
+    --brand: 232 80% 65%;
+    --brand-soft: 232 30% 16%;
   }
 }
 
@@ -59,40 +77,80 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1, "ss02" 1, "cv11" 1;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+  }
+
+  /* Focus ring — visible, refined */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
 @layer utilities {
+  /* Backgrounds */
   .grid-bg {
     background-image:
-      linear-gradient(to right, hsl(var(--border) / 0.5) 1px, transparent 1px),
-      linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px);
-    background-size: 56px 56px;
+      linear-gradient(to right, hsl(var(--border) / 0.55) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.55) 1px, transparent 1px);
+    background-size: 72px 72px;
   }
   .radial-fade {
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+    mask-image: radial-gradient(ellipse 80% 60% at center 40%, black 30%, transparent 75%);
   }
+  .noise {
+    position: relative;
+  }
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* Typography helpers */
   .text-balance {
     text-wrap: balance;
   }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .display {
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+  }
+
+  /* Brand accent helpers */
   .text-brand {
     color: hsl(var(--brand));
   }
   .bg-brand {
     background-color: hsl(var(--brand));
   }
+  .bg-brand-soft {
+    background-color: hsl(var(--brand-soft));
+  }
   .ring-brand {
     --tw-ring-color: hsl(var(--brand));
   }
-  .glow {
-    box-shadow:
-      0 0 0 1px hsl(var(--border)),
-      0 12px 40px -12px hsl(var(--brand) / 0.25);
+  .border-brand {
+    border-color: hsl(var(--brand));
   }
+
+  /* Scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -101,10 +159,200 @@
     background: hsl(var(--border));
     border-radius: 4px;
   }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+  }
+
+  /* Card lift */
+  .card-lift {
+    transition:
+      transform var(--dur-base) var(--ease-out-quart),
+      box-shadow var(--dur-base) var(--ease-out-quart),
+      border-color var(--dur-base) var(--ease-out-quart);
+  }
+  .card-lift:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 hsl(var(--border)),
+      0 12px 24px -8px hsl(240 12% 6% / 0.08),
+      0 4px 8px -4px hsl(240 12% 6% / 0.04);
+    border-color: hsl(var(--foreground) / 0.18);
+  }
+}
+
+@layer components {
+  /* Button shine sweep */
+  .btn-shine {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .btn-shine::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      hsl(var(--background) / 0.18) 50%,
+      transparent 70%
+    );
+    transform: translateX(-120%);
+    transition: transform 700ms var(--ease-out-expo);
+    pointer-events: none;
+  }
+  .btn-shine:hover::before {
+    transform: translateX(120%);
+  }
 }
 
 /* Mermaid styling overrides */
 .mermaid-host svg {
   max-width: 100% !important;
   height: auto !important;
+}
+
+/* ====== Motion primitives (CSS-only) ====== */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+@keyframes orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -10px) scale(1.05);
+  }
+}
+
+.animate-reveal-up {
+  animation: reveal-up var(--dur-slow) var(--ease-out-expo) both;
+}
+.animate-reveal-fade {
+  animation: reveal-fade var(--dur-slow) var(--ease-out-quart) both;
+}
+.animate-reveal-scale {
+  animation: reveal-scale var(--dur-slow) var(--ease-out-expo) both;
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2.6s var(--ease-out-quart) infinite;
+}
+.animate-orbit {
+  animation: orbit 18s linear infinite;
+}
+.animate-marquee {
+  animation: marquee-x 32s linear infinite;
+}
+.animate-blink {
+  animation: blink 1s steps(1) infinite;
+}
+.animate-drift {
+  animation: drift 12s var(--ease-out-quart) infinite;
+}
+
+/* Reveal-on-scroll: element is hidden until [data-revealed=true] is set by IO */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity var(--dur-slow) var(--ease-out-expo),
+    transform var(--dur-slow) var(--ease-out-expo);
+  will-change: opacity, transform;
+}
+[data-reveal="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Animated tab indicator (Radix data-state hook) */
+[data-state="active"].tab-trigger > .tab-trigger-indicator {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

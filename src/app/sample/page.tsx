@@ -1,38 +1,40 @@
 import Link from "next/link";
-import { Logo } from "@/components/shared/Logo";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { LandingHeader } from "@/components/landing/LandingHeader";
 import { ArchitectureView } from "@/components/architecture/ArchitectureView";
 import { SAMPLE_ARCHITECTURE } from "@/lib/samples/scribestack";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Reveal } from "@/components/motion";
 
 export const metadata = {
   title: "Sample report",
-  description: "See what Tessar produces. A complete, principal-grade cloud architecture for a sample product.",
+  description:
+    "See what Tessar produces. A complete, principal-grade cloud architecture for a sample product.",
 };
 
 export default function SamplePage() {
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-xl">
-        <div className="container flex h-16 items-center justify-between">
-          <Link href="/"><Logo /></Link>
-          <div className="flex items-center gap-2">
-            <Badge variant="brand" className="hidden gap-1.5 px-2.5 py-1 sm:inline-flex">
-              <Sparkles className="size-3" /> Sample report
-            </Badge>
-            <Button asChild variant="brand" className="gap-2">
-              <Link href="/login">Design yours <ArrowRight className="size-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <LandingHeader signedIn={false} />
       <main className="flex-1">
-        <div className="container max-w-7xl py-10">
-          <div className="mb-6 rounded-lg border border-dashed border-brand/40 bg-brand/5 p-4 text-sm">
-            <span className="font-medium">This is a sample</span> — generated for an imaginary product to show you the
-            depth and structure of every Tessar report. Sign in to design one for your real idea.
-          </div>
+        <div className="container max-w-7xl py-10 md:py-14">
+          <Reveal className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-2xl border bg-card/60 p-5 backdrop-blur">
+            <div>
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Sample report
+              </div>
+              <div className="mt-1.5 text-base font-medium">
+                Generated for an imaginary product to show the depth of every Tessar report.
+              </div>
+            </div>
+            <Link
+              href="/login"
+              className="group/cta inline-flex items-center gap-2 text-sm font-medium text-foreground transition-colors"
+            >
+              Design yours
+              <span className="transition-transform duration-200 group-hover/cta:translate-x-0.5">
+                →
+              </span>
+            </Link>
+          </Reveal>
           <ArchitectureView arch={SAMPLE_ARCHITECTURE} showDownload={false} />
         </div>
       </main>

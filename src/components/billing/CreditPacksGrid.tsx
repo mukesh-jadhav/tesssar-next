@@ -116,64 +116,86 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      {CREDIT_PACKS.map((pack) => (
-        <Card
-          key={pack.id}
-          className={cn(
-            "relative flex flex-col",
-            pack.badge === "Most popular" && "border-brand shadow-lg shadow-blue-500/10",
-          )}
-        >
-          {pack.badge && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge variant="brand" className="px-3 py-1 text-[11px] shadow">
-                {pack.badge}
-              </Badge>
-            </div>
-          )}
-          <CardContent className="flex flex-1 flex-col p-6">
-            <div className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              {pack.name}
-            </div>
-            <div className="mt-3 flex items-baseline gap-1">
-              <span className="text-4xl font-semibold tracking-tight">{formatINR(pack.pricePaise)}</span>
-            </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              {pack.credits} {pack.credits === 1 ? "architecture run" : "architecture runs"} ·{" "}
-              {formatINR(pack.perRunPaise)} / run
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">{pack.description}</p>
-            <ul className="my-6 space-y-2 text-sm">
-              <Feature>Full report — diagrams, tiers, costs, risks</Feature>
-              <Feature>Downloadable PDF for stakeholders</Feature>
-              <Feature>Permanent history & versioning</Feature>
-              <Feature>Refund on agent failure</Feature>
-            </ul>
-            <Button
-              onClick={() => buyPack(pack)}
-              disabled={loadingPackId === pack.id}
-              variant={pack.badge === "Most popular" ? "brand" : "default"}
-              className="mt-auto"
-              size="lg"
-            >
-              {loadingPackId === pack.id ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                `Buy ${pack.name}`
+      {CREDIT_PACKS.map((pack, i) => {
+        const popular = pack.badge === "Most popular";
+        return (
+          <div
+            key={pack.id}
+            className="animate-reveal-up"
+            style={{
+              animationDelay: `${i * 90}ms`,
+              animationFillMode: "both",
+            }}
+          >
+            <Card
+              className={cn(
+                "card-lift relative flex h-full flex-col",
+                popular && "border-foreground/30",
               )}
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+            >
+              {pack.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge
+                    className={cn(
+                      "px-3 py-1 text-[10px] font-medium uppercase tracking-wider shadow-sm",
+                      popular
+                        ? "border-transparent bg-foreground text-background"
+                        : "",
+                    )}
+                  >
+                    {pack.badge}
+                  </Badge>
+                </div>
+              )}
+              <CardContent className="flex flex-1 flex-col p-7">
+                <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {pack.name}
+                </div>
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="display text-[clamp(2.25rem,4vw,3rem)] font-semibold tabular-nums leading-none">
+                    {formatINR(pack.pricePaise)}
+                  </span>
+                </div>
+                <div className="mt-2 text-sm text-muted-foreground">
+                  {pack.credits} {pack.credits === 1 ? "architecture run" : "architecture runs"} ·{" "}
+                  {formatINR(pack.perRunPaise)} / run
+                </div>
+                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                  {pack.description}
+                </p>
+                <ul className="my-7 space-y-2.5 text-sm">
+                  <Feature>Full report — diagrams, tiers, costs, risks</Feature>
+                  <Feature>Downloadable PDF for stakeholders</Feature>
+                  <Feature>Permanent history &amp; versioning</Feature>
+                  <Feature>Refund on agent failure</Feature>
+                </ul>
+                <Button
+                  onClick={() => buyPack(pack)}
+                  disabled={loadingPackId === pack.id}
+                  variant={popular ? "default" : "outline"}
+                  className="mt-auto"
+                  size="lg"
+                >
+                  {loadingPackId === pack.id ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    `Buy ${pack.name}`
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 function Feature({ children }: { children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-2">
-      <Check className="mt-0.5 size-4 shrink-0 text-brand" />
-      <span>{children}</span>
+    <li className="flex items-start gap-2.5">
+      <Check className="mt-0.5 size-4 shrink-0 text-foreground" />
+      <span className="text-foreground/80">{children}</span>
     </li>
   );
 }

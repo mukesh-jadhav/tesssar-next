@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, Loader2, AlertTriangle } from "lucide-react";
+import { Sparkles, ArrowRight, Loader2, AlertTriangle, Check } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type ProgressEvent =
   | { type: "init"; architectureId: string }
@@ -35,17 +36,42 @@ const EXAMPLES = [
   "Privacy-preserving health records vault for Indian hospitals. ABDM compliant, end-to-end encrypted, consent-based sharing, audit log, mobile + web.",
 ];
 
+const PLACEHOLDER_HINTS = [
+  "e.g. A realtime collaborative whiteboard for design teams…",
+  "e.g. An ABDM-compliant health records vault for Indian hospitals…",
+  "e.g. A B2B logistics platform ingesting 100K truck GPS pings every 5 seconds…",
+  "e.g. An AI support copilot that drafts replies from ticket history…",
+];
+
 export function NewArchitectureForm({ credits }: { credits: number }) {
   const router = useRouter();
   const [brief, setBrief] = useState("");
+  const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [generating, setGenerating] = useState(false);
   const [phase, setPhase] = useState<string | null>(null);
   const [phaseMsg, setPhaseMsg] = useState<string>("");
   const [tokens, setTokens] = useState(0);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const phaseIndex = phase ? PHASE_ORDER.indexOf(phase as (typeof PHASE_ORDER)[number]) : -1;
-  const progress = phaseIndex < 0 ? (generating ? 3 : 0) : Math.round(((phaseIndex + 1) / PHASE_ORDER.length) * 100);
+  // Rotate placeholder hints
+  useEffect(() => {
+    if (brief.length > 0 || generating) return;
+    const i = setInterval(() => {
+      setPlaceholderIdx((p) => (p + 1) % PLACEHOLDER_HINTS.length);
+    }, 3600);
+    return () => clearInterval(i);
+  }, [brief.length, generating]);
+
+  const phaseIndex = phase
+    ? PHASE_ORDER.indexOf(phase as (typeof PHASE_ORDER)[number])
+    : -1;
+  const progress =
+    phaseIndex < 0
+      ? generating
+        ? 3
+        : 0
+      : Math.round(((phaseIndex + 1) / PHASE_ORDER.length) * 100);
 
   async function handleSubmit() {
     if (brief.trim().length < 30) {
@@ -121,36 +147,56 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
   return (
     <div className="space-y-6">
       {!generating ? (
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex items-start gap-2">
-              <Sparkles className="mt-0.5 size-4 text-brand" />
+        <Card className="overflow-hidden">
+          <CardContent className="space-y-5 p-7">
+            <div className="flex items-start gap-3">
+              <div className="grid size-9 shrink-0 place-items-center rounded-lg border bg-background">
+                <Sparkles className="size-4 text-foreground/80" />
+              </div>
               <div className="flex-1">
-                <div className="font-medium">Describe the system you want to build</div>
-                <p className="text-sm text-muted-foreground">
-                  Be as detailed or as loose as you like. The architect will fill gaps with reasoned assumptions and surface them.
+                <div className="font-medium tracking-tight">
+                  Describe the system you want to build
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Be as detailed or as loose as you like. The architect fills gaps with reasoned
+                  assumptions and surfaces them.
                 </p>
               </div>
             </div>
-            <Textarea
-              value={brief}
-              onChange={(e) => setBrief(e.target.value)}
-              placeholder="e.g. A realtime collaborative whiteboard for design teams. Infinite canvas, multiplayer cursors, version history, AI-assisted suggestions. Target 50K users year-1, India + SEA. Free + Pro plans..."
-              className="min-h-[200px] resize-none text-base leading-relaxed"
-              maxLength={8000}
-            />
+            <div className="relative">
+              <Textarea
+                ref={textareaRef}
+                value={brief}
+                onChange={(e) => setBrief(e.target.value)}
+                placeholder=" "
+                className="min-h-[220px] resize-none text-[15px] leading-relaxed"
+                maxLength={8000}
+              />
+              {brief.length === 0 && (
+                <div
+                  key={placeholderIdx}
+                  className="pointer-events-none absolute left-3.5 top-3 animate-reveal-fade text-[15px] leading-relaxed text-muted-foreground/70"
+                >
+                  {PLACEHOLDER_HINTS[placeholderIdx]}
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span>{brief.length} / 8000 characters</span>
-              <span>One credit will be used.</span>
+              <span className="tabular-nums">
+                {brief.length.toLocaleString("en-IN")} / 8,000 characters
+              </span>
+              <span>1 credit · refunded on failure</span>
             </div>
             <div>
-              <div className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Or try one of these</div>
+              <div className="mb-3 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Try one of these
+              </div>
               <div className="flex flex-wrap gap-2">
                 {EXAMPLES.map((ex, i) => (
                   <button
                     key={i}
                     onClick={() => setBrief(ex)}
-                    className="rounded-full border px-3 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    className="rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-all duration-200 ease-out-quart hover:-translate-y-px hover:border-foreground/30 hover:bg-card hover:text-foreground"
                   >
                     Example {i + 1}
                   </button>
@@ -160,61 +206,85 @@ export function NewArchitectureForm({ credits }: { credits: number }) {
             <Button
               onClick={handleSubmit}
               size="lg"
-              variant="brand"
               className="w-full gap-2"
               disabled={brief.trim().length < 30}
             >
               Design my architecture
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-4 transition-transform group-hover/btn:translate-x-0.5" />
             </Button>
           </CardContent>
         </Card>
       ) : (
         <Card className="overflow-hidden">
-          <CardContent className="p-6 space-y-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin text-brand" />
-                <span className="text-sm font-medium">Designing your system…</span>
-                <Badge variant="secondary" className="ml-auto">~{tokens.toLocaleString()} tokens</Badge>
+          <CardContent className="space-y-6 p-7">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2.5">
+                <Loader2 className="size-4 animate-spin" />
+                <span className="text-sm font-medium tracking-tight">
+                  Designing your system…
+                </span>
+                <Badge
+                  variant="outline"
+                  className="ml-auto font-mono text-[10px] tabular-nums"
+                >
+                  ~{tokens.toLocaleString("en-IN")} tokens
+                </Badge>
               </div>
               <Progress value={progress} />
-              <div className="text-sm text-muted-foreground">{phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}</div>
+              <div
+                key={phaseMsg}
+                className="animate-reveal-fade text-sm text-muted-foreground"
+              >
+                {phaseMsg || "Connecting to Gemini 2.5 Pro on Vertex AI…"}
+              </div>
             </div>
 
-            <ol className="space-y-2">
+            <ol className="space-y-2.5">
               {PHASE_ORDER.map((p, i) => {
                 const done = phaseIndex > i;
                 const active = phaseIndex === i;
                 return (
-                  <li key={p} className="flex items-center gap-3 text-sm">
+                  <li
+                    key={p}
+                    className={cn(
+                      "flex items-center gap-3 text-sm transition-all duration-300 ease-out-quart",
+                      !done && !active && "opacity-50",
+                    )}
+                  >
                     <span
-                      className={`grid size-5 place-items-center rounded-full border text-[10px] ${
-                        done
-                          ? "border-brand bg-brand text-white"
-                          : active
-                            ? "border-brand bg-brand/10 text-brand"
-                            : "border-muted text-muted-foreground"
-                      }`}
+                      className={cn(
+                        "grid size-5 place-items-center rounded-full border text-[10px] transition-all duration-300 ease-out-quart",
+                        done && "scale-100 border-foreground bg-foreground text-background",
+                        active && "scale-110 border-foreground bg-background text-foreground",
+                        !done && !active && "border-border text-muted-foreground",
+                      )}
                     >
-                      {done ? "✓" : i + 1}
+                      {done ? <Check className="size-3" /> : i + 1}
                     </span>
-                    <span className={active ? "font-medium" : done ? "" : "text-muted-foreground"}>
+                    <span
+                      className={cn(
+                        "transition-colors duration-300",
+                        active && "font-medium",
+                        done && "text-muted-foreground line-through decoration-foreground/20",
+                      )}
+                    >
                       {phaseLabel(p)}
                     </span>
-                    {active && <Loader2 className="size-3.5 animate-spin text-brand" />}
+                    {active && (
+                      <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                    )}
                   </li>
                 );
               })}
             </ol>
 
             {errorMsg && (
-              <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                <AlertTriangle className="mt-0.5 size-4" />
+              <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3.5 text-sm text-destructive">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                 <div>
                   <div className="font-medium">Generation failed</div>
-                  <div className="text-xs">{errorMsg}</div>
-                  <div className="mt-1 text-xs">Your credit has been refunded.</div>
+                  <div className="mt-0.5 text-xs">{errorMsg}</div>
+                  <div className="mt-1 text-xs opacity-80">Your credit has been refunded.</div>
                 </div>
               </div>
             )}

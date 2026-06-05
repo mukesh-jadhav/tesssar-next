@@ -55,33 +55,44 @@ export function ArchitectureView({
   return (
     <div className="space-y-10">
       {/* HEADER */}
-      <header className="space-y-4">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <header className="space-y-5">
+        <div className="flex flex-wrap items-start justify-between gap-4 animate-reveal-up">
           <div>
-            <Badge variant="brand" className="mb-3 uppercase tracking-wider">{arch.meta.domain}</Badge>
-            <h1 className="text-4xl font-semibold tracking-tight md:text-5xl text-balance">
+            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              {arch.meta.domain}
+            </div>
+            <h1 className="display mt-2 text-balance text-[clamp(2.25rem,5vw,3.5rem)] font-semibold">
               {arch.meta.title}
             </h1>
-            <p className="mt-3 max-w-2xl text-lg text-muted-foreground text-balance">
+            <p className="mt-4 max-w-2xl text-balance text-[15px] leading-relaxed text-muted-foreground md:text-base">
               {arch.meta.one_liner}
             </p>
           </div>
           {showDownload && architectureId && (
             <Button asChild variant="outline" className="gap-2">
-              <a href={`/api/architect/${architectureId}/pdf`} target="_blank" rel="noreferrer">
+              <a
+                href={`/api/architect/${architectureId}/pdf`}
+                target="_blank"
+                rel="noreferrer"
+              >
                 <Download className="size-4" />
                 Download PDF
               </a>
             </Button>
           )}
         </div>
-        <Card className="border-brand/30 bg-gradient-to-br from-background to-secondary/40">
+        <Card
+          className="animate-reveal-up"
+          style={{ animationDelay: "100ms", animationFillMode: "both" }}
+        >
           <CardContent className="p-6">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-brand">
+            <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
               <Sparkles className="size-3.5" />
               Executive summary
             </div>
-            <p className="mt-3 text-base leading-relaxed text-foreground/90">{arch.executive_summary}</p>
+            <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">
+              {arch.executive_summary}
+            </p>
           </CardContent>
         </Card>
       </header>
@@ -134,32 +145,56 @@ export function ArchitectureView({
 
         {/* DIAGRAMS */}
         <TabsContent value="diagrams" className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-            <div className="space-y-1 lg:sticky lg:top-20 lg:self-start">
-              {arch.diagrams.map((d) => (
-                <button
-                  key={d.id}
-                  onClick={() => setActiveDiagram(d.id)}
-                  className={`w-full rounded-lg border p-3 text-left text-sm transition-colors ${
-                    activeDiagram === d.id ? "border-brand bg-brand/5" : "hover:bg-muted"
-                  }`}
-                >
-                  <div className="font-medium">{d.title}</div>
-                  <div className="mt-0.5 text-xs uppercase tracking-wider text-muted-foreground">
-                    {d.kind.replace(/-/g, " ")}
-                  </div>
-                </button>
-              ))}
+          <div className="grid gap-5 lg:grid-cols-[260px_1fr]">
+            <div className="space-y-1.5 lg:sticky lg:top-24 lg:self-start">
+              {arch.diagrams.map((d) => {
+                const active = activeDiagram === d.id;
+                return (
+                  <button
+                    key={d.id}
+                    onClick={() => setActiveDiagram(d.id)}
+                    className={`group/diag relative flex w-full items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all duration-200 ease-out-quart ${
+                      active
+                        ? "border-foreground/20 bg-card shadow-[0_1px_0_hsl(var(--border)),0_4px_10px_-4px_hsl(var(--foreground)/0.08)]"
+                        : "border-transparent hover:border-border hover:bg-card/60"
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      className={`mt-1.5 h-px shrink-0 origin-left bg-foreground transition-all duration-300 ease-out-expo ${
+                        active ? "w-4" : "w-2 opacity-40"
+                      }`}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium leading-snug">{d.title}</div>
+                      <div className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                        {d.kind.replace(/-/g, " ")}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {currentDiagram && (
-                <>
+                <div
+                  key={currentDiagram.id}
+                  className="space-y-4 animate-reveal-up"
+                >
                   <div>
-                    <h3 className="text-lg font-semibold">{currentDiagram.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{currentDiagram.description}</p>
+                    <h3 className="display text-2xl font-semibold tracking-tight">
+                      {currentDiagram.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                      {currentDiagram.description}
+                    </p>
                   </div>
-                  <MermaidDiagram chart={currentDiagram.mermaid} />
-                </>
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-6">
+                      <MermaidDiagram chart={currentDiagram.mermaid} />
+                    </CardContent>
+                  </Card>
+                </div>
               )}
             </div>
           </div>

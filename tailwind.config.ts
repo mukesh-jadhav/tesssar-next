@@ -54,6 +54,16 @@ const config: Config = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
+      transitionTimingFunction: {
+        "out-quart": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      },
+      boxShadow: {
+        "hover-card":
+          "0 1px 0 hsl(var(--border)), 0 12px 24px -8px hsl(240 12% 6% / 0.08), 0 4px 8px -4px hsl(240 12% 6% / 0.04)",
+        ring: "0 0 0 1px hsl(var(--foreground) / 0.08)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
