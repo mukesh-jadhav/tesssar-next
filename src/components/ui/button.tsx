@@ -3,31 +3,63 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
+/**
+ * Material 3 Expressive Button.
+ *
+ * Variants follow the M3 common-buttons spec:
+ *   - filled    → high emphasis, primary action (default)
+ *   - tonal     → medium emphasis, secondary-container fill
+ *   - elevated  → tonal w/ elevation, low-contrast surfaces
+ *   - outlined  → medium emphasis, outline-only
+ *   - text      → low emphasis, no container
+ *   - fab       → floating action button
+ *
+ * Shape is pill (full) by default per M3 Expressive.
+ */
 const buttonVariants = cva(
-  "group/btn relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-[transform,background-color,color,box-shadow,border-color,opacity] duration-200 ease-out-quart focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
+  [
+    "state-layer press group/btn relative inline-flex items-center justify-center gap-2",
+    "whitespace-nowrap font-medium tracking-[0.00625em] select-none",
+    "transition-[transform,background-color,color,box-shadow,border-color,opacity]",
+    "duration-m3-fast-effects ease-m3-default-effects",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "disabled:pointer-events-none disabled:opacity-40",
+    "[&_svg]:size-[18px] [&_svg]:shrink-0",
+    "[&_svg]:transition-transform [&_svg]:duration-m3-default-effects [&_svg]:ease-m3-default-effects",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default:
-          "btn-shine bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_1px_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(var(--foreground)/0.08)] hover:shadow-[0_2px_0_hsl(var(--foreground)/0.08),0_8px_16px_-4px_hsl(var(--foreground)/0.16)]",
-        brand:
-          "btn-shine bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_1px_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(var(--foreground)/0.08)] hover:shadow-[0_2px_0_hsl(var(--foreground)/0.08),0_8px_16px_-4px_hsl(var(--foreground)/0.16)]",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+        filled: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
+        default: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
+        brand: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
+        tonal: "bg-m3-secondary-container text-m3-on-secondary-container",
+        secondary: "bg-m3-secondary-container text-m3-on-secondary-container",
+        elevated:
+          "bg-m3-surface-container-low text-m3-primary shadow-m3-1 hover:shadow-m3-2",
+        outlined:
+          "border border-m3-outline bg-transparent text-m3-primary hover:border-m3-primary",
         outline:
-          "border border-border bg-background hover:border-foreground/30 hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-foreground underline-offset-4 hover:underline",
+          "border border-m3-outline bg-transparent text-m3-primary hover:border-m3-primary",
+        text: "bg-transparent text-m3-primary",
+        ghost: "bg-transparent text-m3-on-surface",
+        destructive:
+          "bg-m3-error text-m3-on-error shadow-m3-1 hover:shadow-m3-2",
+        link: "text-m3-primary underline-offset-4 hover:underline",
+        fab: "bg-m3-primary-container text-m3-on-primary-container shadow-m3-3 hover:shadow-m3-4",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-lg px-5 text-sm",
-        xl: "h-13 rounded-xl px-7 text-[15px]",
-        icon: "size-10",
+        xs: "h-8 rounded-full px-3 text-xs",
+        sm: "h-9 rounded-full px-3.5 text-[13px]",
+        default: "h-10 rounded-full px-5 text-sm",
+        lg: "h-11 rounded-full px-6 text-[15px]",
+        xl: "h-14 rounded-full px-8 text-base",
+        icon: "size-10 rounded-full",
+        fab: "size-14 rounded-2xl",
+        "fab-extended": "h-14 rounded-2xl px-5 text-base",
       },
     },
-    defaultVariants: { variant: "default", size: "default" },
+    defaultVariants: { variant: "filled", size: "default" },
   },
 );
 

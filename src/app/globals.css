@@ -4,68 +4,185 @@
 
 @layer base {
   :root {
-    /* Surfaces — warm-neutral, not pure white */
-    --background: 40 14% 99%;
-    --foreground: 240 12% 6%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 12% 6%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 12% 6%;
+    /* ============================================================
+       MATERIAL DESIGN 3 EXPRESSIVE — light theme baseline
+       Indigo primary, warm-neutral surfaces, tone-based.
+       ============================================================ */
 
-    /* Primary = foreground (monochrome-first) */
-    --primary: 240 12% 6%;
-    --primary-foreground: 40 14% 99%;
+    /* --- M3 key colors --- */
+    --md-sys-color-primary: 258 53% 41%;
+    --md-sys-color-on-primary: 0 0% 100%;
+    --md-sys-color-primary-container: 258 100% 92%;
+    --md-sys-color-on-primary-container: 258 100% 11%;
 
-    --secondary: 240 6% 96%;
-    --secondary-foreground: 240 12% 6%;
-    --muted: 240 6% 96%;
-    --muted-foreground: 240 5% 42%;
-    --accent: 240 6% 96%;
-    --accent-foreground: 240 12% 6%;
+    --md-sys-color-secondary: 258 14% 38%;
+    --md-sys-color-on-secondary: 0 0% 100%;
+    --md-sys-color-secondary-container: 258 30% 91%;
+    --md-sys-color-on-secondary-container: 258 30% 11%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 98%;
+    --md-sys-color-tertiary: 338 38% 41%;
+    --md-sys-color-on-tertiary: 0 0% 100%;
+    --md-sys-color-tertiary-container: 338 100% 92%;
+    --md-sys-color-on-tertiary-container: 338 100% 11%;
 
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 240 12% 6%;
-    --radius: 0.75rem;
+    --md-sys-color-error: 0 75% 42%;
+    --md-sys-color-on-error: 0 0% 100%;
+    --md-sys-color-error-container: 6 100% 92%;
+    --md-sys-color-on-error-container: 0 100% 12%;
 
-    /* Brand accent — used sparingly, deeper/more architectural */
-    --brand: 232 70% 52%;
-    --brand-soft: 232 90% 96%;
+    /* --- M3 surface tones --- */
+    --md-sys-color-surface: 290 16% 99%;
+    --md-sys-color-surface-dim: 290 6% 87%;
+    --md-sys-color-surface-bright: 290 16% 99%;
+    --md-sys-color-surface-container-lowest: 0 0% 100%;
+    --md-sys-color-surface-container-low: 290 16% 97%;
+    --md-sys-color-surface-container: 290 12% 94%;
+    --md-sys-color-surface-container-high: 290 10% 91%;
+    --md-sys-color-surface-container-highest: 290 8% 88%;
+    --md-sys-color-on-surface: 258 14% 11%;
+    --md-sys-color-on-surface-variant: 258 8% 30%;
+    --md-sys-color-outline: 258 6% 50%;
+    --md-sys-color-outline-variant: 258 10% 82%;
+    --md-sys-color-inverse-surface: 258 14% 18%;
+    --md-sys-color-inverse-on-surface: 290 16% 95%;
+    --md-sys-color-inverse-primary: 258 100% 82%;
+    --md-sys-color-scrim: 0 0% 0%;
+    --md-sys-color-shadow: 0 0% 0%;
 
-    /* Motion tokens */
-    --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --dur-fast: 180ms;
-    --dur-base: 260ms;
-    --dur-slow: 500ms;
+    /* ============================================================
+       Legacy aliases — kept so existing utilities keep working.
+       Backed by the M3 tokens above.
+       ============================================================ */
+    --background: var(--md-sys-color-surface);
+    --foreground: var(--md-sys-color-on-surface);
+    --card: var(--md-sys-color-surface-container-low);
+    --card-foreground: var(--md-sys-color-on-surface);
+    --popover: var(--md-sys-color-surface-container);
+    --popover-foreground: var(--md-sys-color-on-surface);
+    --primary: var(--md-sys-color-primary);
+    --primary-foreground: var(--md-sys-color-on-primary);
+    --secondary: var(--md-sys-color-secondary-container);
+    --secondary-foreground: var(--md-sys-color-on-secondary-container);
+    --muted: var(--md-sys-color-surface-container);
+    --muted-foreground: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-secondary-container);
+    --accent-foreground: var(--md-sys-color-on-secondary-container);
+    --destructive: var(--md-sys-color-error);
+    --destructive-foreground: var(--md-sys-color-on-error);
+    --border: var(--md-sys-color-outline-variant);
+    --input: var(--md-sys-color-outline-variant);
+    --ring: var(--md-sys-color-primary);
+
+    /* M3 Expressive uses a default lg radius of 16dp */
+    --radius: 1rem;
+
+    /* Brand accent — keep for legacy callsites */
+    --brand: var(--md-sys-color-primary);
+    --brand-soft: var(--md-sys-color-primary-container);
+
+    /* ============================================================
+       M3 SHAPE — corner radius scale (Expressive update)
+       ============================================================ */
+    --md-sys-shape-corner-none: 0px;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 8px;
+    --md-sys-shape-corner-medium: 12px;
+    --md-sys-shape-corner-large: 16px;
+    --md-sys-shape-corner-large-increased: 20px;
+    --md-sys-shape-corner-extra-large: 28px;
+    --md-sys-shape-corner-extra-large-increased: 32px;
+    --md-sys-shape-corner-extra-extra-large: 48px;
+    --md-sys-shape-corner-full: 9999px;
+
+    /* ============================================================
+       M3 EXPRESSIVE motion physics — web-equivalent cubic-béziers
+       Source: m3.material.io/styles/motion/overview/specs
+       ============================================================ */
+    --md-sys-motion-easing-expressive-fast-spatial: cubic-bezier(0.42, 1.67, 0.21, 0.90);
+    --md-sys-motion-easing-expressive-default-spatial: cubic-bezier(0.38, 1.21, 0.22, 1.00);
+    --md-sys-motion-easing-expressive-slow-spatial: cubic-bezier(0.39, 1.29, 0.35, 0.98);
+    --md-sys-motion-easing-expressive-fast-effects: cubic-bezier(0.31, 0.94, 0.34, 1.00);
+    --md-sys-motion-easing-expressive-default-effects: cubic-bezier(0.34, 0.80, 0.34, 1.00);
+    --md-sys-motion-easing-expressive-slow-effects: cubic-bezier(0.34, 0.88, 0.34, 1.00);
+
+    --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --md-sys-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+    --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --md-sys-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --md-sys-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+
+    --md-sys-motion-duration-expressive-fast-spatial: 350ms;
+    --md-sys-motion-duration-expressive-default-spatial: 500ms;
+    --md-sys-motion-duration-expressive-slow-spatial: 650ms;
+    --md-sys-motion-duration-expressive-fast-effects: 150ms;
+    --md-sys-motion-duration-expressive-default-effects: 200ms;
+    --md-sys-motion-duration-expressive-slow-effects: 300ms;
+
+    /* Legacy motion aliases — wired into M3 expressive equivalents */
+    --ease-out-quart: var(--md-sys-motion-easing-expressive-default-effects);
+    --ease-out-expo: var(--md-sys-motion-easing-expressive-default-spatial);
+    --ease-spring: var(--md-sys-motion-easing-expressive-fast-spatial);
+    --dur-fast: var(--md-sys-motion-duration-expressive-fast-effects);
+    --dur-base: var(--md-sys-motion-duration-expressive-default-effects);
+    --dur-slow: var(--md-sys-motion-duration-expressive-default-spatial);
+
+    /* ============================================================
+       M3 elevation levels — soft, tone-based shadows
+       ============================================================ */
+    --md-sys-elevation-1:
+      0 1px 2px 0 hsl(var(--md-sys-color-shadow) / 0.30),
+      0 1px 3px 1px hsl(var(--md-sys-color-shadow) / 0.15);
+    --md-sys-elevation-2:
+      0 1px 2px 0 hsl(var(--md-sys-color-shadow) / 0.30),
+      0 2px 6px 2px hsl(var(--md-sys-color-shadow) / 0.15);
+    --md-sys-elevation-3:
+      0 1px 3px 0 hsl(var(--md-sys-color-shadow) / 0.30),
+      0 4px 8px 3px hsl(var(--md-sys-color-shadow) / 0.15);
+    --md-sys-elevation-4:
+      0 2px 3px 0 hsl(var(--md-sys-color-shadow) / 0.30),
+      0 6px 10px 4px hsl(var(--md-sys-color-shadow) / 0.15);
+    --md-sys-elevation-5:
+      0 4px 4px 0 hsl(var(--md-sys-color-shadow) / 0.30),
+      0 8px 12px 6px hsl(var(--md-sys-color-shadow) / 0.15);
   }
 
   .dark {
-    --background: 240 10% 5%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 7%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 12% 6%;
-    --secondary: 240 4% 12%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 12%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 12%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 0 0% 83%;
-    --brand: 232 80% 65%;
-    --brand-soft: 232 30% 16%;
+    --md-sys-color-primary: 258 100% 82%;
+    --md-sys-color-on-primary: 258 100% 18%;
+    --md-sys-color-primary-container: 258 50% 32%;
+    --md-sys-color-on-primary-container: 258 100% 92%;
+
+    --md-sys-color-secondary: 258 30% 80%;
+    --md-sys-color-on-secondary: 258 30% 20%;
+    --md-sys-color-secondary-container: 258 18% 32%;
+    --md-sys-color-on-secondary-container: 258 30% 92%;
+
+    --md-sys-color-tertiary: 338 100% 86%;
+    --md-sys-color-on-tertiary: 338 80% 16%;
+    --md-sys-color-tertiary-container: 338 45% 32%;
+    --md-sys-color-on-tertiary-container: 338 100% 92%;
+
+    --md-sys-color-error: 6 100% 84%;
+    --md-sys-color-on-error: 6 100% 18%;
+    --md-sys-color-error-container: 6 80% 30%;
+    --md-sys-color-on-error-container: 6 100% 92%;
+
+    --md-sys-color-surface: 258 8% 9%;
+    --md-sys-color-surface-dim: 258 8% 9%;
+    --md-sys-color-surface-bright: 258 6% 22%;
+    --md-sys-color-surface-container-lowest: 258 10% 5%;
+    --md-sys-color-surface-container-low: 258 8% 11%;
+    --md-sys-color-surface-container: 258 6% 14%;
+    --md-sys-color-surface-container-high: 258 5% 18%;
+    --md-sys-color-surface-container-highest: 258 5% 22%;
+    --md-sys-color-on-surface: 290 16% 92%;
+    --md-sys-color-on-surface-variant: 258 10% 75%;
+    --md-sys-color-outline: 258 6% 60%;
+    --md-sys-color-outline-variant: 258 6% 30%;
+    --md-sys-color-inverse-surface: 290 16% 92%;
+    --md-sys-color-inverse-on-surface: 258 14% 18%;
+    --md-sys-color-inverse-primary: 258 53% 41%;
   }
 }
 
@@ -190,6 +307,69 @@
       0 4px 8px -4px hsl(240 12% 6% / 0.04);
     border-color: hsl(var(--foreground) / 0.18);
   }
+
+  /* ============================================================
+     M3 STATE LAYER — semi-transparent overlay used by buttons,
+     chips, list items, etc., to communicate hover/focus/press.
+     Usage: add `.state-layer` to any interactive element.
+     ============================================================ */
+  .state-layer {
+    position: relative;
+    isolation: isolate;
+  }
+  .state-layer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: currentColor;
+    opacity: 0;
+    transition: opacity var(--md-sys-motion-duration-expressive-fast-effects)
+      var(--md-sys-motion-easing-expressive-default-effects);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .state-layer > * {
+    position: relative;
+    z-index: 1;
+  }
+  .state-layer:hover::after { opacity: 0.08; }
+  .state-layer:focus-visible::after { opacity: 0.10; }
+  .state-layer:active::after { opacity: 0.12; }
+
+  /* ============================================================
+     M3 SHAPE — radius utilities matching shape tokens
+     ============================================================ */
+  .shape-none { border-radius: var(--md-sys-shape-corner-none); }
+  .shape-xs { border-radius: var(--md-sys-shape-corner-extra-small); }
+  .shape-sm { border-radius: var(--md-sys-shape-corner-small); }
+  .shape-md { border-radius: var(--md-sys-shape-corner-medium); }
+  .shape-lg { border-radius: var(--md-sys-shape-corner-large); }
+  .shape-lg-inc { border-radius: var(--md-sys-shape-corner-large-increased); }
+  .shape-xl { border-radius: var(--md-sys-shape-corner-extra-large); }
+  .shape-xl-inc { border-radius: var(--md-sys-shape-corner-extra-large-increased); }
+  .shape-xxl { border-radius: var(--md-sys-shape-corner-extra-extra-large); }
+  .shape-full { border-radius: var(--md-sys-shape-corner-full); }
+
+  /* ============================================================
+     M3 ELEVATION — surface shadows by level
+     ============================================================ */
+  .elev-0 { box-shadow: none; }
+  .elev-1 { box-shadow: var(--md-sys-elevation-1); }
+  .elev-2 { box-shadow: var(--md-sys-elevation-2); }
+  .elev-3 { box-shadow: var(--md-sys-elevation-3); }
+  .elev-4 { box-shadow: var(--md-sys-elevation-4); }
+  .elev-5 { box-shadow: var(--md-sys-elevation-5); }
+
+  /* ============================================================
+     M3 SURFACE container utilities
+     ============================================================ */
+  .surface { background-color: hsl(var(--md-sys-color-surface)); color: hsl(var(--md-sys-color-on-surface)); }
+  .surface-container-lowest { background-color: hsl(var(--md-sys-color-surface-container-lowest)); }
+  .surface-container-low { background-color: hsl(var(--md-sys-color-surface-container-low)); }
+  .surface-container { background-color: hsl(var(--md-sys-color-surface-container)); }
+  .surface-container-high { background-color: hsl(var(--md-sys-color-surface-container-high)); }
+  .surface-container-highest { background-color: hsl(var(--md-sys-color-surface-container-highest)); }
 }
 
 @layer components {
@@ -367,4 +547,138 @@
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ============================================================
+   M3 EXPRESSIVE — page transitions + loading patterns
+   ============================================================ */
+
+/* Page enter — spring scale + slide, used by app-route layouts */
+@keyframes m3-page-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.m3-page-enter {
+  animation: m3-page-enter var(--md-sys-motion-duration-expressive-default-spatial)
+    var(--md-sys-motion-easing-expressive-default-spatial) both;
+  will-change: opacity, transform;
+}
+
+/* Container-transform — used when a card morphs into a detail surface */
+@keyframes m3-container-transform-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    border-radius: var(--md-sys-shape-corner-extra-large);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: var(--md-sys-shape-corner-large);
+  }
+}
+.m3-container-transform-in {
+  animation: m3-container-transform-in var(--md-sys-motion-duration-expressive-slow-spatial)
+    var(--md-sys-motion-easing-expressive-default-spatial) both;
+}
+
+/* Breathing skeleton — pulse with subtle scale instead of just opacity */
+@keyframes m3-breathe {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.m3-breathe {
+  animation: m3-breathe 1.6s var(--md-sys-motion-easing-expressive-default-effects) infinite;
+}
+
+/* Wavy loading indicator (M3 Expressive linear progress) */
+@keyframes m3-progress-indeterminate {
+  0% { transform: translateX(-100%) scaleX(0.35); }
+  40% { transform: translateX(0%) scaleX(0.6); }
+  100% { transform: translateX(120%) scaleX(0.35); }
+}
+.m3-progress-track {
+  position: relative;
+  overflow: hidden;
+  background-color: hsl(var(--md-sys-color-secondary-container));
+  border-radius: var(--md-sys-shape-corner-full);
+}
+.m3-progress-bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  background-color: hsl(var(--md-sys-color-primary));
+  border-radius: var(--md-sys-shape-corner-full);
+  transform-origin: left;
+  animation: m3-progress-indeterminate 1.8s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
+}
+
+/* Route-top progress (linear) — used by RouteProgress component */
+@keyframes m3-route-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.m3-route-bar {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--md-sys-color-primary)),
+    hsl(var(--md-sys-color-tertiary)),
+    transparent
+  );
+  z-index: 60;
+  animation: m3-route-bar 1.2s var(--md-sys-motion-easing-expressive-default-spatial) infinite;
+}
+
+/* Staggered children — apply with .m3-stagger and child :nth selectors */
+.m3-stagger > * {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: m3-page-enter var(--md-sys-motion-duration-expressive-default-spatial)
+    var(--md-sys-motion-easing-expressive-default-spatial) both;
+}
+.m3-stagger > *:nth-child(1) { animation-delay: 40ms; }
+.m3-stagger > *:nth-child(2) { animation-delay: 90ms; }
+.m3-stagger > *:nth-child(3) { animation-delay: 140ms; }
+.m3-stagger > *:nth-child(4) { animation-delay: 190ms; }
+.m3-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.m3-stagger > *:nth-child(6) { animation-delay: 290ms; }
+.m3-stagger > *:nth-child(7) { animation-delay: 340ms; }
+.m3-stagger > *:nth-child(8) { animation-delay: 390ms; }
+.m3-stagger > *:nth-child(9) { animation-delay: 440ms; }
+.m3-stagger > *:nth-child(10) { animation-delay: 490ms; }
+
+/* FAB pop-in — bouncy entrance */
+@keyframes m3-fab-in {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.m3-fab-in {
+  animation: m3-fab-in var(--md-sys-motion-duration-expressive-default-spatial)
+    var(--md-sys-motion-easing-expressive-fast-spatial) both;
+}
+
+/* Ripple-ish press feedback — used on .state-layer with .press */
+.press {
+  transition: transform var(--md-sys-motion-duration-expressive-fast-effects)
+    var(--md-sys-motion-easing-expressive-default-effects);
+}
+.press:active {
+  transform: scale(0.97);
 }

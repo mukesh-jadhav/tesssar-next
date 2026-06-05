@@ -3,6 +3,7 @@ import { Roboto_Flex, Roboto, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
+import { RouteProgress } from "@/components/shared/RouteProgress";
 
 // Material 3 — brand typeface (variable, used for display + headlines)
 const robotoFlex = Roboto_Flex({
@@ -54,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="min-h-screen font-sans antialiased">
+        <RouteProgress />
         {children}
         <CommandMenu />
         <Toaster richColors position="top-right" />
