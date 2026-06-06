@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { MermaidDiagram } from "./MermaidDiagram";
+import { EditorialDiagram } from "./EditorialDiagram";
 import { ScaleExplorer } from "./ScaleExplorer";
 import type { Architecture, Risk } from "@/types/architecture";
 
@@ -143,8 +143,8 @@ export function ArchitectureView({
               <h3 className="display text-[clamp(1.4rem,2.4vw,1.9rem)] leading-tight tracking-[-0.02em]">
                 {currentDiagram.title}
               </h3>
-              <div className="card-paper mt-6 overflow-hidden p-4 md:p-8">
-                <MermaidDiagram chart={currentDiagram.mermaid} />
+              <div className="mt-6">
+                <EditorialDiagram chart={currentDiagram.mermaid} />
               </div>
             </div>
           )}

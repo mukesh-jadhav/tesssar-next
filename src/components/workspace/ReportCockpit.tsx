@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { MermaidDiagram } from "@/components/architecture/MermaidDiagram";
+import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
 import type { Architecture, Risk } from "@/types/architecture";
@@ -220,9 +220,7 @@ function DiagramsPanel({
               {current.description}
             </p>
           </div>
-          <div className="overflow-hidden p-4 md:p-6 bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]">
-            <MermaidDiagram chart={current.mermaid} />
-          </div>
+          <EditorialDiagram chart={current.mermaid} />
         </>
       )}
     </div>
