@@ -52,12 +52,13 @@ export async function getOrCreateUserDoc(args: {
   const now = Date.now();
 
   if (!snap.exists) {
+    const WELCOME_CREDITS = 3;
     const newUser: UserDoc = {
       uid: args.uid,
       email: args.email,
       displayName: args.displayName,
       photoURL: args.photoURL,
-      credits: 1, // First free credit
+      credits: WELCOME_CREDITS,
       freeCreditGranted: true,
       totalSpent: 0,
       createdAt: now,
@@ -65,13 +66,13 @@ export async function getOrCreateUserDoc(args: {
     };
     await ref.set(newUser);
 
-    // Ledger entry for the granted credit
+    // Ledger entry for the granted credits
     await adminDb.collection("ledger").add({
       uid: args.uid,
       type: "grant",
-      delta: 1,
-      balanceAfter: 1,
-      reason: "Welcome — first run free",
+      delta: WELCOME_CREDITS,
+      balanceAfter: WELCOME_CREDITS,
+      reason: `Welcome — ${WELCOME_CREDITS} free designs to start`,
       createdAt: now,
     });
 

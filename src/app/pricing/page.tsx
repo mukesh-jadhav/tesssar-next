@@ -29,7 +29,7 @@ export default async function PricingPage() {
         <div className="flex flex-col justify-end gap-6 pb-3">
           <p className="text-[17px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[40ch]">
             Buy credits. Use them when you have an idea worth designing.
-            Credits never expire. One credit = one architecture report.
+            Credits never expire. One credit = one architecture report. New accounts start with 3 free designs.
           </p>
         </div>
       </section>

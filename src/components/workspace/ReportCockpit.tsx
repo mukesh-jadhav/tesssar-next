@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
+import { ExportMenu } from "@/components/architecture/ExportMenu";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
 import type {
@@ -114,13 +115,7 @@ export function ReportCockpit({
         </div>
         {showDownload && architectureId && (
           <div className="shrink-0 flex items-center gap-2 pr-3 pl-3 border-l border-[hsl(var(--line))]">
-            <Link
-              href={`/api/architect/${architectureId}/pdf`}
-              className="h-7 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2.5 text-[11.5px] hover:border-[hsl(var(--ink))] transition-colors"
-            >
-              <span className="ms text-[13px]" aria-hidden>download</span>
-              PDF
-            </Link>
+            <ExportMenu architectureId={architectureId} size="sm" />
           </div>
         )}
       </div>

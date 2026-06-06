@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { TessarLogo } from "@/components/shared/TessarLogo";
 
 const NAV = [
   { href: "/sample",  label: "Sample" },
@@ -35,11 +36,8 @@ export function LandingTopBar({ signedIn }: { signedIn: boolean }) {
             scrolled && "border-[hsl(var(--line))] bg-[hsl(var(--card))]/90 backdrop-blur",
           )}
         >
-          <Link href="/" className="flex items-center gap-2.5 pl-3">
-            <span className="grid size-9 place-items-center rounded-xl bg-[hsl(var(--ink))] text-[hsl(var(--paper))]">
-              <span className="display text-[15px] leading-none">T</span>
-            </span>
-            <span className="display text-[20px] tracking-[-0.02em]">Tessar</span>
+          <Link href="/" className="flex items-center gap-2.5 pl-3" aria-label="Tessar home">
+            <TessarLogo variant="wordmark" size={32} className="text-[hsl(var(--ink))]" />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">

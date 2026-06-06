@@ -119,7 +119,7 @@ export function HomeCockpit({
               <span className="text-[11.5px] text-[hsl(var(--ink-3))]">
                 {signedIn
                   ? "1 credit · refunded on failure"
-                  : "First run is free — we'll sign you in with Google"}
+                  : "3 free designs to start — we'll sign you in with Google"}
               </span>
               <div className="flex items-center gap-3">
                 <kbd className="hidden md:inline-flex items-center rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2 py-1 text-[10.5px] font-mono text-[hsl(var(--ink-3))]">

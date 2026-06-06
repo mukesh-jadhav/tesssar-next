@@ -2,14 +2,15 @@ import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
+import { TessarLogo } from "@/components/shared/TessarLogo";
 import type { ProfileChipUser } from "@/components/auth/ProfileChip";
 
 /**
  * AppHeader — app-wide top bar.
  *
- *  - Tessar logo on the left, slim nav center, sign-in / profile right.
- *  - Server component; fetches session + credit balance once per request.
- *  - Rendered from the root layout so every page gets the same chrome.
+ *  - Logo flush to the left edge, profile flush to the right edge.
+ *  - No max-width container; the bar spans the whole viewport so
+ *    the brand mark anchors the page corner.
  */
 export async function AppHeader() {
   const user = await getSessionUser();
@@ -25,12 +26,9 @@ export async function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]/85 backdrop-blur supports-[backdrop-filter]:bg-[hsl(var(--paper))]/70">
-      <div className="mx-auto flex h-14 max-w-[1480px] items-center justify-between gap-6 px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid size-8 place-items-center rounded-xl bg-[hsl(var(--ink))] text-[hsl(var(--paper))]">
-            <span className="display text-[13px] leading-none">T</span>
-          </span>
-          <span className="display text-[18px] tracking-[-0.02em]">Tessar</span>
+      <div className="flex h-14 w-full items-center justify-between gap-4 pl-4 pr-3 md:pl-6 md:pr-5">
+        <Link href="/" className="flex items-center gap-2.5 -ml-0.5" aria-label="Tessar home">
+          <TessarLogo variant="wordmark" size={30} className="text-[hsl(var(--ink))]" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">
@@ -39,7 +37,7 @@ export async function AppHeader() {
           <HeaderLink href="/pricing" label="Pricing" />
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 -mr-0.5">
           <HeaderAuth user={profileUser} credits={credits} />
         </div>
       </div>

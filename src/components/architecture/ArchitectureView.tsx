@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "./EditorialDiagram";
+import { ExportMenu } from "./ExportMenu";
 import { ScaleExplorer } from "./ScaleExplorer";
 import type { Architecture, Risk } from "@/types/architecture";
 
@@ -48,13 +49,7 @@ export function ArchitectureView({
             <div className="flex items-baseline gap-5">
               <span className="eyebrow hidden md:inline">Vol 01 · Issue 05</span>
               {showDownload && architectureId && (
-                <Link
-                  href={`/api/architect/${architectureId}/pdf`}
-                  className="btn-pill btn-pill-sm"
-                >
-                  <span className="ms text-[16px]" aria-hidden>download</span>
-                  PDF
-                </Link>
+                <ExportMenu architectureId={architectureId} size="md" />
               )}
             </div>
           </div>
