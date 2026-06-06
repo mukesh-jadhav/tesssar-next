@@ -26,8 +26,10 @@ import type {
  */
 
 type ChapterId =
-  | "design" | "diagrams" | "brief" | "pieces" | "traffic" | "numbers"
-  | "breaks" | "guards" | "watch" | "next";
+  | "story" | "brief" | "design" | "pieces" | "traffic" | "diagrams"
+  | "numbers" | "breaks" | "guards" | "watch" | "next";
+
+type Act = "intro" | "why" | "what" | "how";
 
 /**
  * Selection — what's currently being inspected in the right panel.
@@ -48,18 +50,26 @@ export type Selection =
 
 export type SelectHandler = (s: Selection) => void;
 
-const CHAPTERS: { id: ChapterId; n: string; label: string }[] = [
-  { id: "design",   n: "01", label: "Design"   },
-  { id: "diagrams", n: "02", label: "Diagrams" },
-  { id: "brief",    n: "03", label: "Brief"    },
-  { id: "pieces",   n: "04", label: "Pieces"   },
-  { id: "traffic",  n: "05", label: "Traffic"  },
-  { id: "numbers",  n: "06", label: "Numbers"  },
-  { id: "breaks",   n: "07", label: "Risks"    },
-  { id: "guards",   n: "08", label: "Guards"   },
-  { id: "watch",    n: "09", label: "Watch"    },
-  { id: "next",     n: "10", label: "Next"     },
+const CHAPTERS: { id: ChapterId; n: string; label: string; act: Act; sub: string }[] = [
+  { id: "story",    n: "00", label: "Overview",      act: "intro", sub: "Start here — what we built and why." },
+  { id: "brief",    n: "01", label: "Brief",         act: "why",   sub: "What this system must do, and what it must not." },
+  { id: "design",   n: "02", label: "Architecture",  act: "what",  sub: "The shape of the system at a glance." },
+  { id: "pieces",   n: "03", label: "Components",    act: "what",  sub: "Every service named, with tech and responsibility." },
+  { id: "traffic",  n: "04", label: "Data & APIs",   act: "what",  sub: "How requests, data, and events move through it." },
+  { id: "diagrams", n: "05", label: "Diagrams",      act: "what",  sub: "The same system, viewed through several lenses." },
+  { id: "numbers",  n: "06", label: "Scale & cost",  act: "how",   sub: "What it costs to run, at every stage of growth." },
+  { id: "breaks",   n: "07", label: "Risks",         act: "how",   sub: "What can fail, and how badly." },
+  { id: "guards",   n: "08", label: "Security",      act: "how",   sub: "The controls that keep it defensible." },
+  { id: "watch",    n: "09", label: "Operations",    act: "how",   sub: "How you know it’s working — and how you ship changes." },
+  { id: "next",     n: "10", label: "Roadmap",       act: "how",   sub: "Phased plan and open questions." },
 ];
+
+const ACT_LABELS: Record<Act, string> = {
+  intro: "Overview",
+  why:   "I · The problem",
+  what:  "II · The design",
+  how:   "III · The operation",
+};
 
 const RISK_PALETTE: Record<Risk["impact"], string> = {
   low:      "bg-[hsl(var(--paper-2))] text-[hsl(var(--ink-2))] border-[hsl(var(--line))]",
@@ -77,7 +87,7 @@ export function ReportCockpit({
   architectureId?: string;
   showDownload?: boolean;
 }) {
-  const [chapter, setChapter] = useState<ChapterId>("design");
+  const [chapter, setChapter] = useState<ChapterId>("story");
   const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
   const [selection, setSelection] = useState<Selection>(null);
   const currentDiagram = arch.diagrams.find((d) => d.id === activeDiagram) ?? arch.diagrams[0];
@@ -90,26 +100,41 @@ export function ReportCockpit({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      {/* ─────────────── Chapter tabs (single header) ─────────────── */}
+      {/* ─────────────── Chapter tabs (3-act narrative) ─────────────── */}
       <div className="h-11 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
         <div className="flex-1 min-w-0 flex items-stretch overflow-x-auto scrollbar-thin">
-          {CHAPTERS.map((c) => {
+          {CHAPTERS.map((c, i) => {
             const active = chapter === c.id;
+            const prevAct = i > 0 ? CHAPTERS[i - 1].act : null;
+            const startsAct = c.act !== prevAct;
             return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setChapter(c.id)}
-                className={cn(
-                  "shrink-0 px-4 flex items-center gap-2 border-b-2 transition-colors text-[12px]",
-                  active
-                    ? "border-[hsl(var(--accent))] text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
-                    : "border-transparent text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
+              <div key={c.id} className="flex items-stretch">
+                {startsAct && i > 0 && (
+                  <span
+                    aria-hidden
+                    className="self-center mx-1.5 h-4 w-px bg-[hsl(var(--line))]"
+                  />
                 )}
-              >
-                <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
-                <span className="font-medium tracking-tight">{c.label}</span>
-              </button>
+                {startsAct && c.act !== "intro" && (
+                  <span className="hidden lg:flex items-center pl-1 pr-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]/70">
+                    {ACT_LABELS[c.act]}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setChapter(c.id)}
+                  title={c.sub}
+                  className={cn(
+                    "shrink-0 px-3.5 flex items-center gap-2 border-b-2 transition-colors text-[12px]",
+                    active
+                      ? "border-[hsl(var(--accent))] text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
+                      : "border-transparent text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
+                  )}
+                >
+                  <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
+                  <span className="font-medium tracking-tight">{c.label}</span>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -125,6 +150,8 @@ export function ReportCockpit({
         {/* Canvas */}
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
           <div className="p-6 md:p-8 lg:p-10">
+            <ChapterIntro chapter={chapter} />
+            {chapter === "story"    && <StoryPanel arch={arch} lead={lead} body={body} onJump={setChapter} />}
             {chapter === "design"   && <SystemDiagram arch={arch} onSelect={setSelection} selectedId={selection?.kind === "component" ? selection.id : null} />}
             {chapter === "diagrams" && (
               <DiagramsPanel
@@ -144,6 +171,7 @@ export function ReportCockpit({
             {chapter === "guards"  && <GuardsPanel arch={arch} onSelect={setSelection} selection={selection} />}
             {chapter === "watch"   && <WatchPanel arch={arch} />}
             {chapter === "next"    && <NextPanel arch={arch} />}
+            <ChapterFooter chapter={chapter} onJump={setChapter} />
           </div>
         </section>
 
@@ -1064,4 +1092,225 @@ function InspectorNode({ label, subLabel, onClear }: { label: string; subLabel?:
       </p>
     </InspectorShell>
   );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Narrative helpers — Story panel, chapter intro & up-next footer
+   ════════════════════════════════════════════════════════════════ */
+
+function chapterByIdOrNull(id: ChapterId) {
+  return CHAPTERS.find((c) => c.id === id) ?? null;
+}
+
+function ChapterIntro({ chapter }: { chapter: ChapterId }) {
+  if (chapter === "story") return null; // StoryPanel has its own hero
+  const c = chapterByIdOrNull(chapter);
+  if (!c) return null;
+  return (
+    <header className="mb-8 flex items-baseline gap-4 border-b border-[hsl(var(--line))] pb-5">
+      <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))] shrink-0">
+        {ACT_LABELS[c.act]} · {c.n}
+      </span>
+      <div className="min-w-0">
+        <h2 className="display text-[clamp(1.35rem,2.2vw,1.9rem)] leading-tight tracking-[-0.025em]">
+          {c.label}
+        </h2>
+        <p className="mt-1.5 text-[13.5px] text-[hsl(var(--ink-2))] max-w-[64ch]">
+          {c.sub}
+        </p>
+      </div>
+    </header>
+  );
+}
+
+function ChapterFooter({ chapter, onJump }: { chapter: ChapterId; onJump: (id: ChapterId) => void }) {
+  const idx = CHAPTERS.findIndex((c) => c.id === chapter);
+  const next = idx >= 0 && idx < CHAPTERS.length - 1 ? CHAPTERS[idx + 1] : null;
+  const prev = idx > 0 ? CHAPTERS[idx - 1] : null;
+  if (!next && !prev) return null;
+  return (
+    <nav className="mt-12 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] sm:grid-cols-2">
+      {prev ? (
+        <button
+          type="button"
+          onClick={() => onJump(prev.id)}
+          className="text-left bg-[hsl(var(--paper))] p-5 transition-colors hover:bg-[hsl(var(--paper-2))]/60 group"
+        >
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">
+            ← Previously
+          </span>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))]">{prev.n}</span>
+            <span className="display text-[16px] tracking-[-0.02em]">{prev.label}</span>
+          </div>
+          <p className="mt-1 text-[12.5px] text-[hsl(var(--ink-2))]">{prev.sub}</p>
+        </button>
+      ) : (
+        <div className="hidden sm:block bg-[hsl(var(--paper))]" />
+      )}
+      {next ? (
+        <button
+          type="button"
+          onClick={() => onJump(next.id)}
+          className="text-left bg-[hsl(var(--paper))] p-5 transition-colors hover:bg-[hsl(var(--paper-2))]/60 group"
+        >
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--accent))]">
+            Up next →
+          </span>
+          <div className="mt-2 flex items-baseline gap-2">
+            <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))]">{next.n}</span>
+            <span className="display text-[16px] tracking-[-0.02em]">{next.label}</span>
+          </div>
+          <p className="mt-1 text-[12.5px] text-[hsl(var(--ink-2))]">{next.sub}</p>
+        </button>
+      ) : (
+        <div className="hidden sm:block bg-[hsl(var(--paper))]" />
+      )}
+    </nav>
+  );
+}
+
+function StoryPanel({
+  arch,
+  lead,
+  body,
+  onJump,
+}: {
+  arch: Architecture;
+  lead: string;
+  body: string;
+  onJump: (id: ChapterId) => void;
+}) {
+  const componentCount = arch.components.length;
+  const diagramCount = arch.diagrams.length;
+  const riskCount = arch.risks.length;
+  const patternCount = arch.applied_patterns.length;
+  const regions = [arch.deployment.primary_region, ...(arch.deployment.additional_regions ?? [])]
+    .filter(Boolean);
+  const tiers = arch.scale_profiles.length;
+  // Pick a representative cost band: the "growth" profile if present, otherwise the second tier.
+  const growth =
+    arch.scale_profiles.find((p) => /growth/i.test(p.tier)) ??
+    arch.scale_profiles[Math.min(1, arch.scale_profiles.length - 1)];
+  const costBand = growth
+    ? `₹${formatINRCompact(growth.monthly_cost_inr_low)}–₹${formatINRCompact(growth.monthly_cost_inr_high)} / mo`
+    : "—";
+
+  const acts: { act: Act; ids: ChapterId[] }[] = [
+    { act: "why",  ids: ["brief"] },
+    { act: "what", ids: ["design", "pieces", "traffic", "diagrams"] },
+    { act: "how",  ids: ["numbers", "breaks", "guards", "watch", "next"] },
+  ];
+
+  return (
+    <div className="flex flex-col gap-10">
+      {/* Hero — title, one-liner, the lead sentence */}
+      <header className="border-b border-[hsl(var(--line))] pb-8">
+        <div className="flex items-baseline gap-3">
+          <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">
+            § Overview · {arch.meta.domain}
+          </span>
+        </div>
+        <h2 className="mt-3 display text-[clamp(1.7rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.03em] max-w-[28ch]">
+          {arch.meta.title}
+        </h2>
+        <p className="mt-3 text-[15px] text-[hsl(var(--ink-2))] max-w-[64ch]">
+          {arch.meta.one_liner}
+        </p>
+        {lead && (
+          <p className="mt-7 serif text-[clamp(1.15rem,1.7vw,1.4rem)] leading-[1.45] text-[hsl(var(--ink))] max-w-[60ch]">
+            {lead}
+          </p>
+        )}
+        {body && (
+          <p className="mt-4 text-[14px] leading-relaxed text-[hsl(var(--ink-2))] max-w-[68ch]">
+            {body}
+          </p>
+        )}
+      </header>
+
+      {/* At-a-glance ticker */}
+      <section>
+        <p className="eyebrow mb-4">At a glance</p>
+        <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+          <StoryStat n={componentCount} k="components" />
+          <StoryStat n={diagramCount}  k="diagrams" />
+          <StoryStat n={patternCount}  k="patterns applied" />
+          <StoryStat n={riskCount}     k="risks scored" />
+          <StoryStat n={tiers}         k="scale tiers" />
+          <StoryStat label={costBand}  k="growth tier cost" />
+        </div>
+        {regions.length > 0 && (
+          <p className="mt-3 text-[12px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
+            Runs in: {regions.join(" · ")} · {arch.deployment.iac} · {arch.deployment.ci_cd}
+          </p>
+        )}
+      </section>
+
+      {/* Reading map — 3 acts */}
+      <section>
+        <p className="eyebrow mb-4">Read in this order</p>
+        <div className="flex flex-col gap-5">
+          {acts.map(({ act, ids }) => (
+            <div key={act} className="grid gap-4 md:grid-cols-[160px_1fr] items-start">
+              <div className="md:pt-1">
+                <p className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">
+                  {ACT_LABELS[act]}
+                </p>
+                <p className="mt-1 text-[12.5px] text-[hsl(var(--ink-2))] max-w-[22ch]">
+                  {act === "why"  && "Start with the problem statement and constraints."}
+                  {act === "what" && "Inspect the shape, the pieces, and how they talk."}
+                  {act === "how"  && "Understand cost, risk, defence, and operations."}
+                </p>
+              </div>
+              <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] sm:grid-cols-2 lg:grid-cols-3">
+                {ids.map((id) => {
+                  const c = chapterByIdOrNull(id);
+                  if (!c) return null;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => onJump(id)}
+                      className="text-left bg-[hsl(var(--paper))] p-4 transition-colors hover:bg-[hsl(var(--paper-2))]/60"
+                    >
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-mono text-[10.5px] tabular-nums text-[hsl(var(--ink-3))]">{c.n}</span>
+                        <span className="display text-[15px] tracking-[-0.02em]">{c.label}</span>
+                        <span className="ms text-[14px] text-[hsl(var(--ink-3))] ml-auto" aria-hidden>arrow_forward</span>
+                      </div>
+                      <p className="mt-1 text-[12.5px] text-[hsl(var(--ink-2))]">{c.sub}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StoryStat({ n, label, k }: { n?: number; label?: string; k: string }) {
+  return (
+    <div className="bg-[hsl(var(--paper))] p-4">
+      <div className="display-tight text-[clamp(1.1rem,1.8vw,1.5rem)] leading-none tracking-[-0.025em] tabular-nums">
+        {label ?? n}
+      </div>
+      <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+        {k}
+      </div>
+    </div>
+  );
+}
+
+function formatINRCompact(paiseOrRupees: number): string {
+  // scale_profiles values are stored as rupees per docs; format with Indian grouping.
+  const n = paiseOrRupees;
+  if (!Number.isFinite(n)) return "—";
+  if (n >= 1_00_00_000) return `${(n / 1_00_00_000).toFixed(1)}Cr`;
+  if (n >= 1_00_000)    return `${(n / 1_00_000).toFixed(1)}L`;
+  if (n >= 1_000)       return `${(n / 1_000).toFixed(0)}K`;
+  return String(Math.round(n));
 }
