@@ -134,11 +134,11 @@ function fitTo(
   totalW: number,
   totalH: number,
   animate = false,
-  maxK = 1.35,
+  maxK = 1.9,
 ) {
   const w = el.clientWidth || 1200;
   const h = el.clientHeight || 800;
-  const PAD = 16;
+  const PAD = 12;
   const k = Math.min((w - PAD * 2) / totalW, (h - PAD * 2) / totalH, maxK);
   const tx = (w - totalW * k) / 2;
   const ty = (h - totalH * k) / 2;
@@ -235,7 +235,7 @@ function FlowCanvas({ graph, className }: { graph: FlowGraph; className?: string
   };
 
   return (
-    <div className={cn("relative overflow-hidden h-[min(64vh,720px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
+    <div className={cn("relative overflow-hidden h-[min(74vh,860px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
       <svg ref={svgRef} className="block w-full h-full select-none">
         {ARROW_DEFS}
         <rect width="100%" height="100%" fill="url(#ed-dot-grid)" opacity="0.5" />
@@ -630,7 +630,7 @@ function SequenceCanvas({ graph, className }: { graph: SequenceGraph; className?
   const zoomBy = (k: number) => svgRef.current && zoomBehavior.current && select(svgRef.current).transition().duration(220).call(zoomBehavior.current.scaleBy, k);
 
   return (
-    <div className={cn("relative overflow-hidden h-[min(64vh,720px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
+    <div className={cn("relative overflow-hidden h-[min(74vh,860px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
       <svg ref={svgRef} className="block w-full h-full select-none">
         {ARROW_DEFS}
         <rect width="100%" height="100%" fill="url(#ed-dot-grid)" opacity="0.5" />
@@ -813,7 +813,7 @@ function ErCanvas({ graph, className }: { graph: ErGraph; className?: string }) 
   const zoomBy = (k: number) => svgRef.current && zoomBehavior.current && select(svgRef.current).transition().duration(220).call(zoomBehavior.current.scaleBy, k);
 
   return (
-    <div className={cn("relative overflow-hidden h-[min(64vh,720px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
+    <div className={cn("relative overflow-hidden h-[min(74vh,860px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]", className)}>
       <svg ref={svgRef} className="block w-full h-full select-none">
         {ARROW_DEFS}
         <rect width="100%" height="100%" fill="url(#ed-dot-grid)" opacity="0.5" />
