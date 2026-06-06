@@ -4,7 +4,7 @@ import { CreditPacksGrid } from "@/components/billing/CreditPacksGrid";
 export const metadata = { title: "Credits" };
 
 const INFO = [
-  { n: "01", title: "Refund on failure", body: "If the agent fails to produce a valid architecture, your credit is automatically refunded." },
+  { n: "01", title: "Refund on failure", body: "If the agent fails to produce a valid architecture, the credits for that run are automatically returned to your balance." },
   { n: "02", title: "Secure payments",   body: "Powered by Razorpay. Cards, UPI, netbanking, wallets — all in INR." },
   { n: "03", title: "Human support",     body: "Email hello@tessar.app for questions about runs or invoices. We reply within a business day." },
 ];
@@ -23,13 +23,14 @@ export default async function PricingPage() {
 
       <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-          Pay per run.<br />
+          ₹49 a design.<br />
           <span className="serif font-normal italic accent">No subscriptions.</span>
         </h1>
         <div className="flex flex-col justify-end gap-6 pb-3">
           <p className="text-[17px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[40ch]">
-            Buy credits. Use them when you have an idea worth designing.
-            Credits never expire. One credit = one architecture report. New accounts start with 3 free designs.
+            One design — a complete architecture report — costs <strong>40 credits</strong>.
+            Buy credits in packs. They never expire. Failed runs auto-refund.
+            New accounts start with <strong>3 free designs</strong>.
           </p>
         </div>
       </section>

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/firebase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { formatDesigns } from "@/lib/credits/display";
 
 /**
  * SideRail — slim editorial sidebar (left side, 72px collapsed → 264px expanded).
@@ -41,8 +42,8 @@ export function AppDrawer({
       try {
         const r = await fetch("/api/credits/balance");
         if (r.ok) {
-          const d = (await r.json()) as { credits: number };
-          setCredits(d.credits);
+          const d = (await r.json()) as { credits: number | null; unlimited?: boolean };
+          setCredits(d.unlimited ? -1 : d.credits ?? 0);
         }
       } catch {}
     }, 15_000);
@@ -120,10 +121,10 @@ export function AppDrawer({
         <Link
           href="/pricing"
           className="flex flex-col items-center gap-0.5 rounded-2xl px-3 py-2 hover:bg-[hsl(var(--paper-2))]"
-          title={`${credits} credits remaining`}
+          title={`${formatDesigns(credits)} designs remaining`}
         >
-          <span className="display text-[20px] tabular-nums">{credits}</span>
-          <span className="text-[9px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">credits</span>
+          <span className="display text-[20px] tabular-nums">{formatDesigns(credits)}</span>
+          <span className="text-[9px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">designs</span>
         </Link>
 
         {/* Account */}

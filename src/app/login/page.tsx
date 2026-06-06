@@ -38,7 +38,7 @@ export default async function LoginPage({
               <span className="serif font-normal italic accent">Start designing.</span>
             </h1>
             <p className="mt-6 text-[16px] leading-relaxed text-[hsl(var(--ink-2))] max-w-[40ch]">
-              Your first architecture run is on the house. No credit card.
+              Your first three architecture runs are on the house. No credit card.
               Bring a system, leave with a report.
             </p>
 

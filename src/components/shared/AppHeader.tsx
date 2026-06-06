@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
+import { getUserRunCount } from "@/lib/architectures/stats";
 import { HeaderAuth } from "@/components/auth/HeaderAuth";
 import { TessarLogo } from "@/components/shared/TessarLogo";
 import type { ProfileChipUser } from "@/components/auth/ProfileChip";
@@ -11,10 +12,15 @@ import type { ProfileChipUser } from "@/components/auth/ProfileChip";
  *  - Logo flush to the left edge, profile flush to the right edge.
  *  - No max-width container; the bar spans the whole viewport so
  *    the brand mark anchors the page corner.
+ *  - The "Sample" nav link is suppressed once the user has at least
+ *    one architecture run of their own — the marketing aid stops
+ *    being useful at that point.
  */
 export async function AppHeader() {
   const user = await getSessionUser();
-  const credits = user ? await getBalance(user.uid) : undefined;
+  const [credits, runCount] = user
+    ? await Promise.all([getBalance(user.uid), getUserRunCount(user.uid)])
+    : [undefined, 0];
 
   const profileUser: ProfileChipUser | null = user
     ? {
@@ -23,6 +29,8 @@ export async function AppHeader() {
         photoURL: user.photoURL ?? null,
       }
     : null;
+
+  const showSample = !user || runCount === 0;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]/85 backdrop-blur supports-[backdrop-filter]:bg-[hsl(var(--paper))]/70">
@@ -33,7 +41,7 @@ export async function AppHeader() {
 
         <nav className="hidden md:flex items-center gap-1">
           <HeaderLink href="/studio" label="Studio" />
-          <HeaderLink href="/sample" label="Sample" />
+          {showSample && <HeaderLink href="/sample" label="Sample" />}
           <HeaderLink href="/pricing" label="Pricing" />
         </nav>
 

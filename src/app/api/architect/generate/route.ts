@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     modelVersion: process.env.VERTEX_MODEL || "gemini-2.5-pro",
     progress: {
       phase: "analyzing",
-      message: "Queued — connecting to Gemini on Vertex AI",
+      message: "Queued — starting the architect",
       tokens: 0,
       updatedAt: now,
     },
@@ -105,7 +105,7 @@ async function runWorker({
   }
 
   let phase = "analyzing";
-  let message = "Connecting to Gemini 2.5 Pro on Vertex AI";
+  let message = "Connecting to the architect";
   let tokens = 0;
 
   try {

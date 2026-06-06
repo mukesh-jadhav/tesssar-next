@@ -71,7 +71,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
         currency: data.currency,
         order_id: data.orderId,
         name: "Tessar",
-        description: `${pack.name} — ${pack.credits} architecture ${pack.credits === 1 ? "run" : "runs"}`,
+        description: `${pack.name} — ${pack.designs} ${pack.designs === 1 ? "design" : "designs"}`,
         prefill: { name: data.user.name, email: data.user.email },
         theme: { color: "#E04F1E" },
         modal: { ondismiss: () => setLoadingPackId(null) },
@@ -83,7 +83,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
               body: JSON.stringify({ ...resp, txId: data.txId }),
             });
             if (!verifyRes.ok) throw new Error(await verifyRes.text());
-            toast.success(`Added ${pack.credits} ${pack.credits === 1 ? "credit" : "credits"} to your account.`);
+            toast.success(`Added ${pack.designs} ${pack.designs === 1 ? "design" : "designs"} to your account.`);
             router.push("/dashboard");
             router.refresh();
           } catch (err) {
@@ -155,7 +155,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
                 popular ? "text-[hsl(var(--paper))]/65" : "text-[hsl(var(--ink-3))]",
               )}
             >
-              {pack.credits} {pack.credits === 1 ? "design" : "designs"} · {formatINR(pack.perRunPaise)} each
+              {pack.designs} {pack.designs === 1 ? "design" : "designs"} · {formatINR(pack.perDesignPaise)} each
             </div>
 
             <p

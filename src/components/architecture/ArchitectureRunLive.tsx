@@ -73,7 +73,7 @@ export function ArchitectureRunLive({ initial }: { initial: ArchitectureDoc }) {
 
   const phase = d.progress?.phase ?? "analyzing";
   const message =
-    d.progress?.message ?? "Connecting to Gemini 2.5 Pro on Vertex AI…";
+    d.progress?.message ?? "Connecting to the architect…";
   const tokens = d.progress?.tokens ?? 0;
   const phaseIndex = PHASE_ORDER.indexOf(
     phase as (typeof PHASE_ORDER)[number],

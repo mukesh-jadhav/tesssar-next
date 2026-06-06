@@ -37,7 +37,7 @@ export default async function HomePage() {
           <p className="m3-page-enter mt-10 max-w-[58ch] text-[18px] leading-[1.55] text-[hsl(var(--ink-2))]">
             Describe a system in one paragraph. Get a production-ready cloud architecture in four
             minutes — components, diagrams, scale tiers, costs in INR, risks, security model, and
-            the patterns that justify every choice. Powered by Gemini 2.5 Pro on Vertex AI.
+            the patterns that justify every choice.
           </p>
 
           <div className="m3-page-enter mt-12 flex flex-wrap items-center gap-4">
@@ -126,7 +126,7 @@ export default async function HomePage() {
             <Step
               n="02"
               title="Tessar designs"
-              body="Gemini 2.5 Pro reads the brief and produces the full report: components, diagrams, three cost tiers, risks, security, patterns."
+              body="The architect reads your brief and produces the full report: components, diagrams, three cost tiers, risks, security, patterns."
             />
             <Step
               n="03"
@@ -193,7 +193,7 @@ export default async function HomePage() {
             <Feature
               icon="cloud_done"
               title="GCP-native"
-              body="Designed for Google Cloud out of the box — Vertex AI, Cloud Run, Firestore, BigQuery, Spanner."
+              body="Designed for Google Cloud out of the box — Cloud Run, Firestore, BigQuery, Spanner, Pub/Sub."
             />
           </div>
         </div>

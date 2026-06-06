@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
 import { signInWithGoogle } from "@/lib/firebase/client";
+import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
+import { formatDesigns } from "@/lib/credits/display";
 
 /**
  * HomeCockpit — single-screen home for the workspace.
@@ -33,16 +35,20 @@ export function HomeCockpit({
   signedIn,
   credits,
   user,
+  runCount = 0,
 }: {
   signedIn: boolean;
   credits?: number;
   user?: ProfileChipUser | null;
+  runCount?: number;
 }) {
   const router = useRouter();
   const [brief, setBrief] = useState("");
   const [busy, setBusy] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const tooShort = brief.trim().length < 30;
+  const showSample = !signedIn || runCount === 0;
 
   async function handleSubmit() {
     if (tooShort) {
@@ -89,7 +95,7 @@ export function HomeCockpit({
 
           <p className="mt-5 text-[15px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[58ch]">
             Plain English in. Production cloud architecture out — diagrams, components,
-            cost tiers, risks, security model. Powered by Gemini on Vertex AI.
+            cost tiers, risks, security model. Ready to share in minutes.
           </p>
 
           {/* Composer */}
@@ -118,10 +124,19 @@ export function HomeCockpit({
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-[hsl(var(--line))]">
               <span className="text-[11.5px] text-[hsl(var(--ink-3))]">
                 {signedIn
-                  ? "1 credit · refunded on failure"
+                  ? "₹49 per design · refunded automatically on failure"
                   : "3 free designs to start — we'll sign you in with Google"}
               </span>
               <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setGuidedOpen(true)}
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))] transition-colors"
+                  title="Build the brief with guided questions"
+                >
+                  <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
+                  Build my brief
+                </button>
                 <kbd className="hidden md:inline-flex items-center rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2 py-1 text-[10.5px] font-mono text-[hsl(var(--ink-3))]">
                   ⌘↵
                 </kbd>
@@ -152,13 +167,23 @@ export function HomeCockpit({
             </div>
           </div>
 
+          {/* Mobile guided-brief button */}
+          <button
+            type="button"
+            onClick={() => setGuidedOpen(true)}
+            className="mt-4 md:hidden inline-flex items-center gap-1.5 self-start rounded-full border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))]"
+          >
+            <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
+            Build my brief with guided questions
+          </button>
+
           {/* Spacer pushes nothing — page never scrolls */}
           <div className="mt-auto pt-8 flex items-baseline gap-5 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
             <span>Vol 01 · Issue 05</span>
             <span className="opacity-50">·</span>
             <span>Bengaluru · IST</span>
             <span className="opacity-50">·</span>
-            <span>Powered by Gemini on Vertex AI</span>
+            <span>Designed in minutes · refunded on failure</span>
           </div>
         </div>
       </section>
@@ -199,32 +224,34 @@ export function HomeCockpit({
               </ul>
             </div>
 
-            {/* Sample shortcut */}
-            <div className="border-t border-[hsl(var(--line))] pt-5">
-              <span className="section-num text-[10.5px]">§ See it built</span>
-              <h3 className="mt-4 display text-[18px] tracking-[-0.02em]">
-                A complete report for an imaginary product.
-              </h3>
-              <p className="mt-2 text-[12.5px] leading-relaxed text-[hsl(var(--ink-2))]">
-                ScribeStack — a notion-meets-google-docs collaborative writing
-                platform. Fully designed, exactly what you&rsquo;d get.
-              </p>
-              <Link
-                href="/sample"
-                className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--accent))] hover:underline"
-              >
-                Open the sample
-                <span className="ms text-[16px]" aria-hidden>arrow_forward</span>
-              </Link>
-            </div>
+            {/* Sample shortcut — hidden after the user has their own work */}
+            {showSample && (
+              <div className="border-t border-[hsl(var(--line))] pt-5">
+                <span className="section-num text-[10.5px]">§ See it built</span>
+                <h3 className="mt-4 display text-[18px] tracking-[-0.02em]">
+                  A complete report for an imaginary product.
+                </h3>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-[hsl(var(--ink-2))]">
+                  ScribeStack — a notion-meets-google-docs collaborative writing
+                  platform. Fully designed, exactly what you&rsquo;d get.
+                </p>
+                <Link
+                  href="/sample"
+                  className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-medium text-[hsl(var(--accent))] hover:underline"
+                >
+                  Open the sample
+                  <span className="ms text-[16px]" aria-hidden>arrow_forward</span>
+                </Link>
+              </div>
+            )}
 
             {/* Credits / account hint */}
             {signedIn && typeof credits === "number" && (
               <div className="border-t border-[hsl(var(--line))] pt-5">
                 <span className="section-num text-[10.5px]">§ Balance</span>
                 <div className="mt-3 flex items-baseline gap-2">
-                  <span className="display-tight text-[40px] leading-none tabular-nums">{credits}</span>
-                  <span className="eyebrow">credits</span>
+                  <span className="display-tight text-[40px] leading-none tabular-nums">{formatDesigns(credits)}</span>
+                  <span className="eyebrow">designs</span>
                 </div>
                 <Link
                   href="/pricing"
@@ -238,6 +265,16 @@ export function HomeCockpit({
           </div>
         </div>
       </aside>
+
+      <GuidedBriefDialog
+        open={guidedOpen}
+        onClose={() => setGuidedOpen(false)}
+        onCompose={(composed) => {
+          setBrief(composed);
+          setGuidedOpen(false);
+          requestAnimationFrame(() => textareaRef.current?.focus());
+        }}
+      />
     </div>
   );
 }

@@ -1,39 +1,50 @@
+/**
+ * One full architecture run consumes a fixed number of credits.
+ * Credits are the lowest-level accounting unit; the user always
+ * thinks in "designs" (one design = RUN_COST_CREDITS credits).
+ */
+export const RUN_COST_CREDITS = 40;
+
 export interface CreditPack {
   id: "single" | "trio" | "deca";
   name: string;
-  credits: number;
+  credits: number; // raw credits granted (designs * RUN_COST_CREDITS)
+  designs: number; // how many designs this pack buys
   pricePaise: number; // INR paise
   badge?: string;
   description: string;
-  perRunPaise: number;
+  perDesignPaise: number; // displayed unit price
 }
 
 export const CREDIT_PACKS: CreditPack[] = [
   {
     id: "single",
-    name: "Solo Run",
-    credits: 1,
-    pricePaise: 49_900, // ₹499
-    perRunPaise: 49_900,
+    name: "Solo",
+    designs: 1,
+    credits: 1 * RUN_COST_CREDITS,
+    pricePaise: 4_900, // ₹49
+    perDesignPaise: 4_900,
     description: "One full architecture. Perfect to validate a single idea.",
   },
   {
     id: "trio",
     name: "Trio",
-    credits: 3,
-    pricePaise: 1_29_900, // ₹1,299
-    perRunPaise: 43_300,
+    designs: 3,
+    credits: 3 * RUN_COST_CREDITS,
+    pricePaise: 12_900, // ₹129
+    perDesignPaise: 4_300,
     badge: "Most popular",
-    description: "Three runs. Iterate on the brief or compare alternatives.",
+    description: "Three designs. Iterate on the brief or compare alternatives.",
   },
   {
     id: "deca",
     name: "Deca",
-    credits: 10,
-    pricePaise: 3_99_900, // ₹3,999
-    perRunPaise: 39_990,
+    designs: 10,
+    credits: 10 * RUN_COST_CREDITS,
+    pricePaise: 39_900, // ₹399
+    perDesignPaise: 3_990,
     badge: "Best value",
-    description: "Ten runs. Built for serial founders and consulting shops.",
+    description: "Ten designs. Built for serial founders and consulting shops.",
   },
 ];
 

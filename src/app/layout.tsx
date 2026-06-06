@@ -51,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Tessar — AI Cloud Architect",
     description:
-      "Production-grade cloud architectures, designed by an AI principal architect. Powered by Gemini on Vertex AI.",
+      "Production-grade cloud architectures, designed by an AI principal architect in minutes. Three designs free for new accounts.",
     type: "website",
   },
   twitter: { card: "summary_large_image", title: "Tessar — AI Cloud Architect" },

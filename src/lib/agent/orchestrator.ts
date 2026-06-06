@@ -47,7 +47,7 @@ export async function* runArchitect(brief: string): AsyncGenerator<ProgressEvent
   let tokens = 0;
   const seenPhases = new Set<ArchitectPhase>();
 
-  yield { type: "phase", phase: "analyzing", message: "Connecting to Gemini 2.5 Pro on Vertex AI" };
+  yield { type: "phase", phase: "analyzing", message: "Connecting to the architect" };
 
   try {
     for await (const chunk of result.stream) {

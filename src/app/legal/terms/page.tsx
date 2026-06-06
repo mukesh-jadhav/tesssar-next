@@ -6,7 +6,7 @@ export default function TermsPage() {
       <h1>Terms of Service</h1>
       <p>By using Tessar you agree to these terms. Tessar generates architecture suggestions for informational purposes; you remain responsible for engineering decisions you ship.</p>
       <h2>Credits</h2>
-      <p>Credits are non-refundable except when the agent fails to produce a valid architecture (automatic refund). Credits do not expire.</p>
+      <p>Credits are non-refundable except when the agent fails to produce a valid architecture (in which case the credits for that run are automatically returned). Credits do not expire.</p>
       <h2>Acceptable Use</h2>
       <p>Don't use the service to generate content that violates Indian law or another party's rights.</p>
       <h2>Limitation of Liability</h2>

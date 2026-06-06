@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
+import { canAffordRun } from "@/lib/credits/display";
 
 const EXAMPLES = [
   {
@@ -36,6 +38,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
   const router = useRouter();
   const [brief, setBrief] = useState(seed ?? "");
   const [submitting, setSubmitting] = useState(false);
+  const [guidedOpen, setGuidedOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
       toast.error("Add at least a sentence or two so the architect can work.");
       return;
     }
-    if (credits < 1) {
+    if (!canAffordRun(credits)) {
       toast.error("You're out of credits. Top up to continue.");
       router.push("/pricing");
       return;
@@ -109,9 +112,18 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
 
         <div className="flex items-center justify-between gap-3 pt-4 border-t border-[hsl(var(--line))]">
           <span className="text-[12px] text-[hsl(var(--ink-3))]">
-            1 credit · refunded on failure
+            ₹49 per design · refunded automatically on failure
           </span>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setGuidedOpen(true)}
+              className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))] transition-colors"
+              title="Build the brief with guided questions"
+            >
+              <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
+              Build my brief
+            </button>
             <kbd className="hidden md:inline-flex items-center rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2 py-1 text-[11px] font-mono text-[hsl(var(--ink-3))]">
               ⌘↵
             </kbd>
@@ -169,6 +181,16 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
           ))}
         </ul>
       </div>
+
+      <GuidedBriefDialog
+        open={guidedOpen}
+        onClose={() => setGuidedOpen(false)}
+        onCompose={(composed) => {
+          setBrief(composed);
+          setGuidedOpen(false);
+          requestAnimationFrame(() => textareaRef.current?.focus());
+        }}
+      />
     </div>
   );
 }

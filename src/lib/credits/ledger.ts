@@ -1,31 +1,40 @@
 import "server-only";
 
 import { adminDb } from "@/lib/firebase/admin";
+import { isAdminEmail } from "@/lib/firebase/admins";
 import type { LedgerEntry, UserDoc } from "@/types/architecture";
+import { RUN_COST_CREDITS } from "@/lib/razorpay/packs";
+import { UNLIMITED_CREDITS } from "@/lib/credits/display";
 import { FieldValue } from "firebase-admin/firestore";
 
 /**
- * Atomically deduct one credit. Returns the new balance.
- * Throws if user has no credits.
+ * Atomically deduct credits for one architecture run. Returns the
+ * new balance. Throws `InsufficientCreditsError` if the user can't
+ * cover the cost.
+ *
+ * Admins are billed nothing and don't write to the ledger; their
+ * balance is reported as `Number.POSITIVE_INFINITY` to the UI.
  */
 export async function consumeCredit(
   uid: string,
   reason: string,
   refId?: string,
+  amount: number = RUN_COST_CREDITS,
 ): Promise<number> {
   const userRef = adminDb.collection("users").doc(uid);
   const balanceAfter = await adminDb.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
     if (!snap.exists) throw new Error("User not found");
     const user = snap.data() as UserDoc;
-    if (user.credits < 1) throw new InsufficientCreditsError();
-    const newBalance = user.credits - 1;
+    if (isAdminEmail(user.email)) return UNLIMITED_CREDITS;
+    if (user.credits < amount) throw new InsufficientCreditsError();
+    const newBalance = user.credits - amount;
     tx.update(userRef, { credits: newBalance });
     const ledgerRef = adminDb.collection("ledger").doc();
     tx.set(ledgerRef, {
       uid,
       type: "consume",
-      delta: -1,
+      delta: -amount,
       balanceAfter: newBalance,
       reason,
       refId,
@@ -36,20 +45,26 @@ export async function consumeCredit(
   return balanceAfter;
 }
 
-/** Refund a previously consumed credit (e.g. on agent failure). */
-export async function refundCredit(uid: string, reason: string, refId?: string): Promise<number> {
+/** Refund a previously consumed run (e.g. on agent failure). */
+export async function refundCredit(
+  uid: string,
+  reason: string,
+  refId?: string,
+  amount: number = RUN_COST_CREDITS,
+): Promise<number> {
   const userRef = adminDb.collection("users").doc(uid);
   return adminDb.runTransaction(async (tx) => {
     const snap = await tx.get(userRef);
     if (!snap.exists) throw new Error("User not found");
     const user = snap.data() as UserDoc;
-    const newBalance = user.credits + 1;
+    if (isAdminEmail(user.email)) return UNLIMITED_CREDITS;
+    const newBalance = user.credits + amount;
     tx.update(userRef, { credits: newBalance });
     const ledgerRef = adminDb.collection("ledger").doc();
     tx.set(ledgerRef, {
       uid,
       type: "refund",
-      delta: 1,
+      delta: amount,
       balanceAfter: newBalance,
       reason,
       refId,
@@ -101,7 +116,9 @@ export class InsufficientCreditsError extends Error {
 export async function getBalance(uid: string): Promise<number> {
   const snap = await adminDb.collection("users").doc(uid).get();
   if (!snap.exists) return 0;
-  return (snap.data() as UserDoc).credits ?? 0;
+  const user = snap.data() as UserDoc;
+  if (isAdminEmail(user.email)) return UNLIMITED_CREDITS;
+  return user.credits ?? 0;
 }
 
 // Silence unused import warning for FieldValue (kept for future atomic ops)

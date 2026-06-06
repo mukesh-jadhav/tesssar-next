@@ -5,6 +5,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { formatDate, truncate } from "@/lib/utils";
 import { getBalance } from "@/lib/credits/ledger";
+import { formatDesigns, canAffordRun, isUnlimited } from "@/lib/credits/display";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 const SUGGESTIONS = [
@@ -16,9 +17,9 @@ const SUGGESTIONS = [
   },
   {
     n: "02",
-    label: "Add a Gemini-powered AI chat feature",
+    label: "Add an AI chat copilot to my app",
     seed:
-      "I want to add a Gemini-powered AI chat feature to my existing app. 50k DAU, low latency, conversation memory. What's the right architecture on Vertex AI?",
+      "I want to add an AI chat copilot to my existing app. 50k DAU, low latency, conversation memory, retrieval over the user's documents. What's the right architecture on Google Cloud?",
   },
   {
     n: "03",
@@ -85,9 +86,11 @@ export default async function DashboardPage() {
               New design
               <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
             </Link>
-            <Link href="/sample" className="btn-pill-ghost btn-pill-lg">
-              See a sample
-            </Link>
+            {totalRuns === 0 && (
+              <Link href="/sample" className="btn-pill-ghost btn-pill-lg">
+                See a sample
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -95,12 +98,18 @@ export default async function DashboardPage() {
       {/* Stats row */}
       <section className="mt-20 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
         <StatCell
-          k="Credits"
-          v={String(credits)}
-          sub={credits === 0 ? "Out of credits" : "Available"}
-          href={credits === 0 ? "/pricing" : "/new"}
-          cta={credits === 0 ? "Top up →" : "Use one →"}
-          accent={credits === 0}
+          k="Designs"
+          v={formatDesigns(credits)}
+          sub={
+            isUnlimited(credits)
+              ? "Admin — unlimited"
+              : canAffordRun(credits)
+                ? "Remaining"
+                : "Out of credits"
+          }
+          href={canAffordRun(credits) ? "/new" : "/pricing"}
+          cta={canAffordRun(credits) ? "Use one →" : "Top up →"}
+          accent={!canAffordRun(credits)}
         />
         <StatCell
           k="Designs"

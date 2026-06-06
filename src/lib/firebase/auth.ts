@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { adminAuth, SESSION_COOKIE_NAME } from "./admin";
 import type { UserDoc } from "@/types/architecture";
 import { adminDb } from "./admin";
+import { isAdminEmail } from "./admins";
+import { RUN_COST_CREDITS } from "@/lib/razorpay/packs";
 
 export async function getSessionUser(): Promise<{
   uid: string;
@@ -33,12 +35,7 @@ export async function requireUser() {
 }
 
 export async function isAdmin(email: string | null | undefined): Promise<boolean> {
-  if (!email) return false;
-  const list = (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  return list.includes(email.toLowerCase());
+  return isAdminEmail(email);
 }
 
 export async function getOrCreateUserDoc(args: {
@@ -52,7 +49,8 @@ export async function getOrCreateUserDoc(args: {
   const now = Date.now();
 
   if (!snap.exists) {
-    const WELCOME_CREDITS = 3;
+    const WELCOME_DESIGNS = 3;
+    const WELCOME_CREDITS = WELCOME_DESIGNS * RUN_COST_CREDITS;
     const newUser: UserDoc = {
       uid: args.uid,
       email: args.email,
@@ -72,7 +70,7 @@ export async function getOrCreateUserDoc(args: {
       type: "grant",
       delta: WELCOME_CREDITS,
       balanceAfter: WELCOME_CREDITS,
-      reason: `Welcome — ${WELCOME_CREDITS} free designs to start`,
+      reason: `Welcome — ${WELCOME_DESIGNS} free designs to start`,
       createdAt: now,
     });
 

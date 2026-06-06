@@ -43,7 +43,7 @@ export default async function NewArchitecturePage({
             patterns that solve them.
           </p>
           <p className="text-[13px] text-[hsl(var(--ink-3))]">
-            One credit per run · about four minutes · cancel any time.
+            ₹49 per design · about four minutes · cancel any time.
           </p>
         </div>
       </section>
