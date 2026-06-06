@@ -5,7 +5,6 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/architecture/MermaidDiagram";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
-import { SystemBlueprint } from "@/components/architecture/SystemBlueprint";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
 import type { Architecture, Risk } from "@/types/architecture";
 
@@ -17,21 +16,20 @@ import type { Architecture, Risk } from "@/types/architecture";
  */
 
 type ChapterId =
-  | "design" | "map" | "diagrams" | "brief" | "pieces" | "traffic" | "numbers"
+  | "design" | "diagrams" | "brief" | "pieces" | "traffic" | "numbers"
   | "breaks" | "guards" | "watch" | "next";
 
 const CHAPTERS: { id: ChapterId; n: string; label: string }[] = [
   { id: "design",   n: "01", label: "Design"   },
-  { id: "map",      n: "02", label: "Map"      },
-  { id: "diagrams", n: "03", label: "Diagrams" },
-  { id: "brief",    n: "04", label: "Brief"    },
-  { id: "pieces",   n: "05", label: "Pieces"   },
-  { id: "traffic",  n: "06", label: "Traffic"  },
-  { id: "numbers",  n: "07", label: "Numbers"  },
-  { id: "breaks",   n: "08", label: "Risks"    },
-  { id: "guards",   n: "09", label: "Guards"   },
-  { id: "watch",    n: "10", label: "Watch"    },
-  { id: "next",     n: "11", label: "Next"     },
+  { id: "diagrams", n: "02", label: "Diagrams" },
+  { id: "brief",    n: "03", label: "Brief"    },
+  { id: "pieces",   n: "04", label: "Pieces"   },
+  { id: "traffic",  n: "05", label: "Traffic"  },
+  { id: "numbers",  n: "06", label: "Numbers"  },
+  { id: "breaks",   n: "07", label: "Risks"    },
+  { id: "guards",   n: "08", label: "Guards"   },
+  { id: "watch",    n: "09", label: "Watch"    },
+  { id: "next",     n: "10", label: "Next"     },
 ];
 
 const RISK_PALETTE: Record<Risk["impact"], string> = {
@@ -104,7 +102,6 @@ export function ReportCockpit({
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
           <div className="p-6 md:p-8 lg:p-10">
             {chapter === "design"   && <SystemDiagram arch={arch} />}
-            {chapter === "map"      && <SystemBlueprint arch={arch} />}
             {chapter === "diagrams" && (
               <DiagramsPanel
                 diagrams={arch.diagrams}
@@ -223,7 +220,7 @@ function DiagramsPanel({
               {current.description}
             </p>
           </div>
-          <div className="card-paper overflow-hidden p-4 md:p-6">
+          <div className="overflow-hidden p-4 md:p-6 bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]">
             <MermaidDiagram chart={current.mermaid} />
           </div>
         </>

@@ -46,6 +46,51 @@ const CAT_ICON: Record<Cat, string> = {
   integration: "extension",
 };
 
+// Tech-logo resolver. Returns a Simple Icons slug if we recognise the
+// technology string; the caller renders it as <image href="https://cdn.simpleicons.org/{slug}/{color}">.
+// Order matters — more specific keywords first.
+const TECH_LOGO_RULES: { match: RegExp; slug: string }[] = [
+  { match: /next\.?js|next 1\d/i,            slug: "nextdotjs" },
+  { match: /\breact\b/i,                     slug: "react" },
+  { match: /tiptap/i,                        slug: "tiptap" },
+  { match: /\byjs\b/i,                       slug: "yjs" },
+  { match: /fastify/i,                       slug: "fastify" },
+  { match: /express\b/i,                     slug: "express" },
+  { match: /\bnode(\.| )?js|node 1\d|node 2\d/i, slug: "nodedotjs" },
+  { match: /firebase|identity platform/i,    slug: "firebase" },
+  { match: /\bgke\b|kubernetes/i,            slug: "kubernetes" },
+  { match: /redis|memorystore/i,             slug: "redis" },
+  { match: /razorpay/i,                      slug: "razorpay" },
+  { match: /postgres/i,                      slug: "postgresql" },
+  { match: /mysql/i,                         slug: "mysql" },
+  { match: /mongo/i,                         slug: "mongodb" },
+  { match: /elastic(search)?/i,              slug: "elasticsearch" },
+  { match: /kafka/i,                         slug: "apachekafka" },
+  { match: /rabbit/i,                        slug: "rabbitmq" },
+  { match: /docker/i,                        slug: "docker" },
+  { match: /terraform/i,                     slug: "terraform" },
+  { match: /grafana/i,                       slug: "grafana" },
+  { match: /prometheus/i,                    slug: "prometheus" },
+  { match: /datadog/i,                       slug: "datadog" },
+  { match: /sentry/i,                        slug: "sentry" },
+  { match: /stripe/i,                        slug: "stripe" },
+  { match: /openai/i,                        slug: "openai" },
+  { match: /anthropic|claude/i,              slug: "anthropic" },
+  { match: /vertex|gemini|bigquery|pub\/?sub|cloud (run|cdn|storage|tasks|monitoring|trace|logging|armor|load balancer)|\bgcs\b|firestore|google cloud/i, slug: "googlecloud" },
+  { match: /\baws\b|amazon web/i,            slug: "amazonwebservices" },
+  { match: /azure|microsoft/i,               slug: "microsoftazure" },
+  { match: /cloudflare/i,                    slug: "cloudflare" },
+  { match: /vercel/i,                        slug: "vercel" },
+  { match: /supabase/i,                      slug: "supabase" },
+];
+
+function techLogo(tech: string): string | null {
+  for (const r of TECH_LOGO_RULES) if (r.match.test(tech)) return r.slug;
+  return null;
+}
+// Ink color (no hash) — Simple Icons CDN accepts hex/CSS-color name in path.
+const LOGO_INK = "1A1C22";
+
 // --- Layout constants -------------------------------------------------------
 const NODE_W = 220;
 const NODE_H = 84;
@@ -238,7 +283,7 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
   const compById = new Map(placed.map((p) => [p.id, p.comp]));
 
   return (
-    <div className="relative card-paper overflow-hidden h-[min(72vh,820px)]">
+    <div className="relative overflow-hidden h-[min(72vh,820px)] bg-[hsl(var(--card))] border border-[hsl(var(--line))] rounded-[2px]">
       <svg ref={svgRef} className="block w-full h-full select-none">
         <defs>
           <pattern id="dot-grid" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
@@ -332,6 +377,7 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
           {/* Nodes */}
           {placed.map((n, i) => {
             const isHot = hovered === n.id;
+            const slug = techLogo(`${n.comp.name} ${n.comp.technology}`);
             return (
               <g
                 key={n.id}
@@ -352,15 +398,27 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                 <text x={14} y={20} className="ed-stamp" fill="hsl(var(--ink) / 0.45)">
                   {String(i + 1).padStart(2, "0")}
                 </text>
-                <text
-                  x={n.w - 14}
-                  y={24}
-                  className="ed-icon"
-                  textAnchor="end"
-                  fill={isHot ? "hsl(var(--ink))" : "hsl(var(--ink) / 0.5)"}
-                >
-                  {CAT_ICON[n.comp.category]}
-                </text>
+                {slug ? (
+                  <image
+                    href={`https://cdn.simpleicons.org/${slug}/${LOGO_INK}`}
+                    x={n.w - 32}
+                    y={10}
+                    width={20}
+                    height={20}
+                    opacity={isHot ? 1 : 0.85}
+                    preserveAspectRatio="xMidYMid meet"
+                  />
+                ) : (
+                  <text
+                    x={n.w - 14}
+                    y={24}
+                    className="ed-icon"
+                    textAnchor="end"
+                    fill={isHot ? "hsl(var(--ink))" : "hsl(var(--ink) / 0.5)"}
+                  >
+                    {CAT_ICON[n.comp.category]}
+                  </text>
+                )}
                 <text x={14} y={46} className="ed-title" fill="hsl(var(--ink))">
                   {trim(n.comp.name, 24)}
                 </text>

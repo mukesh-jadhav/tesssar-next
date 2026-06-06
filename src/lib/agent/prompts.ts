@@ -150,7 +150,7 @@ type Architecture = {
 
 # DIAGRAM AUTHORING RULES
 - Use Mermaid 11.x syntax. Do NOT wrap in triple backticks inside the JSON string.
-- For C4 diagrams, use \`flowchart TD\` with grouped subgraphs (Mermaid's c4 syntax is unstable; prefer flowchart with semantic naming). Style external systems with \`classDef external fill:#1e293b,stroke:#64748b,color:#fff\` etc.
+- For C4 diagrams, use \`flowchart TD\` with grouped subgraphs (Mermaid's c4 syntax is unstable; prefer flowchart with semantic naming). Do NOT add \`classDef\` colors — the editorial theme handles styling, custom colors will be stripped at render.
 - For sequence diagrams, use \`sequenceDiagram\` with participant aliases, \`Note over X: ...\` for important context, and \`alt/else\` for error paths.
 - For ER diagrams, use \`erDiagram\` with \`||--o{\` relationships and PK/FK indicators.
 - Every diagram MUST have a unique \`id\` (kebab-case) and a meaningful \`title\`.

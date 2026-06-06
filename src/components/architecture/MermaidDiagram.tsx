@@ -5,20 +5,77 @@ import { cn } from "@/lib/utils";
 
 let mermaidInitialized = false;
 
+// Tech-logo resolver (Simple Icons slug from free-form node text).
+// Order matters — more specific keywords first.
+const MERMAID_LOGO_RULES: { match: RegExp; slug: string }[] = [
+  { match: /next\.?js|next 1\d/i,            slug: "nextdotjs" },
+  { match: /\breact\b/i,                     slug: "react" },
+  { match: /tiptap/i,                        slug: "tiptap" },
+  { match: /\byjs\b/i,                       slug: "yjs" },
+  { match: /fastify/i,                       slug: "fastify" },
+  { match: /express\b/i,                     slug: "express" },
+  { match: /\bnode(\.| )?js|node 1\d|node 2\d/i, slug: "nodedotjs" },
+  { match: /firebase|identity platform/i,    slug: "firebase" },
+  { match: /\bgke\b|kubernetes/i,            slug: "kubernetes" },
+  { match: /redis|memorystore/i,             slug: "redis" },
+  { match: /razorpay/i,                      slug: "razorpay" },
+  { match: /postgres/i,                      slug: "postgresql" },
+  { match: /mysql/i,                         slug: "mysql" },
+  { match: /mongo/i,                         slug: "mongodb" },
+  { match: /elastic(search)?/i,              slug: "elasticsearch" },
+  { match: /kafka/i,                         slug: "apachekafka" },
+  { match: /rabbit/i,                        slug: "rabbitmq" },
+  { match: /docker/i,                        slug: "docker" },
+  { match: /terraform/i,                     slug: "terraform" },
+  { match: /grafana/i,                       slug: "grafana" },
+  { match: /prometheus/i,                    slug: "prometheus" },
+  { match: /datadog/i,                       slug: "datadog" },
+  { match: /sentry/i,                        slug: "sentry" },
+  { match: /stripe/i,                        slug: "stripe" },
+  { match: /openai/i,                        slug: "openai" },
+  { match: /anthropic|claude/i,              slug: "anthropic" },
+  { match: /vertex|gemini|bigquery|pub\/?sub|cloud (run|cdn|storage|tasks|monitoring|trace|logging|armor|load balancer)|\bgcs\b|firestore|google cloud/i, slug: "googlecloud" },
+  { match: /\baws\b|amazon web/i,            slug: "amazonwebservices" },
+  { match: /azure|microsoft/i,               slug: "microsoftazure" },
+  { match: /cloudflare/i,                    slug: "cloudflare" },
+  { match: /vercel/i,                        slug: "vercel" },
+  { match: /supabase/i,                      slug: "supabase" },
+];
+
+function mermaidTechLogo(text: string): string | null {
+  for (const r of MERMAID_LOGO_RULES) if (r.match.test(text)) return r.slug;
+  return null;
+}
+
+// Strip any `classDef ...` lines from a Mermaid chart so charts authored
+// elsewhere (sample data, AI output) can't force their own colors and
+// override the editorial theme. `class X foo` lines are kept; they just
+// become no-ops without their classDef.
+function stripClassDefs(chart: string): string {
+  return chart
+    .split("\n")
+    .filter((line) => !/^\s*classDef\b/i.test(line))
+    .join("\n");
+}
+
 // Editorial palette injected into mermaid SVG (paper / ink / vermillion).
 // We use literal fallback fonts (not CSS vars) so mermaid measures glyph
 // widths against the same font it renders with — otherwise labels clip.
 const MERMAID_FONT = "Manrope, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+// Border colour: ink @ 18% over paper, flattened so mermaid kinds that
+// render inline strokes (sequence / C4) match SystemDiagram's lighter feel.
+const INK_18 = "#D1CEC7";
+const INK_10 = "#E2E0D9";
 const THEME = {
   primaryColor: "#FAF6EC",        // paper
   primaryTextColor: "#16181D",    // ink
-  primaryBorderColor: "#1A1C22",  // ink
+  primaryBorderColor: INK_18,
   lineColor: "#16181D",           // ink
-  secondaryColor: "#F2EBD8",      // paper-2
+  secondaryColor: "#FAF6EC",
   tertiaryColor: "#FAF6EC",
   background: "transparent",
-  clusterBkg: "#F2EBD8",
-  clusterBorder: "#1A1C22",
+  clusterBkg: "#FAF6EC",
+  clusterBorder: INK_10,
   edgeLabelBackground: "#FAF6EC",
   fontSize: "13px",
   fontFamily: MERMAID_FONT,
@@ -26,18 +83,18 @@ const THEME = {
   personBkg: "#FAF6EC",
   person_bg: "#FAF6EC",
   c4_person_bg: "#FAF6EC",
-  c4_person_border: "#1A1C22",
-  c4_external_person_bg: "#F2EBD8",
-  c4_external_person_border: "#1A1C22",
-  c4_system_bg: "#1A1C22",
-  c4_system_border: "#1A1C22",
+  c4_person_border: INK_18,
+  c4_external_person_bg: "#FAF6EC",
+  c4_external_person_border: INK_18,
+  c4_system_bg: "#FAF6EC",
+  c4_system_border: INK_18,
   c4_external_system_bg: "#FAF6EC",
-  c4_external_system_border: "#1A1C22",
+  c4_external_system_border: INK_18,
   c4_container_bg: "#FAF6EC",
-  c4_container_border: "#1A1C22",
-  c4_external_container_bg: "#F2EBD8",
+  c4_container_border: INK_18,
+  c4_external_container_bg: "#FAF6EC",
   c4_component_bg: "#FAF6EC",
-  c4_external_component_bg: "#F2EBD8",
+  c4_external_component_bg: "#FAF6EC",
 };
 
 export function MermaidDiagram({ chart, className }: { chart: string; className?: string }) {
@@ -66,7 +123,7 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
           });
           mermaidInitialized = true;
         }
-        const { svg: rendered } = await mermaid.render(`m_${id}`, chart);
+        const { svg: rendered } = await mermaid.render(`m_${id}`, stripClassDefs(chart));
         if (!cancelled) setSvg(rendered);
       } catch (e) {
         if (!cancelled) setErr((e as Error).message || "Failed to render");
@@ -91,9 +148,41 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
     if (!svgEl) return;
 
     // Reduced motion: don't add dots.
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-    const created: SVGGElement[] = [];
+    const created: SVGElement[] = [];
+
+    // ── Tech logos: tag each node with a Simple Icons brand mark at top-right ──
+    const nodes = Array.from(svgEl.querySelectorAll<SVGGElement>("g.node, g.actor, g.classGroup"));
+    nodes.forEach((node) => {
+      const label = (node.textContent || "").trim();
+      if (!label) return;
+      const slug = mermaidTechLogo(label);
+      if (!slug) return;
+      let bbox: DOMRect;
+      try { bbox = node.getBBox(); } catch { return; }
+      if (!bbox.width || !bbox.height) return;
+      const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+      const size = 18;
+      img.setAttributeNS("http://www.w3.org/1999/xlink", "href", `https://cdn.simpleicons.org/${slug}/1A1C22`);
+      img.setAttribute("href", `https://cdn.simpleicons.org/${slug}/1A1C22`);
+      img.setAttribute("x", String(bbox.x + bbox.width - size - 8));
+      img.setAttribute("y", String(bbox.y + 6));
+      img.setAttribute("width", String(size));
+      img.setAttribute("height", String(size));
+      img.setAttribute("opacity", "0.85");
+      img.setAttribute("data-tech-logo", "true");
+      img.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      node.appendChild(img);
+      created.push(img);
+    });
+
+    if (reduced) {
+      return () => {
+        created.forEach((g) => { try { g.parentNode?.removeChild(g); } catch { /* ignore */ } });
+      };
+    }
+
     const edges = Array.from(
       svgEl.querySelectorAll<SVGPathElement>(
         "path.flowchart-link, .edgePath path.path, g.edgePaths path, path.relation, path.messageLine0, path.messageLine1",
