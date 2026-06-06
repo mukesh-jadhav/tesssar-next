@@ -37,12 +37,12 @@ steps:
       - --region=${_REGION}
       - --platform=managed
       - --allow-unauthenticated
-      - --cpu=1
-      - --memory=1Gi
-      - --min-instances=0
+      - --cpu=2
+      - --memory=2Gi
+      - --min-instances=1
       - --max-instances=20
-      - --concurrency=80
-      - --timeout=300
+      - --concurrency=20
+      - --timeout=900
       - --port=8080
       - --service-account=tessar-runtime@$PROJECT_ID.iam.gserviceaccount.com
       - --set-env-vars=GCP_PROJECT_ID=$PROJECT_ID,GCP_LOCATION=${_VERTEX_LOCATION},VERTEX_MODEL=${_VERTEX_MODEL},NEXT_PUBLIC_APP_URL=${_APP_URL},FIREBASE_ADMIN_PROJECT_ID=$PROJECT_ID

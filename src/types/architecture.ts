@@ -288,6 +288,13 @@ export interface ArchitectureDoc {
   completedAt?: number;
   durationMs?: number;
   modelVersion: string;
+  /** Latest progress snapshot, written incrementally by the background worker. */
+  progress?: {
+    phase: string;
+    message: string;
+    tokens: number;
+    updatedAt: number;
+  };
 }
 
 export interface TransactionDoc {
