@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
@@ -8,7 +9,8 @@ import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 export const metadata = { title: "Library" };
 
 export default async function HistoryPage() {
-  const user = (await getSessionUser())!;
+  const user = await getSessionUser();
+  if (!user) redirect("/login?next=/history");
   const snap = await adminDb
     .collection("architectures")
     .where("uid", "==", user.uid)

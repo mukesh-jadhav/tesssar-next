@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
@@ -34,7 +35,8 @@ const SUGGESTIONS = [
 ];
 
 export default async function DashboardPage() {
-  const user = (await getSessionUser())!;
+  const user = await getSessionUser();
+  if (!user) redirect("/login?next=/dashboard");
   const credits = await getBalance(user.uid);
 
   const recentSnap = await adminDb

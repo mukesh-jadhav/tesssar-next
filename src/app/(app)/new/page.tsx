@@ -2,6 +2,7 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
 import { NewArchitectureForm } from "@/components/architecture/NewArchitectureForm";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "New design" };
 
@@ -10,7 +11,8 @@ export default async function NewArchitecturePage({
 }: {
   searchParams: { seed?: string; prompt?: string };
 }) {
-  const user = (await getSessionUser())!;
+  const user = await getSessionUser();
+  if (!user) redirect("/login?next=/new");
   const credits = await getBalance(user.uid);
   const firstName =
     (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";

@@ -9,7 +9,8 @@ export default async function ArchitectureResultPage({
 }: {
   params: { id: string };
 }) {
-  const user = (await getSessionUser())!;
+  const user = await getSessionUser();
+  if (!user) redirect("/login?next=/architecture/" + params.id);
   const snap = await adminDb.collection("architectures").doc(params.id).get();
   if (!snap.exists) notFound();
   const initial = snap.data() as ArchitectureDoc;
