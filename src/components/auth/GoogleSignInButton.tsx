@@ -3,23 +3,23 @@
 import { useState } from "react";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export function GoogleSignInButton({ next = "/studio" }: { next?: string }) {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleClick() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      toast.success("Signed in. Welcome to Tessar.");
-      router.push(next);
-      router.refresh();
+      // Hard nav — guarantees the next page renders with the fresh
+      // __tessar_session cookie. router.push + router.refresh races
+      // against the RSC cache in production and intermittently serves
+      // the stale signed-out render.
+      window.location.href = next;
     } catch (err) {
-      toast.error((err as Error).message || "Sign-in failed");
-    } finally {
+      const msg = (err as Error).message || "Sign-in failed";
+      if (!/popup-closed|cancelled/i.test(msg)) toast.error(msg);
       setLoading(false);
     }
   }
