@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 import { RouteProgress } from "@/components/shared/RouteProgress";
+import { AppHeader } from "@/components/shared/AppHeader";
 
 // Display — modern editorial sans with SOFT axis (rounded corners) and
 // variable width. The personality typeface of the whole product.
@@ -69,9 +70,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen flex flex-col antialiased">
         <RouteProgress />
-        {children}
+        <AppHeader />
+        <div className="flex-1 min-h-0 flex flex-col">
+          {children}
+        </div>
         <CommandMenu />
         <Toaster richColors position="top-right" />
       </body>

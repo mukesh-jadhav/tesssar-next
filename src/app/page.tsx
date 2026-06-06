@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
-import { LandingTopBar } from "@/components/landing/LandingTopBar";
 
 export const metadata = {
   title: "Tessar — Cloud architecture, in four minutes",
@@ -12,10 +11,8 @@ export default async function HomePage() {
 
   return (
     <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
-      <LandingTopBar signedIn={signedIn} />
-
       {/* HERO */}
-      <section className="relative px-6 pt-40 pb-24 md:px-12 md:pt-48 md:pb-32">
+      <section className="relative px-6 pt-20 pb-24 md:px-12 md:pt-28 md:pb-32">
         <div className="mx-auto max-w-[1280px]">
           <p className="section-num m3-page-enter">§ Volume 01 · Cloud architecture, in four minutes</p>
 

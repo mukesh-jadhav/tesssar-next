@@ -25,8 +25,8 @@ export function WorkspaceShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grain h-full w-full bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
-      <main className="h-full w-full min-w-0 min-h-0 flex flex-col bg-[hsl(var(--paper-2))]">
+    <div className="grain shell-locked flex-1 min-h-0 w-full flex flex-col bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
+      <main className="flex-1 min-h-0 w-full min-w-0 flex flex-col bg-[hsl(var(--paper-2))]">
         {children}
       </main>
     </div>

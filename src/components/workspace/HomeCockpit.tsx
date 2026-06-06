@@ -59,24 +59,6 @@ export function HomeCockpit({
 
   return (
     <div className="relative flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_360px]">
-      {/* Profile chip — fixed top-right of viewport */}
-      {signedIn && user && (
-        <div className="absolute right-5 top-5 z-30">
-          <ProfileChip user={user} credits={credits} />
-        </div>
-      )}
-      {!signedIn && (
-        <div className="absolute right-5 top-5 z-30">
-          <Link
-            href="/login"
-            className="btn-pill btn-pill-sm"
-          >
-            Sign in
-            <span className="ms text-[16px]" aria-hidden>arrow_outward</span>
-          </Link>
-        </div>
-      )}
-
       {/* Canvas */}
       <section className="min-h-0 overflow-auto scrollbar-thin">
         <div className="h-full flex flex-col p-8 md:p-12 lg:p-14 xl:p-16">
