@@ -59,11 +59,24 @@ export async function signInWithGoogle(): Promise<User> {
   provider.setCustomParameters({ prompt: "select_account" });
   const result = await signInWithPopup(auth, provider);
   const idToken = await result.user.getIdToken();
-  await fetch("/api/auth/session", {
+  const res = await fetch("/api/auth/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
+    credentials: "same-origin",
   });
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const body = (await res.json()) as { error?: string; detail?: string; code?: string };
+      detail = `${body.error ?? "Sign-in failed"}${body.code ? ` (${body.code})` : ""}${body.detail ? `: ${body.detail}` : ""}`;
+    } catch {
+      /* leave HTTP status */
+    }
+    // Sign out the client SDK too so we don't end up in a half-signed state.
+    try { await fbSignOut(auth); } catch { /* ignore */ }
+    throw new Error(detail);
+  }
   return result.user;
 }
 
