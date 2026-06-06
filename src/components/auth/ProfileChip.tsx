@@ -128,10 +128,18 @@ export function ProfileChip({
           )}
 
           <ul className="py-1.5 text-[13px]">
-            <MenuLink href="/dashboard" icon="dashboard" label="Dashboard" onClick={() => setOpen(false)} />
-            <MenuLink href="/history" icon="history" label="History" onClick={() => setOpen(false)} />
-            <MenuLink href="/pricing" icon="payments" label="Pricing & credits" onClick={() => setOpen(false)} />
+            <MenuLink href="/new"       icon="add_circle" label="New design"  onClick={() => setOpen(false)} accent />
+            <MenuLink href="/studio"    icon="workspaces" label="Studio"      onClick={() => setOpen(false)} />
+            <MenuLink href="/history"   icon="history"    label="Past runs"   onClick={() => setOpen(false)} />
+            <MenuLink href="/dashboard" icon="dashboard"  label="Dashboard"   onClick={() => setOpen(false)} />
           </ul>
+
+          <div className="border-t border-[hsl(var(--line))] py-1.5">
+            <ul className="text-[13px]">
+              <MenuLink href="/pricing" icon="payments"   label="Buy credits"        onClick={() => setOpen(false)} />
+              <MenuLink href="/dashboard#billing" icon="receipt_long" label="Billing & invoices" onClick={() => setOpen(false)} />
+            </ul>
+          </div>
 
           <div className="border-t border-[hsl(var(--line))] py-1.5">
             <button
@@ -158,21 +166,36 @@ function MenuLink({
   icon,
   label,
   onClick,
+  accent,
 }: {
   href: string;
   icon: string;
   label: string;
   onClick: () => void;
+  accent?: boolean;
 }) {
   return (
     <li>
       <Link
         href={href}
         onClick={onClick}
-        className="flex items-center gap-2.5 px-4 py-2.5 text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-2))] hover:text-[hsl(var(--ink))] transition-colors"
+        className={
+          accent
+            ? "flex items-center gap-2.5 px-4 py-2.5 text-[hsl(var(--ink))] font-medium hover:bg-[hsl(var(--paper-2))] transition-colors"
+            : "flex items-center gap-2.5 px-4 py-2.5 text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-2))] hover:text-[hsl(var(--ink))] transition-colors"
+        }
         role="menuitem"
       >
-        <span className="ms text-[18px] text-[hsl(var(--ink-3))]" aria-hidden>{icon}</span>
+        <span
+          className={
+            accent
+              ? "ms text-[18px] text-[hsl(var(--accent))]"
+              : "ms text-[18px] text-[hsl(var(--ink-3))]"
+          }
+          aria-hidden
+        >
+          {icon}
+        </span>
         {label}
       </Link>
     </li>

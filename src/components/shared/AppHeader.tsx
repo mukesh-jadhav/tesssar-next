@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
-import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
+import { HeaderAuth } from "@/components/auth/HeaderAuth";
+import type { ProfileChipUser } from "@/components/auth/ProfileChip";
 
 /**
  * AppHeader — app-wide top bar.
@@ -13,7 +14,6 @@ import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip
 export async function AppHeader() {
   const user = await getSessionUser();
   const credits = user ? await getBalance(user.uid) : undefined;
-  const signedIn = !!user;
 
   const profileUser: ProfileChipUser | null = user
     ? {
@@ -40,14 +40,7 @@ export async function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {signedIn && profileUser ? (
-            <ProfileChip user={profileUser} credits={credits} />
-          ) : (
-            <Link href="/login" className="btn-pill btn-pill-sm">
-              Sign in
-              <span className="ms text-[16px]" aria-hidden>arrow_outward</span>
-            </Link>
-          )}
+          <HeaderAuth user={profileUser} credits={credits} />
         </div>
       </div>
     </header>
