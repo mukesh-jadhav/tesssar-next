@@ -56,7 +56,7 @@ export function LandingTopBar({ signedIn }: { signedIn: boolean }) {
 
           <div className="flex items-center gap-2">
             <Link
-              href={signedIn ? "/dashboard" : "/login"}
+              href={signedIn ? "/studio" : "/login"}
               className="btn-pill btn-pill-sm hidden md:inline-flex"
             >
               {signedIn ? "Open studio" : "Sign in"}
@@ -87,7 +87,7 @@ export function LandingTopBar({ signedIn }: { signedIn: boolean }) {
                 </Link>
               ))}
               <Link
-                href={signedIn ? "/dashboard" : "/login"}
+                href={signedIn ? "/studio" : "/login"}
                 onClick={() => setOpen(false)}
                 className="btn-pill mt-3"
               >

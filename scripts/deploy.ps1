@@ -15,27 +15,26 @@
 param(
   [Parameter(Mandatory = $true)] [string] $ProjectId,
   [string] $Region = "asia-south1",
-  [string] $AppUrl = ""
+  [string] $AppUrl = "https://tessar.dev"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 
 function Step($msg) { Write-Host ("`n>> " + $msg) -ForegroundColor Cyan }
 function Ok($msg)   { Write-Host ("  [ok] " + $msg) -ForegroundColor Green }
 
+# PS 5.1 treats native-command stderr under ErrorActionPreference=Stop as fatal,
+# even with 2>$null. Use Probe for existence checks.
+function Probe {
+  param([scriptblock] $Block)
+  $prev = $ErrorActionPreference
+  $ErrorActionPreference = "SilentlyContinue"
+  try { & $Block } catch { $null } finally { $ErrorActionPreference = $prev }
+}
+
 Step "Selecting project $ProjectId"
 gcloud config set project $ProjectId | Out-Null
-
-if (-not $AppUrl) {
-  $existing = (gcloud run services describe tessar --region $Region --project $ProjectId --format="value(status.url)" 2>$null)
-  if ($existing) {
-    $AppUrl = $existing
-    Ok "Using existing service URL $AppUrl"
-  } else {
-    $AppUrl = "https://placeholder.invalid"
-    Ok "No existing service. Using $AppUrl for now - re-run with -AppUrl after first deploy."
-  }
-}
+Ok "App URL = $AppUrl"
 
 Step "Submitting build to Cloud Build"
 gcloud builds submit `
@@ -43,18 +42,21 @@ gcloud builds submit `
   --substitutions "_REGION=$Region,_APP_URL=$AppUrl" `
   --project $ProjectId
 
-Step "Resolving deployed URL"
-$url = (gcloud run services describe tessar --region $Region --project $ProjectId --format="value(status.url)")
-Ok "Deployed: $url"
+if ($LASTEXITCODE -ne 0) {
+  Write-Host "`nBuild failed. See log link above." -ForegroundColor Red
+  exit $LASTEXITCODE
+}
 
-if ($AppUrl -ne $url -and $AppUrl -eq "https://placeholder.invalid") {
-  Write-Host "`nRe-running with the real URL so NEXT_PUBLIC_APP_URL is correct..." -ForegroundColor Yellow
-  gcloud builds submit `
-    --config cloudbuild.yaml `
-    --substitutions "_REGION=$Region,_APP_URL=$url" `
-    --project $ProjectId
-  Ok "Final URL: $url"
+Step "Resolving deployed URL"
+$url = Probe { gcloud run services describe tessar --region $Region --project $ProjectId --format="value(status.url)" 2>$null }
+if ($url) {
+  Ok "Cloud Run URL: $url"
+  if ($AppUrl -ne $url) {
+    Write-Host ""
+    Write-Host "NOTE: Your build inlined NEXT_PUBLIC_APP_URL=$AppUrl (from .env.production)." -ForegroundColor Yellow
+    Write-Host "      Cloud Run is serving from $url." -ForegroundColor Yellow
+    Write-Host "      Map $AppUrl to this service: Cloud Run console -> Manage Custom Domains." -ForegroundColor Yellow
+  }
 }
 
 Write-Host "`nDone." -ForegroundColor Green
-Write-Host ("  Open: " + $url) -ForegroundColor Cyan

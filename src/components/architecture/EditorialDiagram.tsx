@@ -393,7 +393,7 @@ function FlowCanvas({ graph, cfg, className, onSelect }: { graph: FlowGraph; cfg
                 </text>
                 {splitRest(n.label) && (
                   <text x={n.w / 2} y={n.h / 2 + 22} textAnchor="middle" className="ed-tech" fill="hsl(var(--ink) / 0.55)">
-                    {trim(splitRest(n.label), 30)}
+                    {trim(splitRest(n.label) ?? "", 30)}
                   </text>
                 )}
               </g>

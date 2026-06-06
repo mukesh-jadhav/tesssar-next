@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function GoogleSignInButton({ next = "/dashboard" }: { next?: string }) {
+export function GoogleSignInButton({ next = "/studio" }: { next?: string }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 

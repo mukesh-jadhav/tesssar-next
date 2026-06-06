@@ -1,0 +1,2 @@
+# Placeholder so Docker COPY ./public works. Static assets (favicon, robots.txt,
+# images served from /) go in this directory.

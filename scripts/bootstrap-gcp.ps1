@@ -25,13 +25,23 @@ param(
   [string] $EnvFile = "./.env.local"
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $ProgressPreference = "SilentlyContinue"
 
 function Step($msg) { Write-Host ("`n>> " + $msg) -ForegroundColor Cyan }
 function Ok($msg)   { Write-Host ("  [ok] " + $msg) -ForegroundColor Green }
 function Skip2($msg){ Write-Host ("  [..] " + $msg) -ForegroundColor DarkGray }
 function Warn($msg) { Write-Host ("  [!!] " + $msg) -ForegroundColor Yellow }
+
+# PS 5.1 treats native-command stderr under ErrorActionPreference=Stop as a
+# fatal NativeCommandError, even with 2>$null. Wrap existence probes so they
+# return $null cleanly when the resource doesn't exist.
+function Probe {
+  param([scriptblock] $Block)
+  $prev = $ErrorActionPreference
+  $ErrorActionPreference = "SilentlyContinue"
+  try { & $Block } catch { $null } finally { $ErrorActionPreference = $prev }
+}
 
 # 0. checks
 Step "Checking gcloud auth"
@@ -63,7 +73,7 @@ Ok ("Enabled: " + ($apis -join ", "))
 
 # 2. artifact registry
 Step "Creating Artifact Registry repo tessar in $Region"
-$repoExists = (gcloud artifacts repositories describe tessar --location $Region --project $ProjectId --format="value(name)" 2>$null)
+$repoExists = Probe { gcloud artifacts repositories describe tessar --location $Region --project $ProjectId --format="value(name)" 2>$null }
 if ($repoExists) { Skip2 "Repo already exists" }
 else {
   gcloud artifacts repositories create tessar `
@@ -77,7 +87,7 @@ else {
 # 3. runtime SA
 $runtimeSa = "tessar-runtime@$ProjectId.iam.gserviceaccount.com"
 Step "Creating runtime service account $runtimeSa"
-$saExists = (gcloud iam service-accounts describe $runtimeSa --project $ProjectId --format="value(email)" 2>$null)
+$saExists = Probe { gcloud iam service-accounts describe $runtimeSa --project $ProjectId --format="value(email)" 2>$null }
 if ($saExists) { Skip2 "Service account already exists" }
 else {
   gcloud iam service-accounts create tessar-runtime `
@@ -112,33 +122,44 @@ gcloud iam service-accounts add-iam-policy-binding $runtimeSa `
 Ok "Runtime SA can self-impersonate (for session cookies)"
 
 # 4. cloud build SA grants
+# Note: since April 2024, new projects use the Compute Engine default SA
+# (PROJECT_NUMBER-compute@developer.gserviceaccount.com) as the default builder,
+# NOT the legacy PROJECT_NUMBER@cloudbuild.gserviceaccount.com. Grant both so
+# either path works.
 $cloudBuildSa = "$projectNumber@cloudbuild.gserviceaccount.com"
-Step "Granting Cloud Build SA permissions"
+$computeSa    = "$projectNumber-compute@developer.gserviceaccount.com"
+Step "Granting build service accounts permissions"
 $cbRoles = @(
   "roles/run.admin",
   "roles/iam.serviceAccountUser",
   "roles/artifactregistry.writer",
-  "roles/secretmanager.admin"
+  "roles/secretmanager.admin",
+  "roles/storage.objectViewer",
+  "roles/logging.logWriter"
 )
-foreach ($r in $cbRoles) {
-  gcloud projects add-iam-policy-binding $ProjectId `
-    --member "serviceAccount:$cloudBuildSa" `
-    --role $r `
-    --condition=None `
-    --quiet | Out-Null
-  Ok "Bound $r to Cloud Build SA"
+foreach ($sa in @($cloudBuildSa, $computeSa)) {
+  foreach ($r in $cbRoles) {
+    gcloud projects add-iam-policy-binding $ProjectId `
+      --member "serviceAccount:$sa" `
+      --role $r `
+      --condition=None `
+      --quiet | Out-Null
+  }
+  Ok "Granted 6 roles to $sa"
 }
 
-gcloud iam service-accounts add-iam-policy-binding $runtimeSa `
-  --member "serviceAccount:$cloudBuildSa" `
-  --role roles/iam.serviceAccountUser `
-  --project $ProjectId `
-  --quiet | Out-Null
-Ok "Cloud Build can impersonate runtime SA"
+foreach ($sa in @($cloudBuildSa, $computeSa)) {
+  gcloud iam service-accounts add-iam-policy-binding $runtimeSa `
+    --member "serviceAccount:$sa" `
+    --role roles/iam.serviceAccountUser `
+    --project $ProjectId `
+    --quiet | Out-Null
+}
+Ok "Build SAs can impersonate runtime SA"
 
 # 5. firestore
 Step "Ensuring Firestore (Native) database in $FirestoreLocation"
-$dbExists = (gcloud firestore databases describe --database="(default)" --project $ProjectId --format="value(name)" 2>$null)
+$dbExists = Probe { gcloud firestore databases describe --database="(default)" --project $ProjectId --format="value(name)" 2>$null }
 if ($dbExists) { Skip2 "Database already exists" }
 else {
   gcloud firestore databases create `
@@ -209,7 +230,7 @@ foreach ($k in $secretMap.Keys) {
 Step "Creating / updating Secret Manager secrets"
 foreach ($secret in $secretValues.Keys) {
   $value = $secretValues[$secret]
-  $exists = (gcloud secrets describe $secret --project $ProjectId --format="value(name)" 2>$null)
+  $exists = Probe { gcloud secrets describe $secret --project $ProjectId --format="value(name)" 2>$null }
   if (-not $exists) {
     gcloud secrets create $secret --replication-policy=automatic --project $ProjectId | Out-Null
   }

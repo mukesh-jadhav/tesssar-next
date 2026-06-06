@@ -11,7 +11,7 @@ export default async function LoginPage({
   searchParams: { next?: string };
 }) {
   const user = await getSessionUser();
-  if (user) redirect(searchParams.next || "/dashboard");
+  if (user) redirect(searchParams.next || "/studio");
 
   return (
     <div className="grain relative min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
@@ -43,7 +43,7 @@ export default async function LoginPage({
             </p>
 
             <div className="mt-12">
-              <GoogleSignInButton next={searchParams.next || "/dashboard"} />
+              <GoogleSignInButton next={searchParams.next || "/studio"} />
             </div>
 
             <p className="mt-8 text-[13px] text-[hsl(var(--ink-3))]">
