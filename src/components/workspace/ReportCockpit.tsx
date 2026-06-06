@@ -5,6 +5,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/architecture/MermaidDiagram";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
+import { SystemBlueprint } from "@/components/architecture/SystemBlueprint";
 import type { Architecture, Risk } from "@/types/architecture";
 
 /**
@@ -15,19 +16,20 @@ import type { Architecture, Risk } from "@/types/architecture";
  */
 
 type ChapterId =
-  | "design" | "brief" | "pieces" | "traffic" | "numbers"
+  | "design" | "diagrams" | "brief" | "pieces" | "traffic" | "numbers"
   | "breaks" | "guards" | "watch" | "next";
 
 const CHAPTERS: { id: ChapterId; n: string; label: string }[] = [
-  { id: "design",  n: "01", label: "Design"   },
-  { id: "brief",   n: "02", label: "Brief"    },
-  { id: "pieces",  n: "03", label: "Pieces"   },
-  { id: "traffic", n: "04", label: "Traffic"  },
-  { id: "numbers", n: "05", label: "Numbers"  },
-  { id: "breaks",  n: "06", label: "Risks"    },
-  { id: "guards",  n: "07", label: "Guards"   },
-  { id: "watch",   n: "08", label: "Watch"    },
-  { id: "next",    n: "09", label: "Next"     },
+  { id: "design",   n: "01", label: "Design"   },
+  { id: "diagrams", n: "02", label: "Diagrams" },
+  { id: "brief",    n: "03", label: "Brief"    },
+  { id: "pieces",   n: "04", label: "Pieces"   },
+  { id: "traffic",  n: "05", label: "Traffic"  },
+  { id: "numbers",  n: "06", label: "Numbers"  },
+  { id: "breaks",   n: "07", label: "Risks"    },
+  { id: "guards",   n: "08", label: "Guards"   },
+  { id: "watch",    n: "09", label: "Watch"    },
+  { id: "next",     n: "10", label: "Next"     },
 ];
 
 const RISK_PALETTE: Record<Risk["impact"], string> = {
@@ -111,8 +113,9 @@ export function ReportCockpit({
         {/* Canvas */}
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
           <div className="p-6 md:p-8 lg:p-10">
-            {chapter === "design"  && (
-              <DesignPanel
+            {chapter === "design"   && <SystemBlueprint arch={arch} />}
+            {chapter === "diagrams" && (
+              <DiagramsPanel
                 diagrams={arch.diagrams}
                 active={activeDiagram}
                 onActive={setActiveDiagram}
@@ -181,7 +184,7 @@ export function ReportCockpit({
    Chapter panels
    ════════════════════════════════════════════════════════════════ */
 
-function DesignPanel({
+function DiagramsPanel({
   diagrams,
   active,
   onActive,
@@ -194,6 +197,18 @@ function DesignPanel({
 }) {
   return (
     <div className="flex flex-col gap-5">
+      <header className="flex items-end justify-between gap-6 border-b border-[hsl(var(--line))] pb-4">
+        <div className="min-w-0">
+          <div className="section-num text-[10.5px] mb-1">§ Diagrams</div>
+          <h3 className="display text-[clamp(1.25rem,1.8vw,1.55rem)] tracking-[-0.02em]">
+            The same system, six lenses.
+          </h3>
+        </div>
+        <span className="hidden md:inline font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+          {diagrams.length} views
+        </span>
+      </header>
+
       {diagrams.length > 1 && (
         <div className="flex flex-wrap gap-1.5">
           {diagrams.map((d) => (
@@ -210,9 +225,9 @@ function DesignPanel({
       {current && (
         <>
           <div>
-            <h3 className="display text-[clamp(1.3rem,2vw,1.7rem)] leading-tight tracking-[-0.02em]">
+            <h4 className="display text-[clamp(1.15rem,1.6vw,1.45rem)] leading-tight tracking-[-0.02em]">
               {current.title}
-            </h3>
+            </h4>
             <p className="mt-2 max-w-[64ch] text-[13.5px] leading-relaxed text-[hsl(var(--ink-2))]">
               {current.description}
             </p>

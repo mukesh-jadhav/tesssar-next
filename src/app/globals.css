@@ -348,6 +348,30 @@
   }
   @keyframes indet { 0% { transform: translateX(-50%); } 100% { transform: translateX(200%); } }
 
+  /* Blueprint — continuous vermillion data-flow rail (vertical).
+     Used on the System Blueprint primary-path timeline. */
+  .blueprint-flow-rail {
+    width: 2px;
+    background-image: repeating-linear-gradient(
+      180deg,
+      hsl(var(--accent)) 0 5px,
+      transparent 5px 14px
+    );
+    animation: blueprint-flow 1.6s linear infinite;
+    opacity: 0.85;
+  }
+  @keyframes blueprint-flow { from { background-position: 0 0; } to { background-position: 0 14px; } }
+
+  /* Blueprint — graph-paper background tile. */
+  .blueprint-grid {
+    background-image:
+      linear-gradient(hsl(var(--line)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--line)) 1px, transparent 1px),
+      radial-gradient(hsl(var(--line-2)) 1px, transparent 1px);
+    background-size: 96px 96px, 96px 96px, 24px 24px;
+    background-position: 0 0, 0 0, 0 0;
+  }
+
   /* Kill legacy ornaments */
   .m3-mesh, .m3-shape-a, .m3-shape-b, .m3-blob { display: none !important; }
 
