@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { select } from "d3-selection";
 import { zoom, zoomIdentity, type ZoomBehavior } from "d3-zoom";
+import dagre from "@dagrejs/dagre";
 import { cn } from "@/lib/utils";
 import {
   parseMermaid,
@@ -24,10 +25,57 @@ import {
  *  - flow      → flowchart / c4-context / c4-container / deployment / data-flow
  *  - sequence  → sequenceDiagram
  *  - er        → erDiagram
+ *
+ * Flow diagrams use dagre for auto-layout: ranks are assigned by edge
+ * direction, edges are routed with anti-collision, and edge labels
+ * reserve their own space in the layout so they never sit on top of a
+ * node. Per-node sizes are computed from label length so titles never
+ * overflow their card. Spacing can be overridden via the `layout` prop
+ * for projects that want denser or roomier diagrams.
  */
 
-export function EditorialDiagram({ chart, className }: { chart: string; className?: string }) {
+export type FlowLayoutConfig = {
+  /** Gap between sibling nodes on the same rank (px). */
+  nodeSep: number;
+  /** Gap between ranks — controls how much room edges + labels get (px). */
+  rankSep: number;
+  /** Gap between parallel edges (px). */
+  edgeSep: number;
+  /** Outer margin around the whole graph (px). */
+  marginX: number;
+  marginY: number;
+  /** Min node width / height — cards never shrink below these (px). */
+  minNodeW: number;
+  minNodeH: number;
+  /** Per-side internal padding of a node card (px). */
+  paddingX: number;
+  paddingY: number;
+};
+
+const FLOW_LAYOUT_DEFAULTS: FlowLayoutConfig = {
+  nodeSep: 72,
+  rankSep: 132,
+  edgeSep: 28,
+  marginX: 48,
+  marginY: 48,
+  minNodeW: 196,
+  minNodeH: 92,
+  paddingX: 28,
+  paddingY: 14,
+};
+
+export function EditorialDiagram({
+  chart,
+  className,
+  layout,
+}: {
+  chart: string;
+  className?: string;
+  /** Optional override of layout knobs — lets a project tune spacing. */
+  layout?: Partial<FlowLayoutConfig>;
+}) {
   const graph = useMemo(() => parseMermaid(stripClassDefs(chart)), [chart]);
+  const cfg: FlowLayoutConfig = { ...FLOW_LAYOUT_DEFAULTS, ...layout };
 
   if (graph.kind === "unknown") {
     return (
@@ -37,7 +85,7 @@ export function EditorialDiagram({ chart, className }: { chart: string; classNam
       </div>
     );
   }
-  if (graph.kind === "flow") return <FlowCanvas graph={graph} className={className} />;
+  if (graph.kind === "flow") return <FlowCanvas graph={graph} cfg={cfg} className={className} />;
   if (graph.kind === "sequence") return <SequenceCanvas graph={graph} className={className} />;
   return <ErCanvas graph={graph} className={className} />;
 }
@@ -197,20 +245,13 @@ const ARROW_DEFS = (
 
 /* ════════════════════════ FLOW ════════════════════════ */
 
-const F_NODE_W = 200;
-const F_NODE_H = 78;
-const F_GROUP_PAD = 22;
-const F_GROUP_HEADER = 44;
-const F_NODE_GAP = 18;
-const F_PAD = 36;
-
-function FlowCanvas({ graph, className }: { graph: FlowGraph; className?: string }) {
+function FlowCanvas({ graph, cfg, className }: { graph: FlowGraph; cfg: FlowLayoutConfig; className?: string }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
   const zoomBehavior = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
-  const layout = useMemo(() => layoutFlow(graph), [graph]);
+  const layout = useMemo(() => layoutFlow(graph, cfg), [graph, cfg]);
 
   useEffect(() => {
     if (!svgRef.current || !gRef.current) return;
@@ -240,7 +281,7 @@ function FlowCanvas({ graph, className }: { graph: FlowGraph; className?: string
         {ARROW_DEFS}
         <rect width="100%" height="100%" fill="url(#ed-dot-grid)" opacity="0.5" />
         <g ref={gRef}>
-          {/* Groups */}
+          {/* Groups (clusters) */}
           {layout.groups.map((g) => (
             <g key={g.id}>
               <rect
@@ -250,7 +291,7 @@ function FlowCanvas({ graph, className }: { graph: FlowGraph; className?: string
                 stroke="hsl(var(--ink) / 0.10)"
                 strokeDasharray="2 3"
               />
-              <text x={g.x + 16} y={g.y + 24} className="ed-lane" fill="hsl(var(--ink))">{g.label}</text>
+              <text x={g.x + 14} y={g.y + 22} className="ed-lane" fill="hsl(var(--ink))">{g.label}</text>
             </g>
           ))}
 
@@ -275,8 +316,16 @@ function FlowCanvas({ graph, className }: { graph: FlowGraph; className?: string
                 </circle>
                 {e.label && e.labelAt && (
                   <g transform={`translate(${e.labelAt.x}, ${e.labelAt.y})`}>
-                    <rect x={-e.label.length * 3.1 - 6} y={-7} width={e.label.length * 6.2 + 12} height={14} fill="hsl(var(--paper))" stroke="hsl(var(--ink) / 0.10)" />
-                    <text className="ed-edge" textAnchor="middle" dominantBaseline="middle" fill="hsl(var(--ink) / 0.7)">{trim(e.label, 36)}</text>
+                    <rect
+                      x={-(e.labelW ?? 60) / 2}
+                      y={-(e.labelH ?? 16) / 2}
+                      width={e.labelW ?? 60}
+                      height={e.labelH ?? 16}
+                      fill="hsl(var(--paper))"
+                      stroke="hsl(var(--ink) / 0.10)"
+                      strokeWidth={0.75}
+                    />
+                    <text className="ed-edge" textAnchor="middle" dominantBaseline="middle" fill="hsl(var(--ink) / 0.72)">{e.label}</text>
                   </g>
                 )}
               </g>
@@ -368,235 +417,181 @@ function splitRest(label: string): string | undefined {
 }
 
 type LaidNode = { id: string; label: string; shape: FlowNode["shape"]; x: number; y: number; w: number; h: number };
-type LaidEdge = { from: string; to: string; d: string; label?: string; dashed?: boolean; labelAt?: { x: number; y: number } };
+type LaidEdge = {
+  from: string;
+  to: string;
+  d: string;
+  label?: string;
+  dashed?: boolean;
+  labelAt?: { x: number; y: number };
+  labelW?: number;
+  labelH?: number;
+};
 type LaidGroup = { id: string; label: string; x: number; y: number; w: number; h: number };
 
-function layoutFlow(graph: FlowGraph): { nodes: LaidNode[]; edges: LaidEdge[]; groups: LaidGroup[]; totalW: number; totalH: number } {
-  const horizontal = graph.direction === "LR" || graph.direction === "RL";
+/**
+ * layoutFlow — dagre auto-layout.
+ *
+ * Each node is sized to fit its actual label content (title + tech),
+ * subgraphs become dagre clusters so members get grouped within a band,
+ * edges are routed by dagre with anti-collision, and edge labels reserve
+ * their own space so they never land on top of a node.
+ *
+ * Everything important (spacing, padding, min sizes) is driven by `cfg`
+ * so a project can tune density without touching this file.
+ */
+function layoutFlow(graph: FlowGraph, cfg: FlowLayoutConfig): {
+  nodes: LaidNode[];
+  edges: LaidEdge[];
+  groups: LaidGroup[];
+  totalW: number;
+  totalH: number;
+} {
+  const rankdir = graph.direction === "LR" || graph.direction === "RL" ? "LR" : "TB";
 
-  // Bucket nodes by group (ungrouped go into a synthetic "_" lane).
-  const groupOrder: string[] = [];
-  const byGroup = new Map<string, FlowNode[]>();
-  for (const n of graph.nodes) {
-    const g = n.group ?? "_";
-    if (!byGroup.has(g)) {
-      byGroup.set(g, []);
-      groupOrder.push(g);
-    }
-    byGroup.get(g)!.push(n);
-  }
+  const g = new dagre.graphlib.Graph({ compound: true, multigraph: false });
+  g.setGraph({
+    rankdir,
+    nodesep: cfg.nodeSep,
+    ranksep: cfg.rankSep,
+    edgesep: cfg.edgeSep,
+    marginx: cfg.marginX,
+    marginy: cfg.marginY,
+    ranker: "network-simplex",
+    align: "UL",
+  });
+  g.setDefaultEdgeLabel(() => ({}));
 
-  // Layer each group by topological depth so edges flow consistently.
-  const depthByNode = computeDepth(graph);
-
-  const groups: LaidGroup[] = [];
-  const placed: LaidNode[] = [];
-
-  if (horizontal) {
-    // LR: groups stacked vertically, each group is a horizontal lane laid
-    // out by depth columns of width F_NODE_W. If the only group is the
-    // synthetic ungrouped "_" and the chain is very long, wrap the columns
-    // into multiple rows so cards stay legible.
-    let cursorY = F_PAD;
-    let maxRight = F_PAD;
-    for (const gid of groupOrder) {
-      const items = byGroup.get(gid)!;
-      const meta = graph.groups.find((g) => g.id === gid);
-      const label = meta?.label ?? (gid === "_" ? "" : gid);
-      const cols = bucketByDepth(items, depthByNode);
-      const showGroup = label && gid !== "_";
-
-      // Wrap long ungrouped chains: max ~6 columns per row.
-      const maxColsPerRow = !showGroup && cols.length > 6 ? 6 : cols.length;
-      const colChunks = chunk(cols, maxColsPerRow);
-
-      const rowsPerChunk = colChunks.map((ch) => Math.max(...ch.map((c) => c.length), 1));
-      const groupW = F_GROUP_PAD * 2 + maxColsPerRow * F_NODE_W + (maxColsPerRow - 1) * F_NODE_GAP;
-      const totalRows = rowsPerChunk.reduce((a, b) => a + b, 0);
-      const groupH = F_GROUP_HEADER + totalRows * F_NODE_H
-        + (totalRows - 1) * F_NODE_GAP
-        + (colChunks.length - 1) * F_NODE_GAP * 2 // gap between chunked rows
-        + F_GROUP_PAD;
-      if (showGroup) groups.push({ id: gid, label, x: F_PAD, y: cursorY, w: groupW, h: groupH });
-
-      let chunkY = cursorY + (showGroup ? F_GROUP_HEADER : F_GROUP_PAD);
-      colChunks.forEach((chunkCols, chunkIdx) => {
-        chunkCols.forEach((col, ci) => {
-          col.forEach((n, ri) => {
-            placed.push({
-              id: n.id,
-              label: n.label,
-              shape: n.shape,
-              x: F_PAD + F_GROUP_PAD + ci * (F_NODE_W + F_NODE_GAP),
-              y: chunkY + ri * (F_NODE_H + F_NODE_GAP),
-              w: F_NODE_W,
-              h: F_NODE_H,
-            });
-          });
-        });
-        chunkY += rowsPerChunk[chunkIdx] * F_NODE_H + (rowsPerChunk[chunkIdx] - 1) * F_NODE_GAP + F_NODE_GAP * 2;
-      });
-      maxRight = Math.max(maxRight, F_PAD + groupW);
-      cursorY += groupH + (showGroup ? F_NODE_GAP : 4);
-    }
-    return finishLayout(placed, graph.edges, groups, maxRight + F_PAD, cursorY + F_PAD);
-  }
-
-  // TB: groups laid out side-by-side horizontally, each group stacks
-  // depth top-to-bottom.
-  let cursorX = F_PAD;
-  let maxBottom = F_PAD;
-  for (const gid of groupOrder) {
-    const items = byGroup.get(gid)!;
-    const meta = graph.groups.find((g) => g.id === gid);
-    const label = meta?.label ?? (gid === "_" ? "" : gid);
-    const rows = bucketByDepth(items, depthByNode);
-    const cols = Math.max(...rows.map((r) => r.length), 1);
-    const groupW = F_GROUP_PAD * 2 + cols * F_NODE_W + (cols - 1) * F_NODE_GAP;
-    const groupH = F_GROUP_HEADER + rows.length * F_NODE_H + (rows.length - 1) * F_NODE_GAP + F_GROUP_PAD;
-    const showGroup = label && gid !== "_";
-    if (showGroup) groups.push({ id: gid, label, x: cursorX, y: F_PAD, w: groupW, h: groupH });
-    rows.forEach((row, ri) => {
-      row.forEach((n, ci) => {
-        placed.push({
-          id: n.id,
-          label: n.label,
-          shape: n.shape,
-          x: cursorX + F_GROUP_PAD + ci * (F_NODE_W + F_NODE_GAP),
-          y: F_PAD + (showGroup ? F_GROUP_HEADER : F_GROUP_PAD) + ri * (F_NODE_H + F_NODE_GAP),
-          w: F_NODE_W,
-          h: F_NODE_H,
-        });
-      });
+  // Register subgraphs as dagre clusters so members get grouped.
+  const clusterIds = new Set<string>();
+  for (const grp of graph.groups) {
+    clusterIds.add(grp.id);
+    g.setNode(grp.id, {
+      label: grp.label,
+      clusterLabelPos: "top",
+      paddingTop: 28,
+      paddingBottom: 12,
+      paddingLeft: 14,
+      paddingRight: 14,
     });
-    maxBottom = Math.max(maxBottom, F_PAD + groupH);
-    cursorX += groupW + (showGroup ? F_NODE_GAP : 4);
+    if (grp.parent) g.setParent(grp.id, grp.parent);
   }
-  return finishLayout(placed, graph.edges, groups, cursorX + F_PAD, maxBottom + F_PAD);
-}
 
-function chunk<T>(arr: T[], size: number): T[][] {
-  if (size <= 0) return [arr];
-  const out: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out.length ? out : [[]];
-}
-
-function bucketByDepth(items: FlowNode[], depth: Map<string, number>): FlowNode[][] {
-  if (!items.length) return [];
-  const minD = Math.min(...items.map((i) => depth.get(i.id) ?? 0));
-  const buckets = new Map<number, FlowNode[]>();
-  for (const it of items) {
-    const d = (depth.get(it.id) ?? 0) - minD;
-    if (!buckets.has(d)) buckets.set(d, []);
-    buckets.get(d)!.push(it);
-  }
-  return Array.from(buckets.keys()).sort((a, b) => a - b).map((k) => buckets.get(k)!);
-}
-
-function computeDepth(graph: FlowGraph): Map<string, number> {
-  // Roots: nodes with no incoming edge inside their own group.
-  const incoming = new Map<string, number>();
-  for (const n of graph.nodes) incoming.set(n.id, 0);
-  for (const e of graph.edges) incoming.set(e.to, (incoming.get(e.to) ?? 0) + 1);
-  const depth = new Map<string, number>();
-  const queue: string[] = [];
+  // Register nodes with measured sizes.
   for (const n of graph.nodes) {
-    if ((incoming.get(n.id) ?? 0) === 0) {
-      depth.set(n.id, 0);
-      queue.push(n.id);
-    }
+    const { w, h } = measureFlowNode(n, cfg);
+    g.setNode(n.id, { label: n.label, width: w, height: h });
+    if (n.group && clusterIds.has(n.group)) g.setParent(n.id, n.group);
   }
-  // BFS: target depth = max(predecessors)+1
-  const adj = new Map<string, string[]>();
+
+  // Register edges. Reserve label box so dagre routes around it.
+  const edgeMeta = new Map<string, FlowEdge>();
   for (const e of graph.edges) {
-    if (!adj.has(e.from)) adj.set(e.from, []);
-    adj.get(e.from)!.push(e.to);
+    const key = `${e.from}\u0001${e.to}`;
+    edgeMeta.set(key, e);
+    const label = e.label?.trim() ?? "";
+    const labelW = label ? Math.max(46, label.length * 7.0 + 16) : 0;
+    const labelH = label ? 18 : 0;
+    g.setEdge(e.from, e.to, {
+      label,
+      width: labelW,
+      height: labelH,
+      labelpos: "c",
+      labeloffset: 0,
+    });
   }
-  let safety = graph.nodes.length * graph.nodes.length;
-  while (queue.length && safety-- > 0) {
-    const id = queue.shift()!;
-    const d = depth.get(id) ?? 0;
-    for (const next of adj.get(id) ?? []) {
-      const nd = depth.get(next);
-      if (nd === undefined || nd < d + 1) {
-        depth.set(next, d + 1);
-        queue.push(next);
-      }
+
+  dagre.layout(g);
+
+  // Extract groups + nodes (dagre returns center coordinates).
+  const placedNodes: LaidNode[] = [];
+  const placedGroups: LaidGroup[] = [];
+  for (const id of g.nodes()) {
+    const meta = g.node(id);
+    if (!meta) continue;
+    const x = meta.x - meta.width / 2;
+    const y = meta.y - meta.height / 2;
+    if (clusterIds.has(id)) {
+      const grp = graph.groups.find((gg) => gg.id === id);
+      placedGroups.push({ id, label: grp?.label ?? id, x, y, w: meta.width, h: meta.height });
+    } else {
+      const fn = graph.nodes.find((nn) => nn.id === id);
+      if (!fn) continue;
+      placedNodes.push({ id, label: fn.label, shape: fn.shape, x, y, w: meta.width, h: meta.height });
     }
   }
-  // Any node still without depth (cycle) → 0
-  for (const n of graph.nodes) if (!depth.has(n.id)) depth.set(n.id, 0);
-  return depth;
+
+  // Extract edges with dagre's points + label position.
+  const placedEdges: LaidEdge[] = [];
+  for (const e of g.edges()) {
+    const meta = g.edge(e);
+    if (!meta || !meta.points || meta.points.length < 2) continue;
+    const orig = edgeMeta.get(`${e.v}\u0001${e.w}`);
+    const pts = meta.points;
+    const d = smoothFlowPath(pts);
+    const hasLabel = typeof meta.label === "string" && meta.label.length > 0
+      && typeof meta.x === "number" && typeof meta.y === "number";
+    placedEdges.push({
+      from: e.v,
+      to: e.w,
+      d,
+      label: orig?.label,
+      dashed: orig?.dashed,
+      labelAt: hasLabel ? { x: meta.x as number, y: meta.y as number } : undefined,
+      labelW: hasLabel ? (meta.width as number) : undefined,
+      labelH: hasLabel ? (meta.height as number) : undefined,
+    });
+  }
+
+  const graphMeta = g.graph();
+  const totalW = (graphMeta.width as number) || 1200;
+  const totalH = (graphMeta.height as number) || 800;
+  return { nodes: placedNodes, edges: placedEdges, groups: placedGroups, totalW, totalH };
 }
 
-function finishLayout(nodes: LaidNode[], edges: FlowEdge[], groups: LaidGroup[], totalW: number, totalH: number) {
-  const byId = new Map(nodes.map((n) => [n.id, n]));
-  const sideCount = new Map<string, number>();
-  for (const e of edges) {
-    const a = byId.get(e.from);
-    const b = byId.get(e.to);
-    if (!a || !b) continue;
-    const horiz = Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
-    if (horiz) {
-      const aSide = a.x < b.x ? "R" : "L";
-      const bSide = a.x < b.x ? "L" : "R";
-      sideCount.set(`${a.id}:${aSide}`, (sideCount.get(`${a.id}:${aSide}`) ?? 0) + 1);
-      sideCount.set(`${b.id}:${bSide}`, (sideCount.get(`${b.id}:${bSide}`) ?? 0) + 1);
-    } else {
-      const aSide = a.y < b.y ? "B" : "T";
-      const bSide = a.y < b.y ? "T" : "B";
-      sideCount.set(`${a.id}:${aSide}`, (sideCount.get(`${a.id}:${aSide}`) ?? 0) + 1);
-      sideCount.set(`${b.id}:${bSide}`, (sideCount.get(`${b.id}:${bSide}`) ?? 0) + 1);
-    }
+/**
+ * Size a flow node so its label fits with comfortable padding. Bricolage
+ * Grotesque at 14.5px averages ~7.4px/char; mono at 10.5px averages
+ * ~6.8px/char. Returns the bounding box dagre will use, including extra
+ * room for shapes that crop their content (rhombus, cylinder).
+ */
+function measureFlowNode(n: FlowNode, cfg: FlowLayoutConfig): { w: number; h: number } {
+  const title = splitFirst(n.label);
+  const tech = splitRest(n.label);
+  const titlePx = title.length * 7.6;
+  const techPx = tech ? tech.length * 6.8 : 0;
+  const logoSlot = techLogo(n.label) ? 30 : 0;
+  let w = Math.max(cfg.minNodeW, cfg.paddingX * 2 + Math.max(titlePx, techPx) + logoSlot);
+  let h = Math.max(cfg.minNodeH, cfg.paddingY * 2 + 18 /*stamp*/ + (tech ? 38 : 22));
+  if (n.shape === "rhombus") {
+    // diamond: usable interior is the inscribed rectangle (~0.7 of bbox)
+    w = Math.round(w * 1.35);
+    h = Math.round(h * 1.25);
+  } else if (n.shape === "cylinder") {
+    h += 10; // leave room for the top ellipse
+  } else if (n.shape === "stadium" || n.shape === "round") {
+    w += 8; // pills get a little extra hug
   }
-  const sideTaken = new Map<string, number>();
-  const out: LaidEdge[] = [];
-  for (const e of edges) {
-    const a = byId.get(e.from);
-    const b = byId.get(e.to);
-    if (!a || !b) continue;
-    const horiz = Math.abs(b.x - a.x) >= Math.abs(b.y - a.y);
-    let pts: { x: number; y: number }[];
-    let labelAt: { x: number; y: number };
-    if (horiz) {
-      const aRight = a.x < b.x;
-      const aSide = aRight ? "R" : "L";
-      const bSide = aRight ? "L" : "R";
-      const tA = sideCount.get(`${a.id}:${aSide}`) ?? 1;
-      const tB = sideCount.get(`${b.id}:${bSide}`) ?? 1;
-      const iA = sideTaken.get(`${a.id}:${aSide}`) ?? 0;
-      const iB = sideTaken.get(`${b.id}:${bSide}`) ?? 0;
-      sideTaken.set(`${a.id}:${aSide}`, iA + 1);
-      sideTaken.set(`${b.id}:${bSide}`, iB + 1);
-      const ax = aRight ? a.x + a.w : a.x;
-      const ay = a.y + (a.h * (iA + 1)) / (tA + 1);
-      const bx = aRight ? b.x : b.x + b.w;
-      const by = b.y + (b.h * (iB + 1)) / (tB + 1);
-      const mx = (ax + bx) / 2;
-      pts = [{ x: ax, y: ay }, { x: mx, y: ay }, { x: mx, y: by }, { x: bx, y: by }];
-      labelAt = { x: mx, y: (ay + by) / 2 };
-    } else {
-      const aBelow = a.y < b.y;
-      const aSide = aBelow ? "B" : "T";
-      const bSide = aBelow ? "T" : "B";
-      const tA = sideCount.get(`${a.id}:${aSide}`) ?? 1;
-      const tB = sideCount.get(`${b.id}:${bSide}`) ?? 1;
-      const iA = sideTaken.get(`${a.id}:${aSide}`) ?? 0;
-      const iB = sideTaken.get(`${b.id}:${bSide}`) ?? 0;
-      sideTaken.set(`${a.id}:${aSide}`, iA + 1);
-      sideTaken.set(`${b.id}:${bSide}`, iB + 1);
-      const ax = a.x + (a.w * (iA + 1)) / (tA + 1);
-      const ay = aBelow ? a.y + a.h : a.y;
-      const bx = b.x + (b.w * (iB + 1)) / (tB + 1);
-      const by = aBelow ? b.y : b.y + b.h;
-      const my = (ay + by) / 2;
-      pts = [{ x: ax, y: ay }, { x: ax, y: my }, { x: bx, y: my }, { x: bx, y: by }];
-      labelAt = { x: (ax + bx) / 2, y: my };
-    }
-    out.push({ from: e.from, to: e.to, d: orthoPath(pts, 10), label: e.label, dashed: e.dashed, labelAt });
+  return { w, h };
+}
+
+/**
+ * Build a smooth path through dagre's polyline points. dagre returns a
+ * sequence of waypoints that includes the source/target ports plus any
+ * bends — a quadratic-bezier-through-midpoints draws a soft cable that
+ * still hits every waypoint visually.
+ */
+function smoothFlowPath(pts: { x: number; y: number }[]): string {
+  if (pts.length === 2) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const mx = (pts[i].x + pts[i + 1].x) / 2;
+    const my = (pts[i].y + pts[i + 1].y) / 2;
+    d += ` Q ${pts[i].x} ${pts[i].y} ${mx} ${my}`;
   }
-  return { nodes, edges: out, groups, totalW, totalH };
+  const last = pts[pts.length - 1];
+  d += ` L ${last.x} ${last.y}`;
+  return d;
 }
 
 /* ════════════════════════ SEQUENCE ════════════════════════ */
