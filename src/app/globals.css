@@ -132,6 +132,7 @@
   }
 
   * { border-color: hsl(var(--border)); }
+  html, body { height: 100%; }
   html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
   body {
     background-color: hsl(var(--paper));
@@ -140,7 +141,7 @@
     font-feature-settings: "ss01" 1, "cv11" 1, "kern" 1;
     font-size: 15px;
     line-height: 1.55;
-    overflow-x: hidden;
+    overflow: hidden;
   }
   ::selection { background: hsl(var(--ink)); color: hsl(var(--paper)); }
   :focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 3px; border-radius: 4px; }

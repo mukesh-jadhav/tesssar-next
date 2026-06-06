@@ -1,6 +1,7 @@
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
 import { NewArchitectureForm } from "@/components/architecture/NewArchitectureForm";
+import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 export const metadata = { title: "New design" };
 
@@ -16,7 +17,8 @@ export default async function NewArchitecturePage({
   const seed = searchParams.seed ?? searchParams.prompt;
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-6 py-14 md:px-12 md:py-20 lg:px-16">
+    <ScrollFrame>
+      <div className="mx-auto w-full max-w-[1200px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
         <span className="tag tag-accent">§ New design</span>
@@ -47,6 +49,7 @@ export default async function NewArchitecturePage({
       <div className="mt-14">
         <NewArchitectureForm credits={credits} seed={seed} />
       </div>
-    </div>
+      </div>
+    </ScrollFrame>
   );
 }

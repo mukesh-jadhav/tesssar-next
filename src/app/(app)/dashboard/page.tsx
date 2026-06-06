@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { formatDate, truncate } from "@/lib/utils";
 import { getBalance } from "@/lib/credits/ledger";
+import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 const SUGGESTIONS = [
   {
@@ -55,7 +56,8 @@ export default async function DashboardPage() {
     (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-6 py-12 md:px-12 md:py-16 lg:px-16">
+    <ScrollFrame>
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead row */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
         <span className="tag tag-accent">{greetingFor(new Date())}</span>
@@ -176,7 +178,8 @@ export default async function DashboardPage() {
           </div>
         </section>
       )}
-    </div>
+      </div>
+    </ScrollFrame>
   );
 }
 

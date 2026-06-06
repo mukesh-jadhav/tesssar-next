@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ArchitectureDoc, TransactionDoc, UserDoc } from "@/types/architecture";
 import { formatDate, formatINR, truncate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 export const metadata = { title: "Admin" };
 
@@ -32,7 +33,8 @@ export default async function AdminPage() {
   const allArchCount = (await adminDb.collection("architectures").count().get()).data().count;
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 py-10 md:px-8 lg:px-12">
+    <ScrollFrame>
+      <div className="mx-auto w-full max-w-[1400px] px-4 py-10 md:px-8 lg:px-12">
       <h1 className="text-3xl font-semibold tracking-tight">Admin</h1>
       <p className="mt-1 text-muted-foreground">Live platform metrics.</p>
 
@@ -119,7 +121,8 @@ export default async function AdminPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </ScrollFrame>
   );
 }
 

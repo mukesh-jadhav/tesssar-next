@@ -1,5 +1,6 @@
 import { getSessionUser } from "@/lib/firebase/auth";
 import { CreditPacksGrid } from "@/components/billing/CreditPacksGrid";
+import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 export const metadata = { title: "Credits" };
 
@@ -13,7 +14,8 @@ export default async function PricingPage() {
   const user = await getSessionUser();
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-6 py-12 md:px-12 md:py-16 lg:px-16">
+    <ScrollFrame>
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
         <span className="tag tag-accent">§ Credits</span>
@@ -84,6 +86,7 @@ export default async function PricingPage() {
           </a>
         </div>
       </section>
-    </div>
+      </div>
+    </ScrollFrame>
   );
 }

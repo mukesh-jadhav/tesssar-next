@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { formatDate, truncate } from "@/lib/utils";
+import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 
 export const metadata = { title: "Library" };
 
@@ -31,7 +32,8 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-6 py-12 md:px-12 md:py-16 lg:px-16">
+    <ScrollFrame>
+      <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
         <span className="tag tag-accent">§ Archive</span>
@@ -121,7 +123,8 @@ export default async function HistoryPage() {
           })}
         </div>
       )}
-    </div>
+      </div>
+    </ScrollFrame>
   );
 }
 
