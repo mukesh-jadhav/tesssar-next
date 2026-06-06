@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
@@ -10,8 +9,8 @@ import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip
  * HeaderAuth — client-side auth surface for the app-wide header.
  *
  *  - Signed-out: a button that triggers the Google popup directly
- *    (no /login round-trip). On success we refresh so the server
- *    layout re-renders with the new session cookie.
+ *    (no /login round-trip). On success we do a full reload so the
+ *    server layout re-renders with the new session cookie.
  *  - Signed-in: the ProfileChip dropdown.
  */
 export function HeaderAuth({
@@ -21,7 +20,6 @@ export function HeaderAuth({
   user: ProfileChipUser | null;
   credits?: number;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   if (user) return <ProfileChip user={user} credits={credits} />;
@@ -31,12 +29,14 @@ export function HeaderAuth({
     setLoading(true);
     try {
       await signInWithGoogle();
-      toast.success("Signed in. Welcome to Tessar.");
-      router.refresh();
+      // Full reload — guarantees the server layout re-renders with the
+      // new __tessar_session cookie. router.refresh() races with the
+      // RSC cache in production and sometimes returns the cached (null)
+      // user.
+      window.location.reload();
     } catch (err) {
       const msg = (err as Error).message || "Sign-in failed";
       if (!/popup-closed|cancelled/i.test(msg)) toast.error(msg);
-    } finally {
       setLoading(false);
     }
   }
