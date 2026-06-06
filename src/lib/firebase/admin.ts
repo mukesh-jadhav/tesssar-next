@@ -25,6 +25,11 @@ const app = buildApp();
 export const adminAuth = getAuth(app);
 export const adminDb = getFirestore(app);
 
-// Cookies session (5 days)
-export const SESSION_COOKIE_NAME = "__tessar_session";
+// Cookies session (5 days).
+//
+// IMPORTANT: must be named `__session` — Firebase Hosting's CDN strips
+// every other cookie on the way back to the browser to preserve cache
+// semantics. Renaming this breaks sign-in on tessar.dev.
+//   https://firebase.google.com/docs/hosting/manage-cache#using_cookies
+export const SESSION_COOKIE_NAME = "__session";
 export const SESSION_MAX_AGE_MS = 5 * 24 * 60 * 60 * 1000;
