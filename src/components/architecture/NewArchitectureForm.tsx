@@ -112,7 +112,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
 
         <div className="flex items-center justify-between gap-3 pt-4 border-t border-[hsl(var(--line))]">
           <span className="text-[12px] text-[hsl(var(--ink-3))]">
-            ₹49 per design · refunded automatically on failure
+            ₹299 per design · refunded automatically on failure
           </span>
           <div className="flex items-center gap-3">
             <button

@@ -22,8 +22,8 @@ export const CREDIT_PACKS: CreditPack[] = [
     name: "Solo",
     designs: 1,
     credits: 1 * RUN_COST_CREDITS,
-    pricePaise: 4_900, // ₹49
-    perDesignPaise: 4_900,
+    pricePaise: 29_900, // ₹299
+    perDesignPaise: 29_900,
     description: "One full architecture. Perfect to validate a single idea.",
   },
   {
@@ -31,8 +31,8 @@ export const CREDIT_PACKS: CreditPack[] = [
     name: "Trio",
     designs: 3,
     credits: 3 * RUN_COST_CREDITS,
-    pricePaise: 12_900, // ₹129
-    perDesignPaise: 4_300,
+    pricePaise: 80_000, // ₹800
+    perDesignPaise: 26_667,
     badge: "Most popular",
     description: "Three designs. Iterate on the brief or compare alternatives.",
   },
@@ -41,9 +41,9 @@ export const CREDIT_PACKS: CreditPack[] = [
     name: "Deca",
     designs: 10,
     credits: 10 * RUN_COST_CREDITS,
-    pricePaise: 39_900, // ₹399
-    perDesignPaise: 3_990,
-    badge: "Best value",
+    pricePaise: 2_69_900, // ₹2,699
+    perDesignPaise: 26_990,
+    badge: "Volume pack",
     description: "Ten designs. Built for serial founders and consulting shops.",
   },
 ];

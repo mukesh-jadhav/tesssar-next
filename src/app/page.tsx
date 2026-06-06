@@ -5,7 +5,7 @@ import { TessarLogo } from "@/components/shared/TessarLogo";
 export const metadata = {
   title: "Tessar — Production cloud architecture in four minutes",
   description:
-    "Describe a system in plain English. Get a defensible cloud architecture — diagrams, components, INR costs, risks, security model — in four minutes. 3 designs free.",
+    "Write a paragraph. Get a defensible cloud architecture — components, diagrams, INR costs, risks, security model — in four minutes. ₹299 a design. First three on us.",
 };
 
 export default async function HomePage() {
@@ -30,14 +30,14 @@ export default async function HomePage() {
           </div>
 
           <h1 className="m3-page-enter mt-8 display-tight text-[clamp(3.2rem,9.2vw,8.5rem)] leading-[0.88] tracking-[-0.045em] max-w-[16ch]">
-            Stop drawing diagrams.{" "}
-            <span className="serif font-normal italic accent">Start shipping designs.</span>
+            Write a paragraph.{" "}
+            <span className="serif font-normal italic accent">Get an architecture.</span>
           </h1>
 
           <p className="m3-page-enter mt-10 max-w-[58ch] text-[18px] leading-[1.55] text-[hsl(var(--ink-2))]">
-            Describe a system in one paragraph. Get a production-ready cloud architecture in four
-            minutes — components, diagrams, scale tiers, costs in INR, risks, security model, and
-            the patterns that justify every choice.
+            Components, diagrams, INR cost tiers, risks, security model, and the patterns that
+            justify every choice. A defensible cloud design in four minutes — not a chatbot
+            reply, a complete report your engineers will actually read.
           </p>
 
           <div className="m3-page-enter mt-12 flex flex-wrap items-center gap-4">
@@ -52,14 +52,14 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-6 text-[12.5px] text-[hsl(var(--ink-3))]">
-            One-click Google sign-in. First three designs free, no card. After that, ₹49 a design — no subscription.
+            Google sign-in. Three designs free, no card. Then ₹299 a design — no subscription, no seats, refunded if a run fails.
           </p>
 
           <div className="mt-20 grid grid-cols-2 gap-x-10 gap-y-6 md:grid-cols-4 border-t border-[hsl(var(--line))] pt-10">
             <Stat n="~4m" k="median run" />
             <Stat n="14" k="report sections" />
             <Stat n="3×" k="scale tiers" />
-            <Stat n="₹49" k="per design" />
+            <Stat n="₹299" k="per design" />
           </div>
         </div>
       </section>
@@ -283,17 +283,17 @@ export default async function HomePage() {
           <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
             <h2 className="display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[18ch]">
               Three designs on us.{" "}
-              <span className="serif italic accent">Then ₹49 each.</span>
+              <span className="serif italic accent">Then ₹299 each.</span>
             </h2>
             <div>
-              <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[50ch]">
-                Pay only for what you generate. No subscription, no seats, no annual lock-in.
-                Top up a credit pack when you need to, otherwise pay nothing. Refunds on
-                failed runs are automatic.
+              <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[52ch]">
+                A freelance architect charges ₹50,000+ and takes two weeks for this report.
+                Tessar ships it in four minutes for ₹299. Pay only when you generate —
+                no subscription, no seats, no annual lock-in. Failed runs auto-refund.
               </p>
               <ul className="mt-8 grid gap-3 text-[14px]">
                 <Bullet>3 free designs the moment you sign in</Bullet>
-                <Bullet>₹49 / design after that — billed in credit packs</Bullet>
+                <Bullet>₹299 / design — packs of 3 (₹800) and 10 (₹2,699)</Bullet>
                 <Bullet>Failed runs refund automatically</Bullet>
                 <Bullet>Credits never expire</Bullet>
                 <Bullet>One Razorpay invoice per pack</Bullet>

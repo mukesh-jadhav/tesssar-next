@@ -23,7 +23,7 @@ export default async function PricingPage() {
 
       <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-          ₹49 a design.<br />
+          ₹299 a design.<br />
           <span className="serif font-normal italic accent">No subscriptions.</span>
         </h1>
         <div className="flex flex-col justify-end gap-6 pb-3">

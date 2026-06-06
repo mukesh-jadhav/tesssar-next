@@ -124,7 +124,7 @@ export function HomeCockpit({
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-[hsl(var(--line))]">
               <span className="text-[11.5px] text-[hsl(var(--ink-3))]">
                 {signedIn
-                  ? "₹49 per design · refunded automatically on failure"
+                  ? "₹299 per design · refunded automatically on failure"
                   : "3 free designs to start — we'll sign you in with Google"}
               </span>
               <div className="flex items-center gap-3">
