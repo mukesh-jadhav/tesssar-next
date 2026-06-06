@@ -14,12 +14,7 @@ export default async function SamplePage() {
   const user = await getSessionUser();
   const credits = user ? await getBalance(user.uid) : undefined;
   return (
-    <WorkspaceShell
-      user={user}
-      credits={credits}
-      contextLabel="§ Sample"
-      contextTitle={SAMPLE_ARCHITECTURE.meta.title}
-    >
+    <WorkspaceShell user={user} credits={credits}>
       <ReportCockpit arch={SAMPLE_ARCHITECTURE} showDownload={false} />
     </WorkspaceShell>
   );

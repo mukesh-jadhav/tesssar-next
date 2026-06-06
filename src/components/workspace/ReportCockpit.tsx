@@ -60,52 +60,40 @@ export function ReportCockpit({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      {/* ─────────────── Sub-header (project context) ─────────────── */}
-      <div className="h-12 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
-        <div className="flex-1 min-w-0 flex items-baseline gap-3 px-5">
-          <span className="section-num text-[10.5px] shrink-0">§ Report</span>
-          <span className="display text-[15px] tracking-[-0.02em] truncate">{arch.meta.title}</span>
-          <span className="hidden md:inline text-[12px] text-[hsl(var(--ink-3))] truncate">
-            · {arch.meta.domain}
-          </span>
+      {/* ─────────────── Chapter tabs (single header) ─────────────── */}
+      <div className="h-11 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
+        <div className="flex-1 min-w-0 flex items-stretch overflow-x-auto scrollbar-thin">
+          {CHAPTERS.map((c) => {
+            const active = chapter === c.id;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => setChapter(c.id)}
+                className={cn(
+                  "shrink-0 px-4 flex items-center gap-2 border-b-2 transition-colors text-[12px]",
+                  active
+                    ? "border-[hsl(var(--accent))] text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
+                    : "border-transparent text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
+                )}
+              >
+                <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
+                <span className="font-medium tracking-tight">{c.label}</span>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex items-center gap-2 pr-3">
-          <span className="hidden md:inline font-mono text-[10px] tabular-nums uppercase tracking-wider text-[hsl(var(--ink-3))]">
-            {arch.components.length} comp · {arch.diagrams.length} diag · {arch.risks.length} risks
-          </span>
-          {showDownload && architectureId && (
+        {showDownload && architectureId && (
+          <div className="shrink-0 flex items-center gap-2 pr-3 pl-3 border-l border-[hsl(var(--line))]">
             <Link
               href={`/api/architect/${architectureId}/pdf`}
-              className="h-8 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-3 text-[12px] hover:border-[hsl(var(--ink))] transition-colors"
+              className="h-7 inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2.5 text-[11.5px] hover:border-[hsl(var(--ink))] transition-colors"
             >
-              <span className="ms text-[14px]" aria-hidden>download</span>
+              <span className="ms text-[13px]" aria-hidden>download</span>
               PDF
             </Link>
-          )}
-        </div>
-      </div>
-
-      {/* ─────────────── Chapter tabs ─────────────── */}
-      <div className="h-11 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))] overflow-x-auto scrollbar-thin">
-        {CHAPTERS.map((c) => {
-          const active = chapter === c.id;
-          return (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setChapter(c.id)}
-              className={cn(
-                "shrink-0 px-4 flex items-center gap-2 border-b-2 transition-colors text-[12px]",
-                active
-                  ? "border-[hsl(var(--accent))] text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
-                  : "border-transparent text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
-              )}
-            >
-              <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
-              <span className="font-medium tracking-tight">{c.label}</span>
-            </button>
-          );
-        })}
+          </div>
+        )}
       </div>
 
       {/* ─────────────── Body: canvas + inspector ─────────────── */}

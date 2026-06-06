@@ -12,9 +12,9 @@ import { toast } from "sonner";
  * WorkspaceShell — single-screen cockpit chrome.
  *
  *  - Viewport is locked (html/body never scroll).
- *  - Top bar: brand mark + active context label + global actions.
- *  - Left rail: primary nav (icon + label), pinned New CTA, account chip.
- *  - Main slot fills the remaining viewport. Any internal scrolling lives
+ *  - One left rail holds the brand mark, primary nav, credits, and
+ *    account chip. There is no top header bar.
+ *  - Main slot fills the remaining viewport. Internal scrolling lives
  *    inside the children — never the shell.
  */
 
@@ -33,7 +33,6 @@ type RailItem = {
 
 const SIGNED_OUT_ITEMS: RailItem[] = [
   { href: "/sample", label: "Sample", icon: "auto_stories", match: (p) => p === "/" || p.startsWith("/sample") },
-  { href: "/login",  label: "Sign in", icon: "login",       match: (p) => p.startsWith("/login") },
 ];
 
 const SIGNED_IN_ITEMS: RailItem[] = [
@@ -47,19 +46,10 @@ const SIGNED_IN_ITEMS: RailItem[] = [
 export function WorkspaceShell({
   user,
   credits,
-  contextLabel,
-  contextTitle,
-  toolbar,
   children,
 }: {
   user: RailUser;
   credits?: number;
-  /** Small eyebrow label rendered in the top bar (e.g. "§ Report · Sample"). */
-  contextLabel?: string;
-  /** Larger context title (e.g. project name). */
-  contextTitle?: string;
-  /** Optional right-side toolbar slot in the top bar. */
-  toolbar?: React.ReactNode;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -91,66 +81,90 @@ export function WorkspaceShell({
   const firstName = user?.displayName?.split(" ")[0] ?? user?.email.split("@")[0] ?? null;
 
   return (
-    <div className="grain h-full w-full flex flex-col bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
-      {/* ─────────────────── TOP BAR ─────────────────── */}
-      <header className="h-12 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
-        {/* Brand block — aligns with rail width below */}
+    <div className="grain h-full w-full flex bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
+      {/* ─────────────────── LEFT RAIL ─────────────────── */}
+      <aside className="w-[88px] shrink-0 border-r border-[hsl(var(--line))] bg-[hsl(var(--paper))] flex flex-col items-stretch">
+        {/* Brand */}
         <Link
           href={user ? "/dashboard" : "/"}
-          className="w-[88px] shrink-0 flex items-center justify-center border-r border-[hsl(var(--line))] hover:bg-[hsl(var(--paper-2))] transition-colors"
+          className="h-14 shrink-0 flex items-center justify-center border-b border-[hsl(var(--line))] hover:bg-[hsl(var(--paper-2))] transition-colors"
+          aria-label="Tessar — home"
         >
-          <span className="grid size-7 place-items-center rounded-lg bg-[hsl(var(--ink))] text-[hsl(var(--paper))]">
-            <span className="display text-[14px] leading-none">T</span>
+          <span className="grid size-8 place-items-center rounded-lg bg-[hsl(var(--ink))] text-[hsl(var(--paper))]">
+            <span className="display text-[15px] leading-none">T</span>
           </span>
         </Link>
 
-        {/* Context strip */}
-        <div className="flex-1 min-w-0 flex items-center gap-4 px-5">
-          {contextLabel && (
-            <span className="section-num shrink-0 text-[10.5px]">{contextLabel}</span>
-          )}
-          {contextTitle && (
-            <span className="display text-[14px] tracking-[-0.015em] text-[hsl(var(--ink))] truncate">
-              {contextTitle}
-            </span>
-          )}
-        </div>
-
-        {/* Toolbar slot */}
-        {toolbar && (
-          <div className="flex items-center gap-2 pr-3 border-l border-[hsl(var(--line))] pl-4">
-            {toolbar}
-          </div>
+        {/* Pinned New CTA */}
+        {user && (
+          <Link
+            href="/new"
+            className="mt-4 mx-auto grid size-11 place-items-center rounded-2xl border border-[hsl(var(--line-2))] bg-[hsl(var(--card))] hover:bg-[hsl(var(--paper-2))] press transition-colors"
+            aria-label="New design"
+            title="New design"
+          >
+            <span className="ms text-[20px]" aria-hidden>add</span>
+          </Link>
         )}
 
-        {/* Credits / account chip */}
-        <div className="flex items-center gap-2 pr-3">
-          {typeof credits === "number" && (
+        {/* Primary nav */}
+        <nav className={cn("flex flex-col items-center gap-1", user ? "mt-5" : "mt-4")}>
+          {items.map((d) => {
+            const active = d.match(pathname);
+            return (
+              <Link
+                key={d.href}
+                href={d.href}
+                className="group/d flex flex-col items-center gap-1 py-2 w-full"
+                title={d.label}
+              >
+                <span
+                  className={cn(
+                    "grid size-10 place-items-center rounded-2xl transition-colors",
+                    active
+                      ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
+                      : "text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-2))]",
+                  )}
+                >
+                  <span className={cn("ms text-[20px]", active && "ms-filled")} aria-hidden>{d.icon}</span>
+                </span>
+                <span className={cn("text-[9.5px] tracking-wide font-mono uppercase", active ? "text-[hsl(var(--ink))]" : "text-[hsl(var(--ink-3))]")}>
+                  {d.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Bottom: credits + account */}
+        <div className="mt-auto flex flex-col items-center gap-3 pt-3 pb-4 border-t border-[hsl(var(--line))]">
+          {typeof credits === "number" && user && (
             <Link
               href="/pricing"
-              className="hidden md:inline-flex h-8 items-center gap-2 rounded-full border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] pl-3 pr-2 text-[12px] hover:border-[hsl(var(--ink))] transition-colors"
-              title="Top up credits"
+              className="flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg hover:bg-[hsl(var(--paper-2))] transition-colors"
+              title="Credits — top up"
             >
-              <span className="ms text-[14px] text-[hsl(var(--accent))]" aria-hidden>savings</span>
-              <span className="font-mono tabular-nums">{credits}</span>
-              <span className="font-mono text-[10px] text-[hsl(var(--ink-3))] uppercase tracking-wider">credits</span>
+              <span className="font-mono tabular-nums text-[13px] leading-none text-[hsl(var(--ink))]">{credits}</span>
+              <span className="font-mono text-[8.5px] uppercase tracking-[0.12em] text-[hsl(var(--ink-3))]">credits</span>
             </Link>
           )}
+
           {user ? (
             <div ref={menuRef} className="relative">
               <button
                 type="button"
                 onClick={() => setMenuOpen((o) => !o)}
-                className="grid size-8 place-items-center rounded-full overflow-hidden border border-[hsl(var(--line-2))] hover:border-[hsl(var(--ink))] transition-colors"
+                className="grid size-9 place-items-center rounded-full overflow-hidden border border-[hsl(var(--line-2))] hover:border-[hsl(var(--ink))] transition-colors"
                 aria-label="Account"
+                title={user.displayName ?? user.email}
               >
                 {user.photoURL ? (
                   <Image
                     src={user.photoURL}
                     alt=""
-                    width={32}
-                    height={32}
-                    className="size-8 rounded-full object-cover"
+                    width={36}
+                    height={36}
+                    className="size-9 rounded-full object-cover"
                     unoptimized
                   />
                 ) : (
@@ -160,7 +174,7 @@ export function WorkspaceShell({
                 )}
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-[110%] z-50 w-64 rounded-2xl border border-[hsl(var(--line-2))] bg-[hsl(var(--paper))] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.18)] p-3">
+                <div className="absolute left-[110%] bottom-0 z-50 w-64 rounded-2xl border border-[hsl(var(--line-2))] bg-[hsl(var(--paper))] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.18)] p-3">
                   <div className="px-2 py-1.5">
                     <p className="text-[13px] font-medium truncate">{user.displayName ?? firstName}</p>
                     <p className="text-[11px] text-[hsl(var(--ink-3))] truncate">{user.email}</p>
@@ -181,73 +195,30 @@ export function WorkspaceShell({
               )}
             </div>
           ) : (
-            <Link href="/login" className="h-8 px-3 inline-flex items-center rounded-full bg-[hsl(var(--ink))] text-[hsl(var(--paper))] text-[12px] font-medium hover:bg-[hsl(var(--accent))] transition-colors">
-              Sign in
+            <Link
+              href="/login"
+              className="grid size-9 place-items-center rounded-full bg-[hsl(var(--ink))] text-[hsl(var(--paper))] hover:bg-[hsl(var(--accent))] transition-colors"
+              title="Sign in"
+              aria-label="Sign in"
+            >
+              <span className="ms text-[18px]" aria-hidden>login</span>
             </Link>
           )}
+
+          <Link
+            href="/legal/privacy"
+            className="text-[9.5px] font-mono uppercase tracking-wide text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]"
+            title="Legal"
+          >
+            §
+          </Link>
         </div>
-      </header>
+      </aside>
 
-      {/* ─────────────────── BODY (rail + main) ─────────────────── */}
-      <div className="flex-1 min-h-0 flex">
-        {/* Left rail */}
-        <aside className="w-[88px] shrink-0 border-r border-[hsl(var(--line))] bg-[hsl(var(--paper))] flex flex-col items-stretch py-4">
-          {/* Pinned New CTA */}
-          {user && (
-            <Link
-              href="/new"
-              className="mx-auto grid size-11 place-items-center rounded-2xl border border-[hsl(var(--line-2))] bg-[hsl(var(--card))] hover:bg-[hsl(var(--paper-2))] press transition-colors"
-              aria-label="New design"
-              title="New design"
-            >
-              <span className="ms text-[20px]" aria-hidden>add</span>
-            </Link>
-          )}
-
-          <nav className={cn("flex flex-col items-center gap-1", user && "mt-5")}>
-            {items.map((d) => {
-              const active = d.match(pathname);
-              return (
-                <Link
-                  key={d.href}
-                  href={d.href}
-                  className="group/d flex flex-col items-center gap-1 py-2 w-full"
-                  title={d.label}
-                >
-                  <span
-                    className={cn(
-                      "grid size-10 place-items-center rounded-2xl transition-colors",
-                      active
-                        ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
-                        : "text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-2))]",
-                    )}
-                  >
-                    <span className={cn("ms text-[20px]", active && "ms-filled")} aria-hidden>{d.icon}</span>
-                  </span>
-                  <span className={cn("text-[9.5px] tracking-wide font-mono uppercase", active ? "text-[hsl(var(--ink))]" : "text-[hsl(var(--ink-3))]")}>
-                    {d.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="mt-auto flex flex-col items-center gap-2 pt-2 border-t border-[hsl(var(--line))]">
-            <Link
-              href="/legal/privacy"
-              className="text-[9.5px] font-mono uppercase tracking-wide text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]"
-              title="Legal"
-            >
-              §
-            </Link>
-          </div>
-        </aside>
-
-        {/* Main slot */}
-        <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-[hsl(var(--paper-2))]">
-          {children}
-        </main>
-      </div>
+      {/* ─────────────────── MAIN ─────────────────── */}
+      <main className="flex-1 min-w-0 min-h-0 flex flex-col bg-[hsl(var(--paper-2))]">
+        {children}
+      </main>
     </div>
   );
 }
