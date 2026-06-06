@@ -47,10 +47,11 @@ export async function getOrCreateUserDoc(args: {
   const ref = adminDb.collection("users").doc(args.uid);
   const snap = await ref.get();
   const now = Date.now();
+  const WELCOME_DESIGNS = 1;
+  const WELCOME_CREDITS = WELCOME_DESIGNS * RUN_COST_CREDITS;
+  const reason = `Welcome — ${WELCOME_DESIGNS} free design to start`;
 
   if (!snap.exists) {
-    const WELCOME_DESIGNS = 3;
-    const WELCOME_CREDITS = WELCOME_DESIGNS * RUN_COST_CREDITS;
     const newUser: UserDoc = {
       uid: args.uid,
       email: args.email,
@@ -64,19 +65,40 @@ export async function getOrCreateUserDoc(args: {
     };
     await ref.set(newUser);
 
-    // Ledger entry for the granted credits
     await adminDb.collection("ledger").add({
       uid: args.uid,
       type: "grant",
       delta: WELCOME_CREDITS,
       balanceAfter: WELCOME_CREDITS,
-      reason: `Welcome — ${WELCOME_DESIGNS} free designs to start`,
+      reason,
       createdAt: now,
     });
 
     return newUser;
   }
 
+  // Existing user — backfill the welcome grant for accounts that
+  // never received one (legacy sign-ups before this flow existed).
+  const existing = snap.data() as UserDoc;
+  if (!existing.freeCreditGranted) {
+    const currentCredits = existing.credits ?? 0;
+    const nextBalance = currentCredits + WELCOME_CREDITS;
+    await ref.update({
+      credits: nextBalance,
+      freeCreditGranted: true,
+      lastSeenAt: now,
+    });
+    await adminDb.collection("ledger").add({
+      uid: args.uid,
+      type: "grant",
+      delta: WELCOME_CREDITS,
+      balanceAfter: nextBalance,
+      reason,
+      createdAt: now,
+    });
+    return { ...existing, credits: nextBalance, freeCreditGranted: true, lastSeenAt: now };
+  }
+
   await ref.update({ lastSeenAt: now });
-  return snap.data() as UserDoc;
+  return existing;
 }

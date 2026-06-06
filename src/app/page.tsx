@@ -12,7 +12,7 @@ export default async function HomePage() {
   const user = await getSessionUser();
   const signedIn = !!user;
   const primaryHref = signedIn ? "/studio" : "/login?next=/studio";
-  const primaryLabel = signedIn ? "Open studio" : "Start free — 3 designs on us";
+  const primaryLabel = signedIn ? "Open studio" : "Start free — first design on us";
 
   return (
     <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
@@ -23,7 +23,7 @@ export default async function HomePage() {
             <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1 text-[11.5px]">
               <span className="size-1.5 rounded-full bg-[hsl(var(--accent))]" />
               <span className="font-mono uppercase tracking-[0.16em] text-[hsl(var(--ink-2))]">
-                3 free designs · no credit card
+                First design free · no credit card
               </span>
             </span>
             <span className="hidden md:inline section-num">§ Volume 01 · Issue 05</span>
@@ -52,7 +52,7 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-6 text-[12.5px] text-[hsl(var(--ink-3))]">
-            Google sign-in. Three designs free, no card. Then ₹299 a design — no subscription, no seats, refunded if a run fails.
+            Google sign-in. Your first design free, no card. Then ₹299 a design — no subscription, no seats, refunded if a run fails.
           </p>
 
           <div className="mt-20 grid grid-cols-2 gap-x-10 gap-y-6 md:grid-cols-4 border-t border-[hsl(var(--line))] pt-10">
@@ -282,7 +282,7 @@ export default async function HomePage() {
 
           <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
             <h2 className="display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[18ch]">
-              Three designs on us.{" "}
+              First design on us.{" "}
               <span className="serif italic accent">Then ₹299 each.</span>
             </h2>
             <div>
@@ -292,7 +292,7 @@ export default async function HomePage() {
                 no subscription, no seats, no annual lock-in. Failed runs auto-refund.
               </p>
               <ul className="mt-8 grid gap-3 text-[14px]">
-                <Bullet>3 free designs the moment you sign in</Bullet>
+                <Bullet>1 free design the moment you sign in</Bullet>
                 <Bullet>₹299 / design — packs of 3 (₹800) and 10 (₹2,699)</Bullet>
                 <Bullet>Failed runs refund automatically</Bullet>
                 <Bullet>Credits never expire</Bullet>
@@ -321,7 +321,7 @@ export default async function HomePage() {
             <span className="serif font-normal italic accent">Get a design.</span>
           </h2>
           <p className="mx-auto mt-10 max-w-[52ch] text-[16px] leading-[1.6] text-[hsl(var(--ink-2))]">
-            Your first three architectures are free. No credit card. Bring a system,
+            Your first architecture is free. No credit card. Bring a system,
             leave with a report you can ship.
           </p>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-4">

@@ -30,7 +30,7 @@ export default async function PricingPage() {
           <p className="text-[17px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[40ch]">
             One design — a complete architecture report — costs <strong>40 credits</strong>.
             Buy credits in packs. They never expire. Failed runs auto-refund.
-            New accounts start with <strong>3 free designs</strong>.
+            New accounts start with <strong>1 free design</strong>.
           </p>
         </div>
       </section>
