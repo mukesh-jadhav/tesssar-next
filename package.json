@@ -29,6 +29,9 @@
     "@react-pdf/renderer": "^4.1.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-zoom": "^3.0.0",
     "firebase": "^11.1.0",
     "firebase-admin": "^13.0.2",
     "geist": "^1.7.2",
@@ -45,6 +48,9 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.8",
+    "@types/d3-zoom": "^3.0.8",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
