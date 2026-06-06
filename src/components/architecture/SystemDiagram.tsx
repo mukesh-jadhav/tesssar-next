@@ -54,7 +54,7 @@ const NODE_GAP_Y = 22;            // vertical gap between cards within a lane
 const LANE_HEADER_H = 56;         // height reserved at top of each lane for label
 const LANE_GAP = 28;              // gap between lane columns
 const DIAGRAM_PAD = 40;
-const NODE_RX = 10;
+const NODE_RX = 2;
 
 function laneOf(cat: Cat): string {
   for (const l of LANES) if (l.cats.includes(cat)) return l.id;
@@ -268,13 +268,13 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                 y={l.y}
                 width={l.w}
                 height={l.h}
-                rx={14}
-                ry={14}
+                rx={2}
+                ry={2}
                 fill="hsl(var(--paper))"
-                stroke="hsl(var(--line))"
+                stroke="hsl(var(--ink) / 0.08)"
                 strokeDasharray="2 3"
               />
-              <text x={l.x + 18} y={l.y + 24} className="ed-eyebrow" fill="hsl(var(--accent))">
+              <text x={l.x + 18} y={l.y + 24} className="ed-eyebrow" fill="hsl(var(--ink) / 0.55)">
                 § {romanize(l.n + 1)}
               </text>
               <text x={l.x + 18} y={l.y + 42} className="ed-lane" fill="hsl(var(--ink))">
@@ -286,7 +286,7 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                 y={l.y + 24}
                 textAnchor="end"
                 className="ed-stamp"
-                fill="hsl(var(--ink-3))"
+                fill="hsl(var(--ink) / 0.4)"
               >
                 {String(placed.filter((p) => p.lane === l.id).length).padStart(2, "0")}
               </text>
@@ -340,18 +340,16 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                 onMouseLeave={() => setHovered(null)}
                 className="cursor-pointer"
               >
-                <rect x={2} y={3} width={n.w} height={n.h} rx={NODE_RX} ry={NODE_RX} fill="hsl(var(--ink))" opacity={0.06} />
                 <rect
                   width={n.w}
                   height={n.h}
                   rx={NODE_RX}
                   ry={NODE_RX}
                   fill="hsl(var(--paper))"
-                  stroke={isHot ? "hsl(var(--accent))" : "hsl(var(--ink))"}
-                  strokeWidth={isHot ? 1.5 : 1.1}
+                  stroke={isHot ? "hsl(var(--ink) / 0.55)" : "hsl(var(--ink) / 0.18)"}
+                  strokeWidth={1}
                 />
-                <rect x={0} y={0} width={4} height={n.h} rx={NODE_RX} ry={NODE_RX} fill="hsl(var(--accent))" opacity={isHot ? 1 : 0.85} />
-                <text x={14} y={20} className="ed-stamp" fill="hsl(var(--ink-3))">
+                <text x={14} y={20} className="ed-stamp" fill="hsl(var(--ink) / 0.45)">
                   {String(i + 1).padStart(2, "0")}
                 </text>
                 <text
@@ -359,14 +357,14 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                   y={24}
                   className="ed-icon"
                   textAnchor="end"
-                  fill={isHot ? "hsl(var(--accent))" : "hsl(var(--ink-3))"}
+                  fill={isHot ? "hsl(var(--ink))" : "hsl(var(--ink) / 0.5)"}
                 >
                   {CAT_ICON[n.comp.category]}
                 </text>
                 <text x={14} y={46} className="ed-title" fill="hsl(var(--ink))">
                   {trim(n.comp.name, 24)}
                 </text>
-                <text x={14} y={66} className="ed-tech" fill="hsl(var(--ink-3))">
+                <text x={14} y={66} className="ed-tech" fill="hsl(var(--ink) / 0.55)">
                   {trim(n.comp.technology.split(",")[0], 32)}
                 </text>
               </g>
