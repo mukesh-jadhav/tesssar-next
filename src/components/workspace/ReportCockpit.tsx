@@ -6,18 +6,46 @@ import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
-import type { Architecture, Risk } from "@/types/architecture";
+import type {
+  AppliedPattern,
+  ArchComponent,
+  Architecture,
+  DataFlow,
+  Risk,
+  SecurityControl,
+  TechChoice,
+} from "@/types/architecture";
 
 /**
  * ReportCockpit — the architecture report rendered as a bounded,
  * single-screen cockpit. The shell wraps this; nothing here grows
  * the page. Only the active chapter panel scrolls internally; the
- * Brief inspector on the right is always fully visible.
+ * inspector on the right is always visible and changes its content
+ * based on whatever the user last clicked anywhere in the cockpit.
  */
 
 type ChapterId =
   | "design" | "diagrams" | "brief" | "pieces" | "traffic" | "numbers"
   | "breaks" | "guards" | "watch" | "next";
+
+/**
+ * Selection — what's currently being inspected in the right panel.
+ * Every clickable item across all chapters narrows to one of these.
+ * `null` means "show the default Brief card".
+ */
+export type Selection =
+  | { kind: "component"; id: string }
+  | { kind: "flow"; step: number }
+  | { kind: "risk"; id: string }
+  | { kind: "pattern"; index: number }
+  | { kind: "api"; index: number }
+  | { kind: "tech"; index: number }
+  | { kind: "security"; index: number }
+  | { kind: "diagram"; id: string }
+  | { kind: "node"; label: string; subLabel?: string }
+  | null;
+
+export type SelectHandler = (s: Selection) => void;
 
 const CHAPTERS: { id: ChapterId; n: string; label: string }[] = [
   { id: "design",   n: "01", label: "Design"   },
@@ -50,8 +78,8 @@ export function ReportCockpit({
 }) {
   const [chapter, setChapter] = useState<ChapterId>("design");
   const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
+  const [selection, setSelection] = useState<Selection>(null);
   const currentDiagram = arch.diagrams.find((d) => d.id === activeDiagram) ?? arch.diagrams[0];
-  const isDiagramChapter = chapter === "design" || chapter === "diagrams";
 
   // Split exec summary into a lead sentence (headline) + body paragraph.
   const summary = arch.executive_summary.trim();
@@ -98,81 +126,48 @@ export function ReportCockpit({
       </div>
 
       {/* ─────────────── Body: canvas + inspector ─────────────── */}
-      <div
-        className={cn(
-          "flex-1 min-h-0 grid grid-cols-1",
-          // Design + Diagrams need the full canvas to read; every other
-          // chapter sits next to the Brief inspector on xl screens.
-          isDiagramChapter ? "xl:grid-cols-1" : "xl:grid-cols-[1fr_360px]",
-        )}
-      >
+      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_360px]">
         {/* Canvas */}
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
-          <div className={cn(isDiagramChapter ? "p-4 md:p-6 lg:p-8" : "p-6 md:p-8 lg:p-10")}>
-            {chapter === "design"   && <SystemDiagram arch={arch} />}
+          <div className="p-6 md:p-8 lg:p-10">
+            {chapter === "design"   && <SystemDiagram arch={arch} onSelect={setSelection} selectedId={selection?.kind === "component" ? selection.id : null} />}
             {chapter === "diagrams" && (
               <DiagramsPanel
                 diagrams={arch.diagrams}
                 active={activeDiagram}
-                onActive={setActiveDiagram}
+                onActive={(id) => { setActiveDiagram(id); setSelection({ kind: "diagram", id }); }}
                 current={currentDiagram}
+                onSelect={setSelection}
+                arch={arch}
               />
             )}
-            {chapter === "brief"   && <BriefPanel arch={arch} />}
-            {chapter === "pieces"  && <PiecesPanel arch={arch} />}
-            {chapter === "traffic" && <TrafficPanel arch={arch} />}
+            {chapter === "brief"   && <BriefPanel arch={arch} onSelect={setSelection} selection={selection} />}
+            {chapter === "pieces"  && <PiecesPanel arch={arch} onSelect={setSelection} selection={selection} />}
+            {chapter === "traffic" && <TrafficPanel arch={arch} onSelect={setSelection} selection={selection} />}
             {chapter === "numbers" && <NumbersPanel arch={arch} />}
-            {chapter === "breaks"  && <RisksPanel arch={arch} />}
-            {chapter === "guards"  && <GuardsPanel arch={arch} />}
+            {chapter === "breaks"  && <RisksPanel arch={arch} onSelect={setSelection} selection={selection} />}
+            {chapter === "guards"  && <GuardsPanel arch={arch} onSelect={setSelection} selection={selection} />}
             {chapter === "watch"   && <WatchPanel arch={arch} />}
             {chapter === "next"    && <NextPanel arch={arch} />}
           </div>
         </section>
 
-        {/* Inspector — Brief, hidden on diagram-first chapters */}
-        {!isDiagramChapter && (
+        {/* Inspector — context-aware. Defaults to the Brief, but switches
+            to whatever the user last clicked on (component, flow, risk,
+            pattern, api, security control, tech choice, diagram, or raw
+            diagram node). */}
         <aside className="hidden xl:flex flex-col min-h-0 border-l border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
           <div className="flex-1 min-h-0 overflow-auto scrollbar-thin">
-            <div className="p-6 lg:p-7 flex flex-col gap-6">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="section-num text-[10.5px]">§ Brief</span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
-                  {arch.meta.domain}
-                </span>
-              </div>
-
-              <div className="relative">
-                <span
-                  aria-hidden
-                  className="absolute -left-1 -top-6 serif italic accent text-[64px] leading-none select-none"
-                >
-                  “
-                </span>
-                <h2 className="display-tight text-[clamp(1.4rem,1.9vw,1.85rem)] leading-[1.02] tracking-[-0.03em]">
-                  {lead}
-                </h2>
-              </div>
-
-              {body && (
-                <p className="text-[13.5px] leading-[1.55] text-[hsl(var(--ink-2))]">
-                  {body}
-                </p>
-              )}
-
-              <p className="serif italic text-[14px] leading-[1.4] text-[hsl(var(--ink-2))] border-t border-[hsl(var(--line))] pt-4">
-                {arch.meta.one_liner}
-              </p>
-
-              <dl className="grid grid-cols-4 gap-x-3 border-t border-[hsl(var(--line))] pt-5">
-                <Ticker n={arch.components.length} k="comp." />
-                <Ticker n={arch.diagrams.length}   k="diag." />
-                <Ticker n={arch.risks.length}      k="risks" />
-                <Ticker n={arch.api_surface.length} k="APIs" />
-              </dl>
-            </div>
+            <ContextInspector
+              arch={arch}
+              selection={selection}
+              onClear={() => setSelection(null)}
+              onSelect={setSelection}
+              lead={lead}
+              body={body}
+            />
           </div>
         </aside>
-        )}
       </div>
     </div>
   );
@@ -187,11 +182,15 @@ function DiagramsPanel({
   active,
   onActive,
   current,
+  onSelect,
+  arch,
 }: {
   diagrams: Architecture["diagrams"];
   active: string;
   onActive: (id: string) => void;
   current?: Architecture["diagrams"][number];
+  onSelect: SelectHandler;
+  arch: Architecture;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -230,14 +229,23 @@ function DiagramsPanel({
               {current.description}
             </p>
           </div>
-          <EditorialDiagram chart={current.mermaid} />
+          <EditorialDiagram
+            chart={current.mermaid}
+            onSelect={(node) => {
+              // Try to resolve to a real component first so the inspector
+              // can show full details; fall back to a raw "node" selection.
+              const match = resolveComponent(arch, node.label);
+              onSelect(match ? { kind: "component", id: match.id } : { kind: "node", label: node.label, subLabel: node.subLabel });
+            }}
+          />
         </>
       )}
     </div>
   );
 }
 
-function BriefPanel({ arch }: { arch: Architecture }) {
+function BriefPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
+  const selPattern = selection?.kind === "pattern" ? selection.index : -1;
   return (
     <div className="flex flex-col gap-8">
       <PanelHead n="02a" title="Requirements" />
@@ -251,27 +259,45 @@ function BriefPanel({ arch }: { arch: Architecture }) {
       <PanelHead n="02b" title="Cloud design patterns applied" />
       <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2">
         {arch.applied_patterns.map((p, i) => (
-          <div key={i} className="bg-[hsl(var(--paper))] p-5">
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSelect({ kind: "pattern", index: i })}
+            className={cn(
+              "text-left bg-[hsl(var(--paper))] p-5 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+              selPattern === i && "ring-1 ring-[hsl(var(--accent))]/60 ring-inset bg-[hsl(var(--paper-2))]/40",
+            )}
+          >
             <div className="flex items-baseline justify-between gap-3">
               <h4 className="display text-[16px] tracking-[-0.02em]">{p.name}</h4>
               <span className="tag !h-5 !text-[10px]">{p.category}</span>
             </div>
             <p className="mt-2 text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{p.why}</p>
             <p className="mt-2 text-[11px] font-mono text-[hsl(var(--accent))]">→ {p.where}</p>
-          </div>
+          </button>
         ))}
       </div>
     </div>
   );
 }
 
-function PiecesPanel({ arch }: { arch: Architecture }) {
+function PiecesPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
+  const selId = selection?.kind === "component" ? selection.id : null;
+  const selTech = selection?.kind === "tech" ? selection.index : -1;
   return (
     <div className="flex flex-col gap-8">
       <PanelHead n="03a" title={`${arch.components.length} services, working together`} />
       <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2 2xl:grid-cols-3">
         {arch.components.map((c, i) => (
-          <div key={c.id} className="bg-[hsl(var(--paper))] p-5 flex flex-col gap-2">
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => onSelect({ kind: "component", id: c.id })}
+            className={cn(
+              "text-left bg-[hsl(var(--paper))] p-5 flex flex-col gap-2 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+              selId === c.id && "ring-1 ring-[hsl(var(--accent))]/60 ring-inset bg-[hsl(var(--paper-2))]/40",
+            )}
+          >
             <div className="flex items-baseline justify-between gap-2">
               <div className="flex items-baseline gap-2 min-w-0">
                 <span className="font-mono text-[10px] tabular-nums text-[hsl(var(--ink-3))]">
@@ -289,14 +315,14 @@ function PiecesPanel({ arch }: { arch: Architecture }) {
               <p className="eyebrow">Scaling</p>
               <p className="mt-1 text-[12px] text-[hsl(var(--ink))]">{c.scaling}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
 
       <PanelHead n="03b" title="Tech stack rationale" />
       <DataTable
         headers={["Layer", "Choice", "Why", "Alternatives"]}
-        rows={arch.tech_stack.map((t) => [
+        rows={arch.tech_stack.map((t, i) => [
           <span key="l" className="font-medium">{t.layer}</span>,
           <span key="c" className="font-mono text-[12px]">{t.choice}</span>,
           <span key="w" className="text-[hsl(var(--ink-2))]">{t.rationale}</span>,
@@ -306,34 +332,47 @@ function PiecesPanel({ arch }: { arch: Architecture }) {
             ))}
           </div>,
         ])}
+        onRowClick={(i) => onSelect({ kind: "tech", index: i })}
+        selectedRow={selTech}
       />
     </div>
   );
 }
 
-function TrafficPanel({ arch }: { arch: Architecture }) {
+function TrafficPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
+  const selStep = selection?.kind === "flow" ? selection.step : -1;
+  const selApi = selection?.kind === "api" ? selection.index : -1;
   return (
     <div className="flex flex-col gap-8">
       <PanelHead n="04a" title="Primary data flow" />
       <ol className="divide-y divide-[hsl(var(--line))] border-y border-[hsl(var(--line))]">
         {arch.data_flows.map((f) => (
-          <li key={f.step} className="grid grid-cols-[auto_1fr] gap-5 py-4">
-            <span className="display text-[28px] tracking-[-0.04em] text-[hsl(var(--ink-3))] tabular-nums w-10">
-              {String(f.step).padStart(2, "0")}
-            </span>
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="display text-[15px] tracking-[-0.02em]">{f.from}</span>
-                <span className="ms text-[14px] text-[hsl(var(--ink-3))]" aria-hidden>arrow_forward</span>
-                <span className="display text-[15px] tracking-[-0.02em]">{f.to}</span>
-                <span className="tag !h-5 !text-[10px]">{f.protocol}</span>
-                {f.latency_budget_ms !== undefined && (
-                  <span className="tag tag-accent !h-5 !text-[10px]">{f.latency_budget_ms}ms</span>
-                )}
+          <li key={f.step}>
+            <button
+              type="button"
+              onClick={() => onSelect({ kind: "flow", step: f.step })}
+              className={cn(
+                "w-full text-left grid grid-cols-[auto_1fr] gap-5 py-4 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+                selStep === f.step && "bg-[hsl(var(--paper-2))]/40",
+              )}
+            >
+              <span className="display text-[28px] tracking-[-0.04em] text-[hsl(var(--ink-3))] tabular-nums w-10">
+                {String(f.step).padStart(2, "0")}
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="display text-[15px] tracking-[-0.02em]">{f.from}</span>
+                  <span className="ms text-[14px] text-[hsl(var(--ink-3))]" aria-hidden>arrow_forward</span>
+                  <span className="display text-[15px] tracking-[-0.02em]">{f.to}</span>
+                  <span className="tag !h-5 !text-[10px]">{f.protocol}</span>
+                  {f.latency_budget_ms !== undefined && (
+                    <span className="tag tag-accent !h-5 !text-[10px]">{f.latency_budget_ms}ms</span>
+                  )}
+                </div>
+                <p className="mt-1 text-[13px] text-[hsl(var(--ink-2))]">{f.action}</p>
+                <p className="mt-0.5 font-mono text-[10.5px] text-[hsl(var(--ink-3))]">{f.payload}</p>
               </div>
-              <p className="mt-1 text-[13px] text-[hsl(var(--ink-2))]">{f.action}</p>
-              <p className="mt-0.5 font-mono text-[10.5px] text-[hsl(var(--ink-3))]">{f.payload}</p>
-            </div>
+            </button>
           </li>
         ))}
       </ol>
@@ -374,6 +413,8 @@ function TrafficPanel({ arch }: { arch: Architecture }) {
           <span key="a" className="text-[12px]">{a.auth}</span>,
           <span key="rl" className="text-[12px] text-[hsl(var(--ink-3))]">{a.rate_limit ?? "—"}</span>,
         ])}
+        onRowClick={(i) => onSelect({ kind: "api", index: i })}
+        selectedRow={selApi}
       />
     </div>
   );
@@ -403,32 +444,42 @@ function NumbersPanel({ arch }: { arch: Architecture }) {
   );
 }
 
-function RisksPanel({ arch }: { arch: Architecture }) {
+function RisksPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
+  const selId = selection?.kind === "risk" ? selection.id : null;
   return (
     <div className="flex flex-col gap-6">
       <PanelHead n="06" title={`${arch.risks.length} ways this can go wrong — and the mitigation`} />
       <ul className="divide-y divide-[hsl(var(--line))] border-y border-[hsl(var(--line))]">
         {arch.risks.map((r, i) => (
-          <li key={r.id} className="py-5 grid grid-cols-[auto_1fr] gap-5">
-            <span className="display text-[28px] tracking-[-0.04em] text-[hsl(var(--ink-3))] tabular-nums w-10">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <div>
-              <div className="flex flex-wrap items-start justify-between gap-2">
-                <h4 className="display text-[16px] tracking-[-0.02em]">{r.title}</h4>
-                <div className="flex flex-wrap gap-1.5">
-                  <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
-                    {r.impact} impact
-                  </span>
-                  <span className="tag !h-5 !text-[10px]">{r.likelihood} likely</span>
-                  <span className="tag !h-5 !text-[10px]">{r.category}</span>
-                </div>
-              </div>
-              <p className="mt-2 text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{r.mitigation}</p>
-              {r.cloud_pattern && (
-                <p className="mt-1.5 text-[11px] font-mono text-[hsl(var(--accent))]">→ Pattern: {r.cloud_pattern}</p>
+          <li key={r.id}>
+            <button
+              type="button"
+              onClick={() => onSelect({ kind: "risk", id: r.id })}
+              className={cn(
+                "w-full text-left py-5 grid grid-cols-[auto_1fr] gap-5 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+                selId === r.id && "bg-[hsl(var(--paper-2))]/40",
               )}
-            </div>
+            >
+              <span className="display text-[28px] tracking-[-0.04em] text-[hsl(var(--ink-3))] tabular-nums w-10">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <h4 className="display text-[16px] tracking-[-0.02em]">{r.title}</h4>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
+                      {r.impact} impact
+                    </span>
+                    <span className="tag !h-5 !text-[10px]">{r.likelihood} likely</span>
+                    <span className="tag !h-5 !text-[10px]">{r.category}</span>
+                  </div>
+                </div>
+                <p className="mt-2 text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{r.mitigation}</p>
+                {r.cloud_pattern && (
+                  <p className="mt-1.5 text-[11px] font-mono text-[hsl(var(--accent))]">→ Pattern: {r.cloud_pattern}</p>
+                )}
+              </div>
+            </button>
           </li>
         ))}
       </ul>
@@ -436,13 +487,22 @@ function RisksPanel({ arch }: { arch: Architecture }) {
   );
 }
 
-function GuardsPanel({ arch }: { arch: Architecture }) {
+function GuardsPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
+  const selIndex = selection?.kind === "security" ? selection.index : -1;
   return (
     <div className="flex flex-col gap-6">
       <PanelHead n="07" title="Identity, isolation, secrets, audit" />
       <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2">
         {arch.security.map((s, i) => (
-          <div key={i} className="bg-[hsl(var(--paper))] p-5">
+          <button
+            key={i}
+            type="button"
+            onClick={() => onSelect({ kind: "security", index: i })}
+            className={cn(
+              "text-left bg-[hsl(var(--paper))] p-5 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+              selIndex === i && "ring-1 ring-[hsl(var(--accent))]/60 ring-inset bg-[hsl(var(--paper-2))]/40",
+            )}
+          >
             <div className="flex items-center justify-between gap-2">
               <span className="tag !h-5 !text-[10px]">{s.area}</span>
               {s.gcp_service && (
@@ -451,7 +511,7 @@ function GuardsPanel({ arch }: { arch: Architecture }) {
             </div>
             <h4 className="display mt-3 text-[15px] tracking-[-0.02em]">{s.control}</h4>
             <p className="mt-1.5 text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{s.implementation}</p>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -593,7 +653,17 @@ function BulletList({ items, muted }: { items: string[]; muted?: boolean }) {
   );
 }
 
-function DataTable({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
+function DataTable({
+  headers,
+  rows,
+  onRowClick,
+  selectedRow,
+}: {
+  headers: string[];
+  rows: React.ReactNode[][];
+  onRowClick?: (i: number) => void;
+  selectedRow?: number;
+}) {
   return (
     <div className="overflow-x-auto border border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
       <table className="w-full text-[12.5px]">
@@ -608,7 +678,15 @@ function DataTable({ headers, rows }: { headers: string[]; rows: React.ReactNode
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-t border-[hsl(var(--line))] align-top">
+            <tr
+              key={i}
+              onClick={onRowClick ? () => onRowClick(i) : undefined}
+              className={cn(
+                "border-t border-[hsl(var(--line))] align-top",
+                onRowClick && "cursor-pointer transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+                selectedRow === i && "bg-[hsl(var(--paper-2))]/40",
+              )}
+            >
               {row.map((cell, j) => (
                 <td key={j} className="py-3 px-4">{cell}</td>
               ))}
@@ -637,5 +715,358 @@ function DDef({ k, v }: { k: string; v: string }) {
       <p className="eyebrow">{k}</p>
       <p className="mt-1.5 text-[13.5px] font-medium text-[hsl(var(--ink))]">{v}</p>
     </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Context inspector — what the right panel shows
+   ════════════════════════════════════════════════════════════════ */
+
+/** Fuzzy-resolve a free-form node label (from a Mermaid diagram or data
+ *  flow row) back to a real component, so the inspector can pull up
+ *  full details. Returns undefined if there's no plausible match. */
+function resolveComponent(arch: Architecture, ref: string): ArchComponent | undefined {
+  const r = ref.toLowerCase().trim();
+  if (!r) return;
+  const exact = arch.components.find((c) => c.name.toLowerCase() === r);
+  if (exact) return exact;
+  for (const c of arch.components) if (r.includes(c.name.toLowerCase())) return c;
+  for (const c of arch.components) if (c.name.toLowerCase().includes(r)) return c;
+  for (const c of arch.components) if (c.technology.toLowerCase().includes(r)) return c;
+  const tokens = r.split(/[^a-z0-9]+/).filter((t) => t.length > 3);
+  if (!tokens.length) return;
+  for (const c of arch.components) {
+    const hay = `${c.name} ${c.technology}`.toLowerCase();
+    if (tokens.every((t) => hay.includes(t))) return c;
+  }
+  return;
+}
+
+function ContextInspector({
+  arch,
+  selection,
+  onClear,
+  onSelect,
+  lead,
+  body,
+}: {
+  arch: Architecture;
+  selection: Selection;
+  onClear: () => void;
+  onSelect: SelectHandler;
+  lead: string;
+  body: string;
+}) {
+  if (!selection) {
+    return <InspectorBrief arch={arch} lead={lead} body={body} />;
+  }
+  switch (selection.kind) {
+    case "component": {
+      const c = arch.components.find((x) => x.id === selection.id);
+      if (!c) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorComponent c={c} arch={arch} onClear={onClear} onSelect={onSelect} />;
+    }
+    case "flow": {
+      const f = arch.data_flows.find((x) => x.step === selection.step);
+      if (!f) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorFlow f={f} arch={arch} onClear={onClear} onSelect={onSelect} />;
+    }
+    case "risk": {
+      const r = arch.risks.find((x) => x.id === selection.id);
+      if (!r) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorRisk r={r} onClear={onClear} />;
+    }
+    case "pattern": {
+      const p = arch.applied_patterns[selection.index];
+      if (!p) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorPattern p={p} onClear={onClear} />;
+    }
+    case "api": {
+      const a = arch.api_surface[selection.index];
+      if (!a) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorApi a={a} onClear={onClear} />;
+    }
+    case "tech": {
+      const t = arch.tech_stack[selection.index];
+      if (!t) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorTech t={t} onClear={onClear} />;
+    }
+    case "security": {
+      const s = arch.security[selection.index];
+      if (!s) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorSecurity s={s} onClear={onClear} />;
+    }
+    case "diagram": {
+      const d = arch.diagrams.find((x) => x.id === selection.id);
+      if (!d) return <InspectorBrief arch={arch} lead={lead} body={body} />;
+      return <InspectorDiagram d={d} onClear={onClear} />;
+    }
+    case "node": {
+      return <InspectorNode label={selection.label} subLabel={selection.subLabel} onClear={onClear} />;
+    }
+  }
+}
+
+function InspectorShell({ eyebrow, title, sub, onClear, children }: {
+  eyebrow: string;
+  title: string;
+  sub?: string;
+  onClear: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="p-6 lg:p-7 flex flex-col gap-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="section-num text-[10.5px]">§ {eyebrow}</span>
+        <button
+          type="button"
+          onClick={onClear}
+          className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] transition-colors"
+          title="Back to brief"
+        >
+          ← brief
+        </button>
+      </div>
+      <div>
+        <h2 className="display-tight text-[clamp(1.25rem,1.8vw,1.7rem)] leading-[1.05] tracking-[-0.02em]">
+          {title}
+        </h2>
+        {sub && (
+          <p className="mt-1.5 font-mono text-[10.5px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+            {sub}
+          </p>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function InspectorField({ k, v, mono }: { k: string; v: React.ReactNode; mono?: boolean }) {
+  return (
+    <div className="border-t border-[hsl(var(--line))] pt-3">
+      <p className="eyebrow">{k}</p>
+      <div className={cn("mt-1 text-[13px] leading-[1.5] text-[hsl(var(--ink))]", mono && "font-mono text-[12px]")}>
+        {v}
+      </div>
+    </div>
+  );
+}
+
+function InspectorBrief({ arch, lead, body }: { arch: Architecture; lead: string; body: string }) {
+  return (
+    <div className="p-6 lg:p-7 flex flex-col gap-6">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="section-num text-[10.5px]">§ Brief</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+          {arch.meta.domain}
+        </span>
+      </div>
+
+      <div className="relative">
+        <span aria-hidden className="absolute -left-1 -top-6 serif italic accent text-[64px] leading-none select-none">
+          “
+        </span>
+        <h2 className="display-tight text-[clamp(1.4rem,1.9vw,1.85rem)] leading-[1.02] tracking-[-0.03em]">
+          {lead}
+        </h2>
+      </div>
+
+      {body && (
+        <p className="text-[13.5px] leading-[1.55] text-[hsl(var(--ink-2))]">{body}</p>
+      )}
+
+      <p className="serif italic text-[14px] leading-[1.4] text-[hsl(var(--ink-2))] border-t border-[hsl(var(--line))] pt-4">
+        {arch.meta.one_liner}
+      </p>
+
+      <dl className="grid grid-cols-4 gap-x-3 border-t border-[hsl(var(--line))] pt-5">
+        <Ticker n={arch.components.length} k="comp." />
+        <Ticker n={arch.diagrams.length}   k="diag." />
+        <Ticker n={arch.risks.length}      k="risks" />
+        <Ticker n={arch.api_surface.length} k="APIs" />
+      </dl>
+
+      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))] border-t border-[hsl(var(--line))] pt-4">
+        Tip · click any card, diagram node, flow row or risk for details here.
+      </p>
+    </div>
+  );
+}
+
+function InspectorComponent({
+  c, arch, onClear, onSelect,
+}: { c: ArchComponent; arch: Architecture; onClear: () => void; onSelect: SelectHandler }) {
+  const relatedFlows = arch.data_flows.filter(
+    (f) => f.from.toLowerCase().includes(c.name.toLowerCase()) || f.to.toLowerCase().includes(c.name.toLowerCase()),
+  );
+  return (
+    <InspectorShell eyebrow="Component" title={c.name} sub={c.category} onClear={onClear}>
+      <InspectorField k="Technology" v={c.technology} mono />
+      <InspectorField k="Responsibility" v={c.responsibility} />
+      <InspectorField k="Scaling" v={c.scaling} />
+      {c.alternatives.length > 0 && (
+        <InspectorField
+          k="Alternatives"
+          v={
+            <div className="flex flex-wrap gap-1">
+              {c.alternatives.map((a) => (
+                <span key={a} className="tag !h-5 !px-2 !text-[10px]">{a}</span>
+              ))}
+            </div>
+          }
+        />
+      )}
+      {relatedFlows.length > 0 && (
+        <InspectorField
+          k={`In ${relatedFlows.length} flow${relatedFlows.length === 1 ? "" : "s"}`}
+          v={
+            <ul className="space-y-1.5">
+              {relatedFlows.slice(0, 6).map((f) => (
+                <li key={f.step}>
+                  <button
+                    type="button"
+                    onClick={() => onSelect({ kind: "flow", step: f.step })}
+                    className="w-full text-left text-[12px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] hover:underline underline-offset-2"
+                  >
+                    <span className="font-mono text-[10px] text-[hsl(var(--ink-3))] mr-2 tabular-nums">
+                      {String(f.step).padStart(2, "0")}
+                    </span>
+                    {f.from} → {f.to}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          }
+        />
+      )}
+    </InspectorShell>
+  );
+}
+
+function InspectorFlow({
+  f, arch, onClear, onSelect,
+}: { f: DataFlow; arch: Architecture; onClear: () => void; onSelect: SelectHandler }) {
+  const fromComp = resolveComponent(arch, f.from);
+  const toComp = resolveComponent(arch, f.to);
+  return (
+    <InspectorShell
+      eyebrow={`Flow · step ${String(f.step).padStart(2, "0")}`}
+      title={f.action}
+      sub={f.protocol}
+      onClear={onClear}
+    >
+      <InspectorField
+        k="From"
+        v={
+          fromComp ? (
+            <button
+              type="button"
+              onClick={() => onSelect({ kind: "component", id: fromComp.id })}
+              className="text-[hsl(var(--ink))] hover:underline underline-offset-2"
+            >
+              {f.from}
+            </button>
+          ) : f.from
+        }
+      />
+      <InspectorField
+        k="To"
+        v={
+          toComp ? (
+            <button
+              type="button"
+              onClick={() => onSelect({ kind: "component", id: toComp.id })}
+              className="text-[hsl(var(--ink))] hover:underline underline-offset-2"
+            >
+              {f.to}
+            </button>
+          ) : f.to
+        }
+      />
+      <InspectorField k="Payload" v={f.payload} mono />
+      {f.latency_budget_ms !== undefined && (
+        <InspectorField k="Latency budget" v={`${f.latency_budget_ms} ms`} mono />
+      )}
+    </InspectorShell>
+  );
+}
+
+function InspectorRisk({ r, onClear }: { r: Risk; onClear: () => void }) {
+  return (
+    <InspectorShell
+      eyebrow={`Risk · ${r.category}`}
+      title={r.title}
+      sub={`${r.impact} impact · ${r.likelihood} likely`}
+      onClear={onClear}
+    >
+      <InspectorField k="Mitigation" v={r.mitigation} />
+      {r.cloud_pattern && <InspectorField k="Pattern" v={r.cloud_pattern} mono />}
+    </InspectorShell>
+  );
+}
+
+function InspectorPattern({ p, onClear }: { p: AppliedPattern; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow="Pattern" title={p.name} sub={p.category} onClear={onClear}>
+      <InspectorField k="Why" v={p.why} />
+      <InspectorField k="Where" v={p.where} mono />
+    </InspectorShell>
+  );
+}
+
+type ApiEntry = Architecture["api_surface"][number];
+function InspectorApi({ a, onClear }: { a: ApiEntry; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow="API" title={`${a.method} ${a.path}`} sub={a.auth} onClear={onClear}>
+      <InspectorField k="Purpose" v={a.purpose} />
+      {a.rate_limit && <InspectorField k="Rate limit" v={a.rate_limit} mono />}
+    </InspectorShell>
+  );
+}
+
+function InspectorTech({ t, onClear }: { t: TechChoice; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow="Tech choice" title={t.choice} sub={t.layer} onClear={onClear}>
+      <InspectorField k="Why" v={t.rationale} />
+      {t.alternatives.length > 0 && (
+        <InspectorField
+          k="Alternatives"
+          v={
+            <div className="flex flex-wrap gap-1">
+              {t.alternatives.map((a) => (
+                <span key={a} className="tag !h-5 !px-2 !text-[10px]">{a}</span>
+              ))}
+            </div>
+          }
+        />
+      )}
+    </InspectorShell>
+  );
+}
+
+function InspectorSecurity({ s, onClear }: { s: SecurityControl; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow={`Security · ${s.area}`} title={s.control} sub={s.gcp_service} onClear={onClear}>
+      <InspectorField k="Implementation" v={s.implementation} />
+    </InspectorShell>
+  );
+}
+
+function InspectorDiagram({ d, onClear }: { d: Architecture["diagrams"][number]; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow="Diagram" title={d.title} sub={d.kind.replace(/-/g, " ")} onClear={onClear}>
+      <InspectorField k="What it shows" v={d.description} />
+    </InspectorShell>
+  );
+}
+
+function InspectorNode({ label, subLabel, onClear }: { label: string; subLabel?: string; onClear: () => void }) {
+  return (
+    <InspectorShell eyebrow="Diagram node" title={label} sub={subLabel} onClear={onClear}>
+      <p className="font-mono text-[10.5px] uppercase tracking-wider text-[hsl(var(--ink-3))] border-t border-[hsl(var(--line))] pt-3">
+        No matching component in the brief.
+      </p>
+    </InspectorShell>
   );
 }

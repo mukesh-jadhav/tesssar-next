@@ -64,15 +64,20 @@ const FLOW_LAYOUT_DEFAULTS: FlowLayoutConfig = {
   paddingY: 14,
 };
 
+export type DiagramNodeSelection = { id: string; label: string; subLabel?: string };
+
 export function EditorialDiagram({
   chart,
   className,
   layout,
+  onSelect,
 }: {
   chart: string;
   className?: string;
   /** Optional override of layout knobs — lets a project tune spacing. */
   layout?: Partial<FlowLayoutConfig>;
+  /** Fired when the user clicks any node inside the diagram. */
+  onSelect?: (node: DiagramNodeSelection) => void;
 }) {
   const graph = useMemo(() => parseMermaid(stripClassDefs(chart)), [chart]);
   const cfg: FlowLayoutConfig = { ...FLOW_LAYOUT_DEFAULTS, ...layout };
@@ -85,9 +90,9 @@ export function EditorialDiagram({
       </div>
     );
   }
-  if (graph.kind === "flow") return <FlowCanvas graph={graph} cfg={cfg} className={className} />;
-  if (graph.kind === "sequence") return <SequenceCanvas graph={graph} className={className} />;
-  return <ErCanvas graph={graph} className={className} />;
+  if (graph.kind === "flow") return <FlowCanvas graph={graph} cfg={cfg} className={className} onSelect={onSelect} />;
+  if (graph.kind === "sequence") return <SequenceCanvas graph={graph} className={className} onSelect={onSelect} />;
+  return <ErCanvas graph={graph} className={className} onSelect={onSelect} />;
 }
 
 /* ════════════════════════ shared helpers ════════════════════════ */
@@ -245,7 +250,7 @@ const ARROW_DEFS = (
 
 /* ════════════════════════ FLOW ════════════════════════ */
 
-function FlowCanvas({ graph, cfg, className }: { graph: FlowGraph; cfg: FlowLayoutConfig; className?: string }) {
+function FlowCanvas({ graph, cfg, className, onSelect }: { graph: FlowGraph; cfg: FlowLayoutConfig; className?: string; onSelect?: (n: DiagramNodeSelection) => void }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
@@ -345,6 +350,7 @@ function FlowCanvas({ graph, cfg, className }: { graph: FlowGraph; cfg: FlowLayo
                 transform={`translate(${n.x}, ${n.y})`}
                 onMouseEnter={() => setHovered(n.id)}
                 onMouseLeave={() => setHovered(null)}
+                onClick={() => onSelect?.({ id: n.id, label: splitFirst(n.label), subLabel: splitRest(n.label) })}
                 className="cursor-pointer"
               >
                 {isDecision ? (
@@ -603,7 +609,7 @@ const SEQ_HEADER_Y = 36;
 const SEQ_ROW_H = 56;
 const SEQ_PAD = 32;
 
-function SequenceCanvas({ graph, className }: { graph: SequenceGraph; className?: string }) {
+function SequenceCanvas({ graph, className, onSelect }: { graph: SequenceGraph; className?: string; onSelect?: (n: DiagramNodeSelection) => void }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
   const zoomBehavior = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
@@ -644,7 +650,12 @@ function SequenceCanvas({ graph, className }: { graph: SequenceGraph; className?
           {layout.participants.map((p, i) => {
             const slug = techLogo(p.label);
             return (
-              <g key={p.id} transform={`translate(${p.x}, ${p.y})`}>
+              <g
+                key={p.id}
+                transform={`translate(${p.x}, ${p.y})`}
+                onClick={() => onSelect?.({ id: p.id, label: p.label })}
+                className={onSelect ? "cursor-pointer" : undefined}
+              >
                 <rect
                   width={SEQ_PARTICIPANT_W} height={SEQ_PARTICIPANT_H}
                   rx={2} ry={2}
@@ -786,7 +797,7 @@ const ER_FIELD_H = 18;
 const ER_PAD = 36;
 const ER_GAP = 32;
 
-function ErCanvas({ graph, className }: { graph: ErGraph; className?: string }) {
+function ErCanvas({ graph, className, onSelect }: { graph: ErGraph; className?: string; onSelect?: (n: DiagramNodeSelection) => void }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
   const zoomBehavior = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
@@ -829,7 +840,12 @@ function ErCanvas({ graph, className }: { graph: ErGraph; className?: string }) 
 
           {/* Entities */}
           {layout.entities.map((ent, idx) => (
-            <g key={ent.id} transform={`translate(${ent.x}, ${ent.y})`}>
+            <g
+              key={ent.id}
+              transform={`translate(${ent.x}, ${ent.y})`}
+              onClick={() => onSelect?.({ id: ent.id, label: ent.id, subLabel: `${ent.fields.length} fields` })}
+              className={onSelect ? "cursor-pointer" : undefined}
+            >
               <rect width={ent.w} height={ent.h} rx={2} ry={2} fill="hsl(var(--paper))" stroke="hsl(var(--ink) / 0.18)" />
               <rect width={ent.w} height={ER_HEAD} rx={2} ry={2} fill="hsl(var(--paper-2))" stroke="hsl(var(--ink) / 0.18)" />
               <text x={12} y={20} className="ed-stamp" fill="hsl(var(--ink) / 0.45)">{String(idx + 1).padStart(2, "0")}</text>

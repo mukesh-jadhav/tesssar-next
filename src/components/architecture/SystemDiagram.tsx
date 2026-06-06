@@ -133,7 +133,15 @@ function buildResolver(arch: Architecture) {
 type Placed = { id: string; comp: ArchComponent; x: number; y: number; w: number; h: number; lane: string };
 type Lane = { id: string; label: string; x: number; y: number; w: number; h: number; n: number };
 
-export function SystemDiagram({ arch }: { arch: Architecture }) {
+export function SystemDiagram({
+  arch,
+  onSelect,
+  selectedId,
+}: {
+  arch: Architecture;
+  onSelect?: (sel: { kind: "component"; id: string }) => void;
+  selectedId?: string | null;
+}) {
   const [hovered, setHovered] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const gRef = useRef<SVGGElement | null>(null);
@@ -473,6 +481,7 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
           {/* Nodes */}
           {placed.map((n, i) => {
             const isHot = hovered === n.id;
+            const isSelected = selectedId === n.id;
             const slug = techLogo(`${n.comp.name} ${n.comp.technology}`);
             return (
               <g
@@ -480,6 +489,7 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                 transform={`translate(${n.x}, ${n.y})`}
                 onMouseEnter={() => setHovered(n.id)}
                 onMouseLeave={() => setHovered(null)}
+                onClick={() => onSelect?.({ kind: "component", id: n.id })}
                 className="cursor-pointer"
               >
                 <rect
@@ -487,9 +497,9 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
                   height={n.h}
                   rx={NODE_RX}
                   ry={NODE_RX}
-                  fill="hsl(var(--paper))"
-                  stroke={isHot ? "hsl(var(--ink) / 0.55)" : "hsl(var(--ink) / 0.18)"}
-                  strokeWidth={1}
+                  fill={isSelected ? "hsl(var(--paper-2))" : "hsl(var(--paper))"}
+                  stroke={isSelected ? "hsl(var(--accent))" : isHot ? "hsl(var(--ink) / 0.55)" : "hsl(var(--ink) / 0.18)"}
+                  strokeWidth={isSelected ? 1.5 : 1}
                 />
                 <text x={14} y={20} className="ed-stamp" fill="hsl(var(--ink) / 0.45)">
                   {String(i + 1).padStart(2, "0")}
