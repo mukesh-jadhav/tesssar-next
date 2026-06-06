@@ -92,13 +92,13 @@ function techLogo(tech: string): string | null {
 const LOGO_INK = "1A1C22";
 
 // --- Layout constants -------------------------------------------------------
-const NODE_W = 224;
-const NODE_H = 112;
-const LANE_PAD_X = 20;            // horizontal padding inside each lane band
-const NODE_GAP_Y = 22;            // vertical gap between cards within a lane
-const LANE_HEADER_H = 62;         // height reserved at top of each lane for label + subtitle
-const LANE_GAP = 32;              // gap between lane columns (room for edge labels)
-const DIAGRAM_PAD = 30;
+const NODE_W = 220;
+const NODE_H = 116;
+const LANE_PAD_X = 22;            // horizontal padding inside each lane band
+const NODE_GAP_Y = 28;            // vertical gap between cards within a lane
+const LANE_HEADER_H = 64;         // height reserved at top of each lane for label + subtitle
+const LANE_GAP = 88;              // wide gutter so edge labels live without overlapping cards
+const DIAGRAM_PAD = 32;
 const NODE_RX = 2;
 
 function laneOf(cat: Cat): string {
@@ -397,61 +397,37 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
             );
           })}
 
-          {/* Edge labels (above edges, below nodes) */}
+          {/* Edge labels (above edges, below nodes) — single uppercase mono
+              chip on paper halo, matching the Diagrams-tab style. */}
           {edges.map((e) => {
             if (!e.label) return null;
             const hot = hovered && (hovered === e.from || hovered === e.to);
-            const stepTxt = e.label.step != null ? String(e.label.step).padStart(2, "0") : null;
-            const verb = trim(e.label.verb, 16);
-            const proto = e.label.proto ? trim(e.label.proto, 8) : null;
-            // Approximate width based on character count (mono ~6.4px @ 9.5px
-            // with the 0.06em tracking we set on .ed-edge).
-            const verbW = verb.length * 6.4;
-            const stepW = stepTxt ? 18 : 0;
-            const protoW = proto ? proto.length * 6.0 + 10 : 0;
-            const pad = 7;
-            const gap = 6;
-            const w = pad * 2 + stepW + (stepW ? gap : 0) + verbW + (proto ? gap + protoW : 0);
-            const h = 17;
+            const verb = trim(e.label.verb, 18);
+            // Approximate width (mono ~6.4px @ 9.5px + 0.06em tracking).
+            const w = verb.length * 6.4 + 14;
+            const h = 16;
             const x = e.label.x - w / 2;
             const y = e.label.y - h / 2;
             return (
               <g key={`lbl-${e.id}`} className={cn("transition-opacity", hovered && !hot && "opacity-15")}>
-                <rect x={x} y={y} width={w} height={h} rx={1.5} ry={1.5}
+                <rect
+                  x={x}
+                  y={y}
+                  width={w}
+                  height={h}
                   fill="hsl(var(--paper))"
-                  stroke="hsl(var(--ink) / 0.12)"
+                  stroke="hsl(var(--ink) / 0.10)"
                   strokeWidth={0.75}
                 />
-                {stepTxt && (
-                  <text x={x + pad} y={y + h / 2 + 3.2} className="ed-step" fill="hsl(var(--accent))">
-                    {stepTxt}
-                  </text>
-                )}
-                <text x={x + pad + stepW + (stepW ? gap : 0)} y={y + h / 2 + 3.2} className="ed-edge" fill="hsl(var(--ink) / 0.72)">
+                <text
+                  x={e.label.x}
+                  y={e.label.y + 3.4}
+                  textAnchor="middle"
+                  className="ed-edge"
+                  fill="hsl(var(--ink) / 0.7)"
+                >
                   {verb}
                 </text>
-                {proto && (
-                  <g>
-                    <rect
-                      x={x + w - pad - protoW + 2}
-                      y={y + 3}
-                      width={protoW - 4}
-                      height={h - 6}
-                      rx={1}
-                      ry={1}
-                      fill="hsl(var(--ink) / 0.06)"
-                    />
-                    <text
-                      x={x + w - pad}
-                      y={y + h / 2 + 3.2}
-                      textAnchor="end"
-                      className="ed-proto"
-                      fill="hsl(var(--ink) / 0.7)"
-                    >
-                      {proto}
-                    </text>
-                  </g>
-                )}
               </g>
             );
           })}
@@ -525,16 +501,14 @@ export function SystemDiagram({ arch }: { arch: Architecture }) {
 
         <style>{`
           .ed-eyebrow { font: 700 9.5px/1 var(--font-mono), monospace; letter-spacing: 0.22em; text-transform: uppercase; }
-          .ed-lane    { font: 600 14px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
+          .ed-lane    { font: 600 15px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
           .ed-sub     { font: 500 10.5px/1 var(--font-mono), monospace; letter-spacing: 0.04em; text-transform: uppercase; }
           .ed-stamp   { font: 500 10px/1 var(--font-mono), monospace; letter-spacing: 0.08em; }
           .ed-icon    { font: 18px/1 'Material Symbols Outlined'; font-feature-settings: 'liga'; }
-          .ed-title   { font: 600 14px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
+          .ed-title   { font: 600 14.5px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
           .ed-tech    { font: 500 10.5px/1 var(--font-mono), monospace; letter-spacing: 0.04em; text-transform: uppercase; }
-          .ed-resp    { font: 400 11px/1.25 var(--font-sans), system-ui, sans-serif; letter-spacing: -0.005em; }
-          .ed-step    { font: 700 9px/1 var(--font-mono), monospace; letter-spacing: 0.08em; }
-          .ed-edge    { font: 500 9.5px/1 var(--font-mono), monospace; letter-spacing: 0.06em; text-transform: uppercase; }
-          .ed-proto   { font: 600 8.5px/1 var(--font-mono), monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+          .ed-resp    { font: 400 11.5px/1.3 var(--font-sans), system-ui, sans-serif; letter-spacing: -0.005em; }
+          .ed-edge    { font: 600 10px/1 var(--font-mono), monospace; letter-spacing: 0.08em; text-transform: uppercase; }
         `}</style>
       </svg>
 
@@ -652,16 +626,25 @@ function trim(s: string, max: number): string {
   return s.length > max ? s.slice(0, max - 1) + "…" : s;
 }
 
-/** Boil an action sentence down to a short imperative verb phrase. */
+/** Boil an action sentence down to a 1–2 word imperative verb phrase that
+ *  fits inside the inter-lane gutter (≈14 chars / ~80px). */
 function edgeVerb(action: string | undefined): string {
   if (!action) return "";
   const cleaned = action
     .replace(/^(the|a|an)\s+/i, "")
     .replace(/[.!?]+\s*$/, "")
     .trim();
-  // Take the first clause / before a comma or "to" so we keep the verb phrase.
-  const cut = cleaned.split(/[,;]| (?:to|in order to|when|so that|because) /i)[0];
-  return cut.trim();
+  // First clause only.
+  const head = cleaned
+    .split(/[,;:]| (?:to|in order to|when|so that|because|via|over|on|into|from|using|with|of) /i)[0]
+    .trim();
+  // Real word tokens only (drop "+", "&", "/", etc.).
+  const words = head.split(/\s+/).filter((w) => /[a-z0-9]/i.test(w));
+  if (!words.length) return "";
+  let phrase = words.slice(0, 2).join(" ");
+  if (phrase.length > 14 && words.length > 1) phrase = words[0];
+  if (phrase.length > 14) phrase = phrase.slice(0, 13) + "…";
+  return phrase;
 }
 
 /** Compact a protocol name into a 4-12 char chip. */

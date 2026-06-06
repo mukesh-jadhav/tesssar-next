@@ -51,6 +51,7 @@ export function ReportCockpit({
   const [chapter, setChapter] = useState<ChapterId>("design");
   const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
   const currentDiagram = arch.diagrams.find((d) => d.id === activeDiagram) ?? arch.diagrams[0];
+  const isDiagramChapter = chapter === "design" || chapter === "diagrams";
 
   // Split exec summary into a lead sentence (headline) + body paragraph.
   const summary = arch.executive_summary.trim();
@@ -97,10 +98,17 @@ export function ReportCockpit({
       </div>
 
       {/* ─────────────── Body: canvas + inspector ─────────────── */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-[1fr_360px]">
+      <div
+        className={cn(
+          "flex-1 min-h-0 grid grid-cols-1",
+          // Design + Diagrams need the full canvas to read; every other
+          // chapter sits next to the Brief inspector on xl screens.
+          isDiagramChapter ? "xl:grid-cols-1" : "xl:grid-cols-[1fr_360px]",
+        )}
+      >
         {/* Canvas */}
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
-          <div className="p-6 md:p-8 lg:p-10">
+          <div className={cn(isDiagramChapter ? "p-4 md:p-6 lg:p-8" : "p-6 md:p-8 lg:p-10")}>
             {chapter === "design"   && <SystemDiagram arch={arch} />}
             {chapter === "diagrams" && (
               <DiagramsPanel
@@ -121,7 +129,8 @@ export function ReportCockpit({
           </div>
         </section>
 
-        {/* Inspector — Brief, always visible */}
+        {/* Inspector — Brief, hidden on diagram-first chapters */}
+        {!isDiagramChapter && (
         <aside className="hidden xl:flex flex-col min-h-0 border-l border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
           <div className="flex-1 min-h-0 overflow-auto scrollbar-thin">
             <div className="p-6 lg:p-7 flex flex-col gap-6">
@@ -163,6 +172,7 @@ export function ReportCockpit({
             </div>
           </div>
         </aside>
+        )}
       </div>
     </div>
   );

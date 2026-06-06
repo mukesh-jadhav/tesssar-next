@@ -173,13 +173,13 @@ function ZoomControls({ onIn, onOut, onFit }: { onIn: () => void; onOut: () => v
 
 const TYPO_CSS = `
   .ed-eyebrow { font: 700 9.5px/1 var(--font-mono), monospace; letter-spacing: 0.22em; text-transform: uppercase; }
-  .ed-lane    { font: 600 13px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
+  .ed-lane    { font: 600 15px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
   .ed-stamp   { font: 500 10px/1 var(--font-mono), monospace; letter-spacing: 0.08em; }
-  .ed-title   { font: 600 13.5px/1.15 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
+  .ed-title   { font: 600 14.5px/1.15 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
   .ed-tech    { font: 500 10.5px/1 var(--font-mono), monospace; letter-spacing: 0.04em; text-transform: uppercase; }
-  .ed-edge    { font: 500 10px/1 var(--font-mono), monospace; letter-spacing: 0.04em; text-transform: uppercase; }
-  .ed-actor   { font: 600 12.5px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
-  .ed-note    { font: 400 11px/1.3 var(--font-ui), system-ui, sans-serif; }
+  .ed-edge    { font: 600 10px/1 var(--font-mono), monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+  .ed-actor   { font: 600 13px/1 var(--font-display), system-ui, sans-serif; letter-spacing: -0.02em; }
+  .ed-note    { font: 400 11.5px/1.3 var(--font-ui), system-ui, sans-serif; }
   .ed-field   { font: 500 10.5px/1 var(--font-mono), monospace; letter-spacing: 0.02em; }
   .ed-key     { font: 700 8.5px/1 var(--font-mono), monospace; letter-spacing: 0.12em; }
 `;
