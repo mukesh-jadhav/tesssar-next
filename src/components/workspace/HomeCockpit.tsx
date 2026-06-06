@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
+import { signInWithGoogle } from "@/lib/firebase/client";
 
 /**
  * HomeCockpit — single-screen home for the workspace.
@@ -39,22 +40,35 @@ export function HomeCockpit({
 }) {
   const router = useRouter();
   const [brief, setBrief] = useState("");
+  const [busy, setBusy] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const tooShort = brief.trim().length < 30;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (tooShort) {
       toast.error("Add at least a sentence or two so the architect can work.");
       return;
     }
+    const seed = encodeURIComponent(brief);
+    const target = `/new?seed=${seed}`;
+
     if (!signedIn) {
-      // Seed the brief into login → /new flow.
-      const seed = encodeURIComponent(brief);
-      router.push(`/login?seed=${seed}`);
+      // One-click: pop Google, set the session cookie, hard-nav to /new so
+      // SSR picks up the fresh cookie (router.push keeps stale RSC cache).
+      setBusy(true);
+      try {
+        await signInWithGoogle();
+        window.location.href = target;
+      } catch (err) {
+        setBusy(false);
+        const msg = (err as Error).message || "Sign-in failed";
+        // Popup-closed is a deliberate user action — don't shout.
+        if (!/popup-closed|cancelled-popup/i.test(msg)) toast.error(msg);
+      }
       return;
     }
-    const seed = encodeURIComponent(brief);
-    router.push(`/new?seed=${seed}`);
+
+    router.push(target);
   }
 
   return (
@@ -105,7 +119,7 @@ export function HomeCockpit({
               <span className="text-[11.5px] text-[hsl(var(--ink-3))]">
                 {signedIn
                   ? "1 credit · refunded on failure"
-                  : "Sign in to design — sample is free to explore"}
+                  : "First run is free — we'll sign you in with Google"}
               </span>
               <div className="flex items-center gap-3">
                 <kbd className="hidden md:inline-flex items-center rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-2 py-1 text-[10.5px] font-mono text-[hsl(var(--ink-3))]">
@@ -114,16 +128,25 @@ export function HomeCockpit({
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={tooShort}
+                  disabled={tooShort || busy}
                   className={cn(
                     "btn-pill press",
-                    tooShort
+                    tooShort || busy
                       ? "!bg-[hsl(var(--paper-3))] !text-[hsl(var(--ink-3))] !border-[hsl(var(--paper-3))] cursor-not-allowed"
                       : "btn-pill-accent",
                   )}
                 >
-                  Design it
-                  <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
+                  {busy ? (
+                    <>
+                      <span className="ms text-[18px] animate-spin" aria-hidden>progress_activity</span>
+                      Signing in
+                    </>
+                  ) : (
+                    <>
+                      Design it
+                      <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
