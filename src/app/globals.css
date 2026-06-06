@@ -132,6 +132,9 @@
   }
 
   * { border-color: hsl(var(--border)); }
+  /* Hide scrollbars globally; scrolling still works */
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+  *::-webkit-scrollbar { width: 0; height: 0; display: none; }
   html, body { height: 100%; }
   html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
   body {
