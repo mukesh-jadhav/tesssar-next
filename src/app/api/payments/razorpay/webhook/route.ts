@@ -1,21 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/razorpay/client";
-import { adminDb } from "@/lib/firebase/admin";
-import { grantCredits } from "@/lib/credits/ledger";
+import { applyPaidTransaction, TransactionMissingError } from "@/lib/credits/ledger";
 import { getPack } from "@/lib/razorpay/packs";
 import { sendReceiptEmail } from "@/lib/email/resend";
-import type { TransactionDoc } from "@/types/architecture";
+import { requestLogger } from "@/lib/security/log";
 
 export const runtime = "nodejs";
 
 /**
  * Razorpay webhook handler — defensive double-credit guard in case the
  * client-side verify route never fires (user closes tab on success page).
+ * Idempotency is enforced by `applyPaidTransaction` (refId-keyed ledger
+ * lookup inside a Firestore transaction), so the verify route and this
+ * webhook can race without ever double-crediting the user.
  */
 export async function POST(req: NextRequest) {
+  const log = requestLogger(req, "pay-webhook");
   const raw = await req.text();
   const signature = req.headers.get("x-razorpay-signature") ?? "";
   if (!verifyWebhookSignature(raw, signature)) {
+    log.warn("invalid webhook signature");
     return new NextResponse("Invalid signature", { status: 400 });
   }
 
@@ -34,39 +38,38 @@ export async function POST(req: NextRequest) {
   const txId = notes.txId;
   if (!txId) return NextResponse.json({ ok: true, reason: "no txId in notes" });
 
-  const txRef = adminDb.collection("transactions").doc(txId);
-  const snap = await txRef.get();
-  if (!snap.exists) return NextResponse.json({ ok: true, reason: "tx missing" });
-  const tx = snap.data() as TransactionDoc;
-  if (tx.status === "paid") return NextResponse.json({ ok: true, idempotent: true });
+  try {
+    const result = await applyPaidTransaction({
+      txId,
+      expectedUid: null, // webhook has no session; HMAC + txId-in-notes is the trust boundary
+      razorpayPaymentId: entity.id,
+      reason: "credit pack purchase (webhook)",
+    });
 
-  const pack = getPack(tx.packId);
-  if (!pack) return new NextResponse("Pack missing", { status: 500 });
+    if (result.alreadyApplied) {
+      return NextResponse.json({ ok: true, idempotent: true });
+    }
 
-  await txRef.update({
-    status: "paid",
-    paidAt: Date.now(),
-    razorpayPaymentId: entity.id,
-  });
+    const txDoc = result.tx;
+    const pack = getPack(txDoc.packId);
+    if (txDoc.email && pack) {
+      sendReceiptEmail({
+        to: txDoc.email,
+        displayName: null,
+        packName: pack.name,
+        credits: pack.credits,
+        amountPaise: txDoc.amountPaise,
+        paymentId: entity.id,
+      }).catch((e) => log.error("receipt email failed", { err: (e as Error).message }));
+    }
 
-  await grantCredits({
-    uid: tx.uid,
-    credits: tx.credits,
-    reason: `${pack.name} pack purchase (webhook)`,
-    transactionId: tx.id,
-    amountPaise: tx.amountPaise,
-  });
-
-  if (tx.email) {
-    sendReceiptEmail({
-      to: tx.email,
-      displayName: null,
-      packName: pack.name,
-      credits: pack.credits,
-      amountPaise: tx.amountPaise,
-      paymentId: entity.id,
-    }).catch((e) => console.error("Receipt email (webhook) failed", e));
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    if (err instanceof TransactionMissingError) {
+      // Razorpay retries on non-2xx; we genuinely have no record, so ack to stop retries.
+      return NextResponse.json({ ok: true, reason: "tx missing" });
+    }
+    log.error("settle failed", { err: (err as Error).message });
+    return new NextResponse("Settle failed", { status: 500 });
   }
-
-  return NextResponse.json({ ok: true });
 }

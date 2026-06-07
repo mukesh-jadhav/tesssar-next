@@ -130,7 +130,7 @@ export default async function DashboardPage() {
       {/* Quick start */}
       <section className="mt-24">
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-          <p className="section-num">§ Quick start</p>
+          <p className="section-num">Quick start</p>
           <p className="eyebrow hidden md:inline">Tap to compose</p>
         </div>
 
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
       {recent.length > 0 && (
         <section className="mt-24">
           <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-            <p className="section-num">§ From your library</p>
+            <p className="section-num">From your library</p>
             <Link href="/history" className="eyebrow ulgrow">View all →</Link>
           </div>
 

@@ -406,7 +406,7 @@ function FlowCanvas({ graph, cfg, className, onSelect }: { graph: FlowGraph; cfg
 
       <Corner pos="tl" label="D-02" />
       <Corner pos="tr" label="REV A" />
-      <Corner pos="bl" label="§ Tessar" />
+      <Corner pos="bl" label="Tessar" />
       <Corner pos="br" label={`${layout.nodes.length} parts · ${layout.edges.length} wires`} />
 
       <ZoomControls onIn={() => zoomBy(1.2)} onOut={() => zoomBy(1 / 1.2)} onFit={fit} />
@@ -713,7 +713,7 @@ function SequenceCanvas({ graph, className, onSelect }: { graph: SequenceGraph; 
               return (
                 <g key={i}>
                   <rect x={it.x} y={it.y} width={it.w} height={it.h} fill="hsl(var(--paper-2))" stroke="hsl(var(--ink) / 0.18)" rx={2} ry={2} />
-                  <text x={it.x + 12} y={it.y + 16} className="ed-stamp" fill="hsl(var(--accent))">§ note</text>
+                  <text x={it.x + 12} y={it.y + 16} className="ed-stamp" fill="hsl(var(--accent))">note</text>
                   <text x={it.x + 12} y={it.y + 32} className="ed-note" fill="hsl(var(--ink))">{trim(it.text, 100)}</text>
                 </g>
               );
@@ -726,7 +726,7 @@ function SequenceCanvas({ graph, className, onSelect }: { graph: SequenceGraph; 
 
       <Corner pos="tl" label="D-02" />
       <Corner pos="tr" label="REV A" />
-      <Corner pos="bl" label="§ Tessar" />
+      <Corner pos="bl" label="Tessar" />
       <Corner pos="br" label={`${layout.participants.length} actors · ${layout.items.length} steps`} />
       <ZoomControls onIn={() => zoomBy(1.2)} onOut={() => zoomBy(1 / 1.2)} onFit={fit} />
     </div>
@@ -871,7 +871,7 @@ function ErCanvas({ graph, className, onSelect }: { graph: ErGraph; className?: 
 
       <Corner pos="tl" label="D-02" />
       <Corner pos="tr" label="REV A" />
-      <Corner pos="bl" label="§ Tessar" />
+      <Corner pos="bl" label="Tessar" />
       <Corner pos="br" label={`${layout.entities.length} entities · ${layout.edges.length} relations`} />
       <ZoomControls onIn={() => zoomBy(1.2)} onOut={() => zoomBy(1 / 1.2)} onFit={fit} />
     </div>

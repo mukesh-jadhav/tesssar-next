@@ -295,6 +295,11 @@ export interface ArchitectureDoc {
     tokens: number;
     updatedAt: number;
   };
+  /** Set when the owner pays to publish a read-only public link. */
+  publicShare?: {
+    slug: string;
+    createdAt: number;
+  };
 }
 
 export interface TransactionDoc {

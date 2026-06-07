@@ -1,10 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, SESSION_COOKIE_NAME, SESSION_MAX_AGE_MS } from "@/lib/firebase/admin";
 import { getOrCreateUserDoc } from "@/lib/firebase/auth";
+import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  // Sign-in is expensive (token verify + Firestore write); cap per-IP to
+  // absorb brute-force attempts against stolen ID tokens.
+  const guard = rateLimit({
+    key: `auth-session:ip:${clientIp(req)}`,
+    limit: 10,
+    windowMs: 60_000,
+  });
+  if (!guard.ok) return rateLimitResponse(guard);
+
   try {
     const { idToken } = (await req.json()) as { idToken?: string };
     if (!idToken) {
@@ -42,14 +52,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const e = err as { code?: string; message?: string };
     console.error("[/api/auth/session] failed:", e?.code, e?.message);
-    return NextResponse.json(
-      {
-        error: "Sign-in failed",
-        code: e?.code ?? "unknown",
-        detail: e?.message ?? String(err),
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Sign-in failed" }, { status: 500 });
   }
 }
 

@@ -41,7 +41,7 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tessar.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tessar.dev"),
   title: {
     default: "Tessar — AI Cloud Architect",
     template: "%s · Tessar",

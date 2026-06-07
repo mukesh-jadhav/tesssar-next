@@ -383,7 +383,7 @@ export function SystemDiagram({
                   strokeDasharray="2 3"
                 />
                 <text x={l.x + 18} y={l.y + 22} className="ed-eyebrow" fill="hsl(var(--ink) / 0.55)">
-                  § {romanize(l.n + 1)}
+                  {romanize(l.n + 1)}
                 </text>
                 <text x={l.x + 18} y={l.y + 42} className="ed-lane" fill="hsl(var(--ink))">
                   {l.label}
@@ -562,7 +562,7 @@ export function SystemDiagram({
 
       <Corner pos="tl" label="D-01" />
       <Corner pos="tr" label="REV A" />
-      <Corner pos="bl" label="§ Tessar" />
+      <Corner pos="bl" label="Tessar" />
       <Corner pos="br" label={`${arch.components.length} parts · ${edges.length} wires`} />
 
       <div className="absolute right-3 bottom-3 flex flex-col items-stretch border border-[hsl(var(--line-2))] bg-[hsl(var(--paper))] rounded-md overflow-hidden">

@@ -113,13 +113,17 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
       try {
         const mermaid = (await import("mermaid")).default;
         if (!mermaidInitialized) {
+          // securityLevel: "strict" runs labels through mermaid's bundled
+          // DOMPurify sanitizer; htmlLabels: false means labels render as
+          // SVG <text>, not foreignObject HTML — together they neutralize
+          // prompt-injection → stored-XSS via AI-generated diagram labels.
           mermaid.initialize({
             startOnLoad: false,
             theme: "base",
-            securityLevel: "loose",
+            securityLevel: "strict",
             fontFamily: MERMAID_FONT,
             themeVariables: THEME,
-            flowchart: { curve: "basis", htmlLabels: true, padding: 20 },
+            flowchart: { curve: "basis", htmlLabels: false, padding: 20 },
           });
           mermaidInitialized = true;
         }

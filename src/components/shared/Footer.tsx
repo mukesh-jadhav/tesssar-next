@@ -28,7 +28,7 @@ export function Footer() {
           <FooterCol heading="Resources">
             <FooterLink href="/legal/terms">Terms</FooterLink>
             <FooterLink href="/legal/privacy">Privacy</FooterLink>
-            <FooterLink href="mailto:hello@tessar.app">Contact</FooterLink>
+            <FooterLink href="mailto:hello@tessar.dev">Contact</FooterLink>
           </FooterCol>
 
           <FooterCol heading="From">
@@ -40,7 +40,6 @@ export function Footer() {
 
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-[hsl(var(--line))] pt-6 text-[12px] text-[hsl(var(--ink-3))]">
           <div>© {new Date().getFullYear()} Tessar. All rights reserved.</div>
-          <div className="font-mono uppercase tracking-wider">vol. 01 · issue 05</div>
         </div>
       </div>
     </footer>

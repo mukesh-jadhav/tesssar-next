@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { safeNext } from "@/lib/security/redirect";
 
 export const metadata = { title: "Sign in" };
 
@@ -10,8 +11,12 @@ export default async function LoginPage({
 }: {
   searchParams: { next?: string };
 }) {
+  // Validate the post-auth destination — unvalidated `next` is an
+  // open-redirect (CWE-601) primitive that turns the sign-in page into
+  // a phishing relay.
+  const next = safeNext(searchParams.next, "/studio");
   const user = await getSessionUser();
-  if (user) redirect(searchParams.next || "/studio");
+  if (user) redirect(next);
 
   return (
     <div className="grain relative min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
@@ -32,8 +37,7 @@ export default async function LoginPage({
         {/* LEFT — sign in */}
         <div className="flex items-center justify-center px-6 py-32 md:px-16">
           <div className="m3-page-enter w-full max-w-md">
-            <p className="section-num">§ Volume 01 · Welcome</p>
-            <h1 className="display-tight mt-6 text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">
+            <h1 className="display-tight text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] tracking-[-0.045em]">
               Sign in.<br />
               <span className="serif font-normal italic accent">Start designing.</span>
             </h1>
@@ -43,7 +47,7 @@ export default async function LoginPage({
             </p>
 
             <div className="mt-12">
-              <GoogleSignInButton next={searchParams.next || "/studio"} />
+              <GoogleSignInButton next={next} />
             </div>
 
             <p className="mt-8 text-[13px] text-[hsl(var(--ink-3))]">
@@ -59,7 +63,6 @@ export default async function LoginPage({
           <div className="m-auto w-full max-w-[520px] px-12 py-24">
             <div className="rule-dots pb-3 flex items-baseline justify-between">
               <span className="tag tag-accent">Featured</span>
-              <span className="eyebrow">Issue 05 · pg. 41</span>
             </div>
 
             <p className="display mt-10 text-[clamp(1.8rem,3vw,2.8rem)] leading-[1.1] tracking-[-0.025em]">

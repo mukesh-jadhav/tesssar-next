@@ -38,7 +38,7 @@ export default async function HistoryPage() {
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
-        <span className="tag tag-accent">§ Archive</span>
+        <span className="tag tag-accent">Archive</span>
         <span className="eyebrow hidden md:inline">
           <span className="text-[hsl(var(--ink))] font-medium tabular-nums">{items.length}</span>{" "}
           {items.length === 1 ? "design" : "designs"}
@@ -74,7 +74,7 @@ export default async function HistoryPage() {
             return (
               <section key={label}>
                 <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-                  <p className="section-num">§ {label}</p>
+                  <p className="section-num">{label}</p>
                   <span className="eyebrow tabular-nums">{list.length}</span>
                 </div>
                 <ul className="mt-2 divide-y divide-[hsl(var(--line))]">
@@ -148,7 +148,7 @@ function StatusBadge({ status }: { status: ArchitectureDoc["status"] }) {
 function EmptyState() {
   return (
     <div className="m3-page-enter mt-20 card-paper p-16 text-center">
-      <p className="section-num">§ The library is empty</p>
+      <p className="section-num">The library is empty</p>
       <h2 className="display-tight mt-8 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] tracking-[-0.04em]">
         Nothing in here<br />
         <span className="serif font-normal italic">— yet.</span>

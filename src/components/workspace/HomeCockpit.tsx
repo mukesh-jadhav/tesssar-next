@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
-import { formatDesigns } from "@/lib/credits/display";
+import { canAffordRun, formatDesigns } from "@/lib/credits/display";
 
 /**
  * HomeCockpit — single-screen home for the workspace.
@@ -55,26 +55,53 @@ export function HomeCockpit({
       toast.error("Add at least a sentence or two so the architect can work.");
       return;
     }
-    const seed = encodeURIComponent(brief);
-    const target = `/new?seed=${seed}`;
 
+    // Unsigned: pop Google, then submit. We send the brief via sessionStorage
+    // so the post-sign-in handoff doesn't re-prompt the user to click "Design"
+    // a second time on /new.
     if (!signedIn) {
-      // One-click: pop Google, set the session cookie, hard-nav to /new so
-      // SSR picks up the fresh cookie (router.push keeps stale RSC cache).
       setBusy(true);
       try {
         await signInWithGoogle();
-        window.location.href = target;
+        await startRun(brief);
       } catch (err) {
         setBusy(false);
         const msg = (err as Error).message || "Sign-in failed";
-        // Popup-closed is a deliberate user action — don't shout.
         if (!/popup-closed|cancelled-popup/i.test(msg)) toast.error(msg);
       }
       return;
     }
 
-    router.push(target);
+    // Signed in: gate on credits before spending a click.
+    if (!canAffordRun(credits)) {
+      toast.error("You're out of credits. Top up to continue.");
+      router.push("/pricing");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await startRun(brief);
+    } catch (err) {
+      setBusy(false);
+      toast.error((err as Error).message || "Couldn't start the run.");
+    }
+  }
+
+  async function startRun(briefText: string) {
+    const res = await fetch("/api/architect/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ brief: briefText }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Failed to start generation");
+    }
+    const { id } = (await res.json()) as { id: string };
+    // Hard nav so the SSR page for /architecture/:id picks up the fresh
+    // session cookie (router.push would reuse stale RSC cache for new users).
+    window.location.href = `/architecture/${id}`;
   }
 
   return (
@@ -84,7 +111,7 @@ export function HomeCockpit({
         <div className="h-full flex flex-col p-8 md:p-12 lg:p-14 xl:p-16">
           {/* eyebrow */}
           <div className="flex items-baseline gap-3 mb-6">
-            <span className="section-num">§ Design</span>
+            <span className="section-num">Design</span>
             <span className="text-[12px] text-[hsl(var(--ink-3))]">Cloud architecture, in minutes.</span>
           </div>
 
@@ -94,14 +121,15 @@ export function HomeCockpit({
           </h1>
 
           <p className="mt-5 text-[15px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[58ch]">
-            Plain English in. Production cloud architecture out — diagrams, components,
-            cost tiers, risks, security model. Ready to share in minutes.
+            Loose drafts welcome. The architect reads every line of your brief
+            before drawing the first box — so the more context you give,
+            the sharper the report comes back.
           </p>
 
           {/* Composer */}
           <div className="mt-8 card-paper relative flex flex-col p-5 md:p-6 focus-within:border-[hsl(var(--ink))] transition-colors">
             <div className="flex items-baseline justify-between pb-3 border-b border-[hsl(var(--line))]">
-              <span className="section-num text-[10.5px]">§ Brief</span>
+              <span className="section-num text-[10.5px]">Brief</span>
               <span className="font-mono text-[10px] tabular-nums uppercase tracking-wider text-[hsl(var(--ink-3))]">
                 {brief.length.toLocaleString("en-IN")} / 8,000
               </span>
@@ -154,7 +182,7 @@ export function HomeCockpit({
                   {busy ? (
                     <>
                       <span className="ms text-[18px] animate-spin" aria-hidden>progress_activity</span>
-                      Signing in
+                      {signedIn ? "Starting" : "Signing in"}
                     </>
                   ) : (
                     <>
@@ -179,8 +207,6 @@ export function HomeCockpit({
 
           {/* Spacer pushes nothing — page never scrolls */}
           <div className="mt-auto pt-8 flex items-baseline gap-5 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
-            <span>Vol 01 · Issue 05</span>
-            <span className="opacity-50">·</span>
             <span>Bengaluru · IST</span>
             <span className="opacity-50">·</span>
             <span>Designed in minutes · refunded on failure</span>
@@ -195,7 +221,7 @@ export function HomeCockpit({
             {/* Examples */}
             <div>
               <div className="flex items-baseline justify-between">
-                <span className="section-num text-[10.5px]">§ Examples</span>
+                <span className="section-num text-[10.5px]">Examples</span>
                 <span className="font-mono text-[10px] text-[hsl(var(--ink-3))]">{EXAMPLES.length}</span>
               </div>
               <ul className="mt-4 divide-y divide-[hsl(var(--line))] border-y border-[hsl(var(--line))]">
@@ -227,7 +253,7 @@ export function HomeCockpit({
             {/* Sample shortcut — hidden after the user has their own work */}
             {showSample && (
               <div className="border-t border-[hsl(var(--line))] pt-5">
-                <span className="section-num text-[10.5px]">§ See it built</span>
+                <span className="section-num text-[10.5px]">See it built</span>
                 <h3 className="mt-4 display text-[18px] tracking-[-0.02em]">
                   A complete report for an imaginary product.
                 </h3>
@@ -248,7 +274,7 @@ export function HomeCockpit({
             {/* Credits / account hint */}
             {signedIn && typeof credits === "number" && (
               <div className="border-t border-[hsl(var(--line))] pt-5">
-                <span className="section-num text-[10.5px]">§ Balance</span>
+                <span className="section-num text-[10.5px]">Balance</span>
                 <div className="mt-3 flex items-baseline gap-2">
                   <span className="display-tight text-[40px] leading-none tabular-nums">{formatDesigns(credits)}</span>
                   <span className="eyebrow">designs</span>

@@ -88,7 +88,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
     <div className="m3-page-enter mx-auto w-full max-w-3xl">
       <div className="card-paper relative overflow-hidden p-6 md:p-8 transition-all focus-within:border-[hsl(var(--ink))]">
         <div className="flex items-baseline justify-between pb-4 border-b border-[hsl(var(--line))]">
-          <span className="section-num">§ Brief</span>
+          <span className="section-num">Brief</span>
           <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))] uppercase tracking-wider">
             {brief.length.toLocaleString("en-IN")} / 8,000
           </span>
@@ -157,7 +157,7 @@ export function NewArchitectureForm({ credits, seed }: { credits: number; seed?:
       {/* Examples */}
       <div className="mt-12">
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-4">
-          <span className="section-num">§ Or try one of these</span>
+          <span className="section-num">Or try one of these</span>
         </div>
         <ul className="mt-2 divide-y divide-[hsl(var(--line))]">
           {EXAMPLES.map((ex) => (

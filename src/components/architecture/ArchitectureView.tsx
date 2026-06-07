@@ -45,9 +45,8 @@ export function ArchitectureView({
         <div className="mx-auto w-full max-w-[1480px] flex flex-col flex-1">
           {/* top strip */}
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <span className="tag tag-accent">§ Architecture report · {arch.meta.domain}</span>
+            <span className="tag tag-accent">Architecture report · {arch.meta.domain}</span>
             <div className="flex items-baseline gap-5">
-              <span className="eyebrow hidden md:inline">Vol 01 · Issue 05</span>
               {showDownload && architectureId && (
                 <ExportMenu architectureId={architectureId} size="md" />
               )}
@@ -56,7 +55,7 @@ export function ArchitectureView({
 
           {/* The kicker = project title (small label) */}
           <div className="mt-12 md:mt-16 flex items-baseline gap-4">
-            <span className="section-num">§ Brief</span>
+            <span className="section-num">Brief</span>
             <span className="display text-[clamp(1.1rem,1.6vw,1.45rem)] tracking-[-0.02em] text-[hsl(var(--ink))] truncate">
               {arch.meta.title}
             </span>
@@ -102,7 +101,7 @@ export function ArchitectureView({
         {/* hint to scroll */}
         <div className="mt-10 flex items-center justify-center gap-2 eyebrow text-[hsl(var(--ink-3))]">
           <span className="size-1 rounded-full bg-[hsl(var(--accent))] animate-pulse" />
-          scroll · the work
+          scroll — the work
         </div>
       </section>
 
@@ -469,7 +468,7 @@ export function ArchitectureView({
           <div className="mx-auto w-full max-w-[1480px] px-6 md:px-12 lg:px-20 py-20 md:py-28">
             <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16 items-end">
               <div>
-                <p className="section-num">§ Fin · End of report</p>
+                <p className="section-num">End of report</p>
                 <h3 className="display-tight mt-6 text-[clamp(2.2rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.04em]">
                   Iterate on this design,<br />
                   <span className="serif font-normal italic accent">or start another.</span>
@@ -484,7 +483,7 @@ export function ArchitectureView({
                   Open library
                 </Link>
                 <p className="eyebrow mt-4 text-[hsl(var(--ink-3))]">
-                  Vol 01 · Issue 05 · {arch.meta.domain}
+                  {arch.meta.domain}
                 </p>
               </div>
             </div>
@@ -528,7 +527,7 @@ function ChapterMark({
           </div>
           {/* chapter title block */}
           <div className="mt-6 md:mt-0 md:pb-2 min-w-0">
-            <p className="section-num">§ Chapter {n}</p>
+            <p className="section-num">Chapter {n}</p>
             <h2 className="display-tight mt-3 text-[clamp(2.2rem,5.5vw,5rem)] leading-[0.95] tracking-[-0.045em]">
               {title}
               <span className="accent">.</span>
@@ -558,7 +557,7 @@ function Spread({ children }: { children: React.ReactNode }) {
 function SubHead({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <div className="mt-4 mb-4 flex items-baseline gap-4">
-      <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">§ {n}</span>
+      <span className="font-mono text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">{n}</span>
       <h3 className="display text-[clamp(1.3rem,2vw,1.65rem)] leading-tight tracking-[-0.02em]">
         {children}
       </h3>

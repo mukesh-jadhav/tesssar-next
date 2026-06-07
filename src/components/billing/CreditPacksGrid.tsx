@@ -8,8 +8,22 @@ import { cn, formatINR } from "@/lib/utils";
 
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayOptions) => { open: () => void };
+    Razorpay?: new (options: RazorpayOptions) => {
+      open: () => void;
+      on: (event: string, cb: (resp: RazorpayFailureResponse) => void) => void;
+    };
   }
+}
+
+interface RazorpayFailureResponse {
+  error?: {
+    code?: string;
+    description?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+    metadata?: { order_id?: string; payment_id?: string };
+  };
 }
 
 interface RazorpayOptions {
@@ -92,6 +106,14 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
             setLoadingPackId(null);
           }
         },
+      });
+      rzp.on("payment.failed", (resp) => {
+        const err = resp?.error;
+        const detail = err?.description || err?.reason || err?.code || "Payment failed";
+        const tail = err?.metadata?.payment_id ? ` (ref ${err.metadata.payment_id})` : "";
+        toast.error(`Razorpay: ${detail}${tail}`);
+        console.error("[razorpay] payment.failed", resp);
+        setLoadingPackId(null);
       });
       rzp.open();
     } catch (err) {

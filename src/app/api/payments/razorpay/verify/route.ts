@@ -1,15 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { verifyPaymentSignature } from "@/lib/razorpay/client";
-import { adminDb } from "@/lib/firebase/admin";
-import { grantCredits } from "@/lib/credits/ledger";
+import {
+  applyPaidTransaction,
+  TransactionForbiddenError,
+  TransactionMissingError,
+} from "@/lib/credits/ledger";
 import { sendReceiptEmail } from "@/lib/email/resend";
 import { getPack } from "@/lib/razorpay/packs";
-import type { TransactionDoc } from "@/types/architecture";
+import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
+import { requestLogger } from "@/lib/security/log";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  const log = requestLogger(req, "pay-verify");
+  const ipGuard = rateLimit({
+    key: `pay-verify:ip:${clientIp(req)}`,
+    limit: 20,
+    windowMs: 60_000,
+  });
+  if (!ipGuard.ok) return rateLimitResponse(ipGuard);
+
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,53 +44,45 @@ export async function POST(req: NextRequest) {
     });
     if (!ok) return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
 
-    const txRef = adminDb.collection("transactions").doc(body.txId);
-    const txSnap = await txRef.get();
-    if (!txSnap.exists) return NextResponse.json({ error: "Transaction missing" }, { status: 404 });
-    const tx = txSnap.data() as TransactionDoc;
-    if (tx.uid !== user.uid) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-
-    // Idempotency
-    if (tx.status === "paid") {
-      return NextResponse.json({ ok: true, alreadyPaid: true });
-    }
-
-    const pack = getPack(tx.packId);
-    if (!pack) return NextResponse.json({ error: "Pack unknown" }, { status: 500 });
-
-    await txRef.update({
-      status: "paid",
-      paidAt: Date.now(),
+    const result = await applyPaidTransaction({
+      txId: body.txId,
+      expectedUid: user.uid,
       razorpayPaymentId: body.razorpay_payment_id,
-      razorpaySignature: body.razorpay_signature,
+      // razorpaySignature is intentionally not persisted: it's verified
+      // above via HMAC and has no audit value at rest (Firestore data
+      // exposure would reveal whether the secret has rotated).
+      reason: "credit pack purchase",
     });
 
-    const newBalance = await grantCredits({
-      uid: user.uid,
-      credits: tx.credits,
-      reason: `${pack.name} pack purchase`,
-      transactionId: tx.id,
-      amountPaise: tx.amountPaise,
-    });
-
-    // Fire-and-forget receipt
-    if (tx.email) {
-      sendReceiptEmail({
-        to: tx.email,
-        displayName: user.displayName,
-        packName: pack.name,
-        credits: pack.credits,
-        amountPaise: tx.amountPaise,
-        paymentId: body.razorpay_payment_id,
-      }).catch((e) => console.error("Receipt email failed", e));
+    if (result.alreadyApplied) {
+      return NextResponse.json({ ok: true, alreadyPaid: true, balance: result.balance });
     }
 
-    return NextResponse.json({ ok: true, balance: newBalance });
+    // Send the receipt outside the transaction. Only the writer that
+    // actually flipped the status (alreadyApplied === false) gets here, so
+    // the receipt is sent exactly once per purchase.
+    const txDoc = result.tx;
+    const purchasedPack = getPack(txDoc.packId);
+    if (txDoc.email && purchasedPack) {
+      sendReceiptEmail({
+        to: txDoc.email,
+        displayName: user.displayName,
+        packName: purchasedPack.name,
+        credits: purchasedPack.credits,
+        amountPaise: txDoc.amountPaise,
+        paymentId: body.razorpay_payment_id,
+      }).catch((e) => log.error("receipt email failed", { err: (e as Error).message }));
+    }
+
+    return NextResponse.json({ ok: true, balance: result.balance });
   } catch (err) {
-    console.error("[razorpay/verify]", err);
-    return NextResponse.json(
-      { error: (err as Error).message || "Verification failed" },
-      { status: 500 },
-    );
+    if (err instanceof TransactionMissingError) {
+      return NextResponse.json({ error: "Transaction missing" }, { status: 404 });
+    }
+    if (err instanceof TransactionForbiddenError) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    log.error("verify failed", { err: (err as Error).message });
+    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
   }
 }

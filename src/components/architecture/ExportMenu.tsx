@@ -88,7 +88,7 @@ export function ExportMenu({
         >
           <div className="px-3 pt-3 pb-2 border-b border-[hsl(var(--line))]">
             <span className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">
-              § Export
+              Export
             </span>
           </div>
           <ul className="py-1.5 text-[13px]">

@@ -26,5 +26,10 @@ service cloud.firestore {
       allow read: if request.auth != null && resource.data.uid == request.auth.uid;
       allow write: if false;
     }
+
+    // Audit log: server-only end-to-end. No client read or write.
+    match /audit/{id} {
+      allow read, write: if false;
+    }
   }
 }

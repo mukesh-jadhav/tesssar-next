@@ -5,6 +5,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
 import { ExportMenu } from "@/components/architecture/ExportMenu";
+import { ShareButton } from "@/components/architecture/ShareButton";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
 import type {
@@ -82,10 +83,12 @@ export function ReportCockpit({
   arch,
   architectureId,
   showDownload = true,
+  publicShare,
 }: {
   arch: Architecture;
   architectureId?: string;
   showDownload?: boolean;
+  publicShare?: { slug: string; createdAt: number } | null;
 }) {
   const [chapter, setChapter] = useState<ChapterId>("story");
   const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
@@ -140,6 +143,7 @@ export function ReportCockpit({
         </div>
         {showDownload && architectureId && (
           <div className="shrink-0 flex items-center gap-2 pr-3 pl-3 border-l border-[hsl(var(--line))]">
+            <ShareButton architectureId={architectureId} initialShare={publicShare} />
             <ExportMenu architectureId={architectureId} size="sm" />
           </div>
         )}
@@ -219,7 +223,7 @@ function DiagramsPanel({
     <div className="flex flex-col gap-5">
       <header className="flex items-end justify-between gap-6 border-b border-[hsl(var(--line))] pb-4">
         <div className="min-w-0">
-          <div className="section-num text-[10.5px] mb-1">§ Diagrams</div>
+          <div className="section-num text-[10.5px] mb-1">Diagrams</div>
           <h3 className="display text-[clamp(1.25rem,1.8vw,1.55rem)] tracking-[-0.02em]">
             The same system, six lenses.
           </h3>
@@ -645,7 +649,7 @@ function NextPanel({ arch }: { arch: Architecture }) {
 function PanelHead({ n, title }: { n: string; title: string }) {
   return (
     <div className="flex items-baseline gap-3">
-      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">§ {n}</span>
+      <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">{n}</span>
       <h3 className="display text-[clamp(1.05rem,1.5vw,1.35rem)] leading-tight tracking-[-0.02em]">
         {title}
       </h3>
@@ -840,7 +844,7 @@ function InspectorShell({ eyebrow, title, sub, onClear, children }: {
   return (
     <div className="p-6 lg:p-7 flex flex-col gap-5">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="section-num text-[10.5px]">§ {eyebrow}</span>
+        <span className="section-num text-[10.5px]">{eyebrow}</span>
         <button
           type="button"
           onClick={onClear}
@@ -880,7 +884,7 @@ function InspectorBrief({ arch, lead, body }: { arch: Architecture; lead: string
   return (
     <div className="p-6 lg:p-7 flex flex-col gap-6">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="section-num text-[10.5px]">§ Brief</span>
+        <span className="section-num text-[10.5px]">Brief</span>
         <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
           {arch.meta.domain}
         </span>
@@ -1208,7 +1212,7 @@ function StoryPanel({
       <header className="border-b border-[hsl(var(--line))] pb-8">
         <div className="flex items-baseline gap-3">
           <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]">
-            § Overview · {arch.meta.domain}
+            Overview · {arch.meta.domain}
           </span>
         </div>
         <h2 className="mt-3 display text-[clamp(1.7rem,3.2vw,2.6rem)] leading-[1.05] tracking-[-0.03em] max-w-[28ch]">

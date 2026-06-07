@@ -28,13 +28,9 @@ export async function GET() {
     });
   } catch (err) {
     const e = err as { code?: string; message?: string };
+    console.warn("[/api/auth/whoami] verify failed:", e?.code, e?.message);
     return NextResponse.json(
-      {
-        signedIn: false,
-        reason: "verify-failed",
-        code: e?.code ?? "unknown",
-        detail: e?.message ?? String(err),
-      },
+      { signedIn: false, reason: "verify-failed" },
       { status: 200 },
     );
   }

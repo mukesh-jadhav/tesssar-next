@@ -51,13 +51,18 @@ export async function getOrCreateUserDoc(args: {
   const WELCOME_CREDITS = WELCOME_DESIGNS * RUN_COST_CREDITS;
   const reason = `Welcome — ${WELCOME_DESIGNS} free design to start`;
 
+  // Pending grants are keyed by lowercased email. They're consumed once,
+  // additive to whatever welcome credits the user normally receives.
+  const pendingExtra = await consumePendingGrants(args.uid, args.email);
+
   if (!snap.exists) {
+    const startingCredits = WELCOME_CREDITS + pendingExtra.delta;
     const newUser: UserDoc = {
       uid: args.uid,
       email: args.email,
       displayName: args.displayName,
       photoURL: args.photoURL,
-      credits: WELCOME_CREDITS,
+      credits: startingCredits,
       freeCreditGranted: true,
       totalSpent: 0,
       createdAt: now,
@@ -73,6 +78,16 @@ export async function getOrCreateUserDoc(args: {
       reason,
       createdAt: now,
     });
+    if (pendingExtra.delta > 0) {
+      await adminDb.collection("ledger").add({
+        uid: args.uid,
+        type: "grant",
+        delta: pendingExtra.delta,
+        balanceAfter: startingCredits,
+        reason: pendingExtra.reason,
+        createdAt: now,
+      });
+    }
 
     return newUser;
   }
@@ -80,25 +95,76 @@ export async function getOrCreateUserDoc(args: {
   // Existing user — backfill the welcome grant for accounts that
   // never received one (legacy sign-ups before this flow existed).
   const existing = snap.data() as UserDoc;
+  let balance = existing.credits ?? 0;
+  const updates: Partial<UserDoc> = { lastSeenAt: now };
+
   if (!existing.freeCreditGranted) {
-    const currentCredits = existing.credits ?? 0;
-    const nextBalance = currentCredits + WELCOME_CREDITS;
-    await ref.update({
-      credits: nextBalance,
-      freeCreditGranted: true,
-      lastSeenAt: now,
-    });
+    balance += WELCOME_CREDITS;
+    updates.credits = balance;
+    updates.freeCreditGranted = true;
     await adminDb.collection("ledger").add({
       uid: args.uid,
       type: "grant",
       delta: WELCOME_CREDITS,
-      balanceAfter: nextBalance,
+      balanceAfter: balance,
       reason,
       createdAt: now,
     });
-    return { ...existing, credits: nextBalance, freeCreditGranted: true, lastSeenAt: now };
   }
 
-  await ref.update({ lastSeenAt: now });
-  return existing;
+  if (pendingExtra.delta > 0) {
+    balance += pendingExtra.delta;
+    updates.credits = balance;
+    await adminDb.collection("ledger").add({
+      uid: args.uid,
+      type: "grant",
+      delta: pendingExtra.delta,
+      balanceAfter: balance,
+      reason: pendingExtra.reason,
+      createdAt: now,
+    });
+  }
+
+  await ref.update(updates);
+  return { ...existing, ...updates, credits: balance };
+}
+
+/**
+ * Look for `pendingGrants/{lowercased-email}` and consume it — used to
+ * pre-allocate credits to a user who hasn't signed in yet. Returns the
+ * total credits to grant and a human-readable reason to write into the
+ * ledger.
+ */
+async function consumePendingGrants(
+  uid: string,
+  email: string,
+): Promise<{ delta: number; reason: string }> {
+  if (!email) return { delta: 0, reason: "" };
+  const key = email.trim().toLowerCase();
+  const ref = adminDb.collection("pendingGrants").doc(key);
+  return adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return { delta: 0, reason: "" };
+    const data = snap.data() as {
+      credits?: number;
+      designs?: number;
+      reason?: string;
+    };
+    const delta =
+      (data.credits ?? 0) +
+      (data.designs ?? 0) * RUN_COST_CREDITS;
+    if (delta <= 0) {
+      tx.delete(ref);
+      return { delta: 0, reason: "" };
+    }
+    const reason =
+      data.reason?.trim() ||
+      `Pre-allocated grant for ${email}`;
+    // Mark as claimed instead of deleting — keeps an audit trail.
+    tx.update(ref, {
+      claimedByUid: uid,
+      claimedAt: Date.now(),
+    });
+    return { delta, reason };
+  });
 }

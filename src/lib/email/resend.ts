@@ -11,7 +11,7 @@ function client() {
   return cached;
 }
 
-const FROM = process.env.RESEND_FROM_EMAIL || "Tessar <receipts@tessar.app>";
+const FROM = process.env.RESEND_FROM_EMAIL || "Tessar <receipts@tessar.dev>";
 
 export async function sendReceiptEmail(args: {
   to: string;
@@ -42,7 +42,7 @@ export async function sendReceiptEmail(args: {
         <tr><td style="padding:8px 0;color:#737373;">Amount paid</td><td style="padding:8px 0;text-align:right;font-weight:600;">${amount}</td></tr>
         <tr><td style="padding:8px 0;color:#737373;">Payment ID</td><td style="padding:8px 0;text-align:right;font-family:monospace;font-size:12px;">${escapeHtml(args.paymentId)}</td></tr>
       </table>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://tessar.app"}/new"
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://tessar.dev"}/new"
          style="display:inline-block;background:#0a0a0a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600;">
         Start a new architecture →
       </a>

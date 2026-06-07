@@ -12,7 +12,7 @@ export default function TermsPage() {
       <h2>Limitation of Liability</h2>
       <p>Tessar is provided "as is". Maximum liability is limited to the amount you paid in the trailing 90 days.</p>
       <h2>Contact</h2>
-      <p>hello@tessar.app</p>
+      <p>hello@tessar.dev</p>
     </div>
   );
 }

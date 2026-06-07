@@ -6,7 +6,7 @@ export const metadata = { title: "Credits" };
 const INFO = [
   { n: "01", title: "Refund on failure", body: "If the agent fails to produce a valid architecture, the credits for that run are automatically returned to your balance." },
   { n: "02", title: "Secure payments",   body: "Powered by Razorpay. Cards, UPI, netbanking, wallets — all in INR." },
-  { n: "03", title: "Human support",     body: "Email hello@tessar.app for questions about runs or invoices. We reply within a business day." },
+  { n: "03", title: "Human support",     body: "Email hello@tessar.dev for questions about runs or invoices. We reply within a business day." },
 ];
 
 export default async function PricingPage() {
@@ -17,8 +17,8 @@ export default async function PricingPage() {
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
-        <span className="tag tag-accent">§ Credits</span>
-        <span className="eyebrow hidden md:inline">All prices in INR · GST inclusive</span>
+        <span className="tag tag-accent">Credits</span>
+        <span className="eyebrow hidden md:inline">All prices in INR, GST inclusive</span>
       </div>
 
       <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
@@ -38,7 +38,7 @@ export default async function PricingPage() {
       {/* Packs */}
       <div className="mt-20">
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-          <p className="section-num">§ Choose a pack</p>
+          <p className="section-num">Choose a pack</p>
           <p className="eyebrow hidden md:inline">Razorpay · INR</p>
         </div>
         <div className="mt-10">
@@ -49,7 +49,7 @@ export default async function PricingPage() {
       {/* Info trio */}
       <section className="mt-24">
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-          <p className="section-num">§ The fine print, plainly</p>
+          <p className="section-num">The fine print, plainly</p>
         </div>
         <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] mt-2 md:grid-cols-3">
           {INFO.map((c) => (
@@ -68,7 +68,7 @@ export default async function PricingPage() {
       <section className="m3-page-enter mt-20">
         <div className="card-ink relative overflow-hidden p-10 md:p-16">
           <div aria-hidden className="pointer-events-none absolute -right-32 -top-32 size-[420px] rounded-full bg-[hsl(var(--accent))]/30 blur-[120px]" />
-          <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/55">§ For teams</p>
+          <p className="font-mono text-[12px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/55">For teams</p>
           <h3 className="display mt-5 text-[clamp(2rem,5vw,4rem)] leading-[0.95] tracking-[-0.04em] text-[hsl(var(--paper))]">
             Bulk credits<br />
             <span className="serif font-normal italic">for agencies.</span>
@@ -78,7 +78,7 @@ export default async function PricingPage() {
             seat, or run cost comparisons across architectures.
           </p>
           <a
-            href="mailto:hello@tessar.app?subject=Bulk credits"
+            href="mailto:hello@tessar.dev?subject=Bulk credits"
             className="btn-pill-accent btn-pill-lg mt-10 inline-flex"
           >
             <span className="ms text-[20px]" aria-hidden>mail</span>

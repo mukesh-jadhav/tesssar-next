@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { safeNext } from "@/lib/security/redirect";
 
 export function GoogleSignInButton({ next = "/studio" }: { next?: string }) {
   const [loading, setLoading] = useState(false);
@@ -15,8 +16,9 @@ export function GoogleSignInButton({ next = "/studio" }: { next?: string }) {
       // Hard nav — guarantees the next page renders with the fresh
       // __tessar_session cookie. router.push + router.refresh races
       // against the RSC cache in production and intermittently serves
-      // the stale signed-out render.
-      window.location.href = next;
+      // the stale signed-out render. safeNext() blocks open-redirect
+      // payloads even if the prop ever flows in from an untrusted source.
+      window.location.href = safeNext(next, "/studio");
     } catch (err) {
       const msg = (err as Error).message || "Sign-in failed";
       if (!/popup-closed|cancelled/i.test(msg)) toast.error(msg);

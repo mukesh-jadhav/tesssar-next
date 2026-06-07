@@ -23,10 +23,9 @@ export default async function HomePage() {
             <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1 text-[11.5px]">
               <span className="size-1.5 rounded-full bg-[hsl(var(--accent))]" />
               <span className="font-mono uppercase tracking-[0.16em] text-[hsl(var(--ink-2))]">
-                First design free · no credit card
+                First design free, no credit card
               </span>
             </span>
-            <span className="hidden md:inline section-num">§ Volume 01 · Issue 05</span>
           </div>
 
           <h1 className="m3-page-enter mt-8 display-tight text-[clamp(3.2rem,9.2vw,8.5rem)] leading-[0.88] tracking-[-0.045em] max-w-[16ch]">
@@ -35,7 +34,7 @@ export default async function HomePage() {
           </h1>
 
           <p className="m3-page-enter mt-10 max-w-[58ch] text-[18px] leading-[1.55] text-[hsl(var(--ink-2))]">
-            Components, diagrams, INR cost tiers, risks, security model, and the patterns that
+            Components, diagrams, cost tiers, risks, security model, and the patterns that
             justify every choice. A defensible cloud design in four minutes — not a chatbot
             reply, a complete report your engineers will actually read.
           </p>
@@ -68,8 +67,7 @@ export default async function HomePage() {
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">§ The math</p>
-            <p className="eyebrow hidden md:inline">Five days of work · or one paragraph</p>
+            <p className="section-num">The math</p>
           </div>
 
           <h2 className="mt-14 display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[26ch]">
@@ -94,7 +92,7 @@ export default async function HomePage() {
               tone="ink"
               items={[
                 "A defensible draft in four minutes",
-                "Three INR cost tiers — Starter / Growth / Scale",
+                "Three cost tiers — Starter / Growth / Scale",
                 "Risk register scored by likelihood × impact",
                 "Diagrams + components + APIs, one source of truth",
                 "PDF, PowerPoint, Markdown — share with anyone",
@@ -108,13 +106,12 @@ export default async function HomePage() {
       <section id="how" className="border-t border-[hsl(var(--line))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">§ How it works</p>
-            <p className="eyebrow hidden md:inline">Three steps · zero meetings</p>
+            <p className="section-num">How it works</p>
           </div>
 
           <h2 className="mt-14 display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[24ch]">
-            Type a paragraph. Get a defensible design{" "}
-            <span className="serif italic accent">you can argue with</span>.
+            Three steps from idea{" "}
+            <span className="serif italic accent">to a design you can argue with</span>.
           </h2>
 
           <div className="mt-16 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
@@ -141,8 +138,7 @@ export default async function HomePage() {
       <section id="why" className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">§ What you get</p>
-            <p className="eyebrow hidden md:inline">Every report includes</p>
+            <p className="section-num">What you get</p>
           </div>
 
           <h2 className="mt-14 display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[26ch]">
@@ -202,7 +198,6 @@ export default async function HomePage() {
       {/* QUOTE */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1100px]">
-          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/55">§ Field report</p>
           <blockquote className="mt-12 display text-[clamp(2rem,4vw,3.4rem)] leading-[1.12] tracking-[-0.025em] max-w-[26ch]">
             <span className="serif italic">“It used to take a week</span> to produce a defensible
             architecture doc. Tessar gives you a draft you can argue with in{" "}
@@ -226,8 +221,7 @@ export default async function HomePage() {
       <section className="border-t border-[hsl(var(--line))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">§ See it built</p>
-            <p className="eyebrow hidden md:inline">No login required</p>
+            <p className="section-num">See it built</p>
           </div>
 
           <div className="mt-14 grid gap-12 lg:grid-cols-[1.2fr_1fr] items-end">
@@ -250,7 +244,7 @@ export default async function HomePage() {
             </div>
 
             <div className="card-paper p-7 md:p-9">
-              <p className="section-num text-[10.5px]">§ Inside the sample</p>
+              <p className="section-num text-[10.5px]">Inside the sample</p>
               <ul className="mt-5 divide-y divide-[hsl(var(--line))]">
                 {[
                   ["Components", "12"],
@@ -276,8 +270,7 @@ export default async function HomePage() {
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">§ Pricing</p>
-            <p className="eyebrow hidden md:inline">Honest, INR-first</p>
+            <p className="section-num">Pricing</p>
           </div>
 
           <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
@@ -315,14 +308,12 @@ export default async function HomePage() {
       {/* FINAL CTA */}
       <section className="border-t border-[hsl(var(--line))] px-6 py-32 md:px-12">
         <div className="mx-auto max-w-[1320px] text-center">
-          <p className="section-num">§ Volume 01 · Issue 05</p>
-          <h2 className="mt-10 display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-            Describe a system.<br />
-            <span className="serif font-normal italic accent">Get a design.</span>
+          <h2 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
+            Your first design{" "}
+            <span className="serif font-normal italic accent">is on us.</span>
           </h2>
           <p className="mx-auto mt-10 max-w-[52ch] text-[16px] leading-[1.6] text-[hsl(var(--ink-2))]">
-            Your first architecture is free. No credit card. Bring a system,
-            leave with a report you can ship.
+            No credit card. Sign in with Google, bring a system, leave with a report you can ship.
           </p>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
             <Link href={primaryHref} className="btn-pill btn-pill-accent btn-pill-lg">
@@ -416,7 +407,7 @@ function Compare({
             : "font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]"
         }
       >
-        § {label}
+        {label}
       </p>
       <ul className="mt-7 space-y-3">
         {items.map((t, i) => (

@@ -80,7 +80,7 @@ export function GuidedBriefDialog({
         {/* Header */}
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] px-7 pt-6 pb-4">
           <div>
-            <span className="section-num text-[10.5px]">§ Guided brief</span>
+            <span className="section-num text-[10.5px]">Guided brief</span>
             <h2 className="display mt-2 text-[26px] tracking-[-0.02em]">
               A few quick picks. <span className="serif italic accent">We write the brief.</span>
             </h2>

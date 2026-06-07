@@ -23,7 +23,7 @@ export default async function NewArchitecturePage({
       <div className="mx-auto w-full max-w-[1200px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
-        <span className="tag tag-accent">§ New design</span>
+        <span className="tag tag-accent">New design</span>
         <span className="eyebrow hidden md:inline">
           Credits available · <span className="text-[hsl(var(--ink))] font-medium">{credits}</span>
         </span>
@@ -38,12 +38,12 @@ export default async function NewArchitecturePage({
 
         <div className="flex flex-col justify-end gap-5 pb-3">
           <p className="text-[17px] leading-[1.55] text-[hsl(var(--ink-2))] max-w-[42ch]">
-            Describe the system in plain English. I&apos;ll return a full
-            report — diagrams, scale tiers, INR cost estimates, risks, and the
-            patterns that solve them.
+            The blank page is the hardest part. Drop a sentence, a wishlist,
+            even a competitor you&apos;d one-up — I&apos;ll handle the diagrams,
+            the math, and the patterns that hold it together.
           </p>
           <p className="text-[13px] text-[hsl(var(--ink-3))]">
-            ₹299 per design · about four minutes · refunded if a run fails.
+            About four minutes per run · refunded automatically if something breaks.
           </p>
         </div>
       </section>

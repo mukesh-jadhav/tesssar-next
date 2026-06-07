@@ -69,7 +69,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
       {/* ─────────── Title block ─────────── */}
       <header className="flex items-end justify-between gap-6 border-b border-[hsl(var(--line))] pb-5">
         <div className="min-w-0">
-          <div className="section-num text-[10.5px] mb-2">§ Blueprint</div>
+          <div className="section-num text-[10.5px] mb-2">Blueprint</div>
           <h2 className="display-tight text-[clamp(1.65rem,2.6vw,2.45rem)] leading-[1.02] tracking-[-0.03em]">
             {arch.meta.title}{" "}
             <span className="serif italic accent text-[0.66em] font-normal">— a single sheet.</span>
@@ -91,7 +91,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
 
         <BlueprintCorner pos="tl" label={`B-01 · ${String(arch.components.length).padStart(2, "0")}`} />
         <BlueprintCorner pos="tr" label="Rev. A" />
-        <BlueprintCorner pos="bl" label="§ Tessar" />
+        <BlueprintCorner pos="bl" label="Tessar" />
         <BlueprintCorner pos="br" label={cornerStamp} />
 
         <div className="relative p-5 md:p-7 lg:p-9">
@@ -104,7 +104,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
                 <header className="flex items-baseline justify-between gap-2 pb-2 border-b border-[hsl(var(--line))]">
                   <div className="min-w-0">
                     <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-[hsl(var(--accent))]">
-                      § {lane.n}
+                      {lane.n}
                     </div>
                     <h3 className="display text-[14px] leading-tight tracking-[-0.02em] mt-0.5">
                       {lane.label}
@@ -133,7 +133,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
       <section className="flex flex-col gap-4">
         <div className="flex items-baseline justify-between gap-4 border-b border-[hsl(var(--line))] pb-3">
           <div>
-            <div className="section-num text-[10.5px] mb-1">§ Wires</div>
+            <div className="section-num text-[10.5px] mb-1">Wires</div>
             <h3 className="display text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[-0.02em]">
               Primary path — from a request to a durable write.
             </h3>
@@ -186,7 +186,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
         <section className="flex flex-col gap-3">
           <div className="flex items-baseline justify-between gap-4 border-b border-[hsl(var(--line))] pb-3">
             <div>
-              <div className="section-num text-[10.5px] mb-1">§ Scaling</div>
+              <div className="section-num text-[10.5px] mb-1">Scaling</div>
               <h3 className="display text-[clamp(1.05rem,1.4vw,1.25rem)] tracking-[-0.02em]">
                 Same blueprint, four sizes.
               </h3>

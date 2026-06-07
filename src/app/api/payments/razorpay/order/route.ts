@@ -4,13 +4,32 @@ import { getRazorpay } from "@/lib/razorpay/client";
 import { getPack } from "@/lib/razorpay/packs";
 import { adminDb } from "@/lib/firebase/admin";
 import type { TransactionDoc } from "@/types/architecture";
+import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
+import { requestLogger } from "@/lib/security/log";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  const log = requestLogger(req, "pay-order");
+  // IP-scoped first so unauthenticated floods can't hammer Razorpay's API.
+  const ipGuard = rateLimit({
+    key: `pay-order:ip:${clientIp(req)}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!ipGuard.ok) return rateLimitResponse(ipGuard);
+
   try {
     const user = await getSessionUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Per-user cap deters card-testing once a session is established.
+    const userGuard = rateLimit({
+      key: `pay-order:uid:${user.uid}`,
+      limit: 10,
+      windowMs: 60_000,
+    });
+    if (!userGuard.ok) return rateLimitResponse(userGuard);
 
     const { packId } = (await req.json()) as { packId?: string };
     const pack = packId ? getPack(packId) : undefined;
@@ -49,15 +68,23 @@ export async function POST(req: NextRequest) {
       orderId: order.id,
       amount: pack.pricePaise,
       currency: "INR",
-      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      keyId: process.env.RAZORPAY_KEY_ID,
       txId: txRef.id,
       pack,
       user: { name: user.displayName ?? "", email: user.email },
     });
   } catch (err: unknown) {
     const e = err as { error?: { description?: string; reason?: string }; message?: string; statusCode?: number };
-    const description = e?.error?.description || e?.message || "Order creation failed";
-    console.error("[razorpay/order]", { description, statusCode: e?.statusCode, reason: e?.error?.reason, raw: err });
-    return NextResponse.json({ error: description }, { status: e?.statusCode ?? 500 });
+    // Log full Razorpay error details server-side, but never echo them to
+    // the client — the description/reason fields can include internal
+    // account hints and PII. The client only needs a status code.
+    log.error("order creation failed", {
+      description: e?.error?.description,
+      reason: e?.error?.reason,
+      statusCode: e?.statusCode,
+      errMessage: e?.message,
+    });
+    const status = e?.statusCode && e.statusCode >= 400 && e.statusCode < 500 ? 400 : 500;
+    return NextResponse.json({ error: "Order creation failed" }, { status });
   }
 }

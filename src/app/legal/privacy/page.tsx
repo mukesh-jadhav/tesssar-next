@@ -10,7 +10,7 @@ export default function PrivacyPage() {
       <h2>Third Parties</h2>
       <p>We use Google Cloud&rsquo;s managed AI services for generation, Razorpay for payments, and Resend for receipts. We do not sell your data to anyone.</p>
       <h2>Your Rights (DPDP 2023)</h2>
-      <p>You may request export or deletion of your data at any time by emailing hello@tessar.app.</p>
+      <p>You may request export or deletion of your data at any time by emailing hello@tessar.dev.</p>
     </div>
   );
 }

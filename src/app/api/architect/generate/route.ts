@@ -4,6 +4,8 @@ import { adminDb } from "@/lib/firebase/admin";
 import { consumeCredit, refundCredit, InsufficientCreditsError } from "@/lib/credits/ledger";
 import { runArchitect } from "@/lib/agent/orchestrator";
 import type { ArchitectureDoc } from "@/types/architecture";
+import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
+import { requestLogger, type RequestLogger } from "@/lib/security/log";
 
 export const runtime = "nodejs";
 export const maxDuration = 900;
@@ -27,8 +29,26 @@ export const maxDuration = 900;
 const inflight = new Set<Promise<unknown>>();
 
 export async function POST(req: NextRequest) {
+  const log = requestLogger(req, "generate");
+  // IP-scoped guard runs first so anonymous floods can't burn Firebase auth.
+  const ipGuard = rateLimit({
+    key: `generate:ip:${clientIp(req)}`,
+    limit: 20,
+    windowMs: 60_000,
+  });
+  if (!ipGuard.ok) return rateLimitResponse(ipGuard);
+
   const user = await getSessionUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
+
+  // Per-user guard: 5 generations / minute. The real cost guard is the
+  // credit ledger; this just absorbs runaway loops and abusive scripts.
+  const userGuard = rateLimit({
+    key: `generate:uid:${user.uid}`,
+    limit: 5,
+    windowMs: 60_000,
+  });
+  if (!userGuard.ok) return rateLimitResponse(userGuard);
 
   const { brief } = (await req.json()) as { brief?: string };
   if (!brief || brief.trim().length < 30) {
@@ -69,15 +89,16 @@ export async function POST(req: NextRequest) {
     throw err;
   }
 
-  const work = runWorker({ docRef, brief, uid: user.uid, startedAt: now })
+  const work = runWorker({ docRef, brief, uid: user.uid, startedAt: now, log })
     .catch((err) => {
-      console.error(`[architect ${docRef.id}] worker crashed`, err);
+      log.error("worker crashed", { archId: docRef.id, err: (err as Error).message });
     })
     .finally(() => {
       inflight.delete(work);
     });
   inflight.add(work);
 
+  log.info("generation started", { archId: docRef.id, uid: user.uid });
   return NextResponse.json({ id: docRef.id });
 }
 
@@ -86,11 +107,13 @@ async function runWorker({
   brief,
   uid,
   startedAt,
+  log,
 }: {
   docRef: FirebaseFirestore.DocumentReference;
   brief: string;
   uid: string;
   startedAt: number;
+  log: RequestLogger;
 }) {
   let lastWriteAt = 0;
   const PROGRESS_THROTTLE_MS = 600;
@@ -132,6 +155,7 @@ async function runWorker({
           },
         });
       } else if (ev.type === "error") {
+        log.error("agent reported error", { archId: docRef.id, message: ev.message });
         await docRef.update({
           status: "failed",
           errorMessage: ev.message,
@@ -141,6 +165,7 @@ async function runWorker({
     }
   } catch (err) {
     const msg = (err as Error).message || "Generation failed";
+    log.error("worker exception", { archId: docRef.id, err: msg });
     await docRef.update({ status: "failed", errorMessage: msg });
     await refundCredit(uid, "Refund on generation failure", docRef.id);
   }

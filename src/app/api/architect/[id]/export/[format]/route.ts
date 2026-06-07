@@ -6,6 +6,7 @@ import { slugify } from "@/lib/utils";
 import { renderArchitecturePDF } from "@/lib/pdf/report";
 import { renderArchitectureMarkdown } from "@/lib/exports/markdown";
 import { renderArchitecturePPTX } from "@/lib/exports/pptx";
+import { rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,6 +25,15 @@ export async function GET(
 
   const user = await getSessionUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
+
+  // Exports allocate big in-memory buffers (PDF/PPTX). 30/min/user is
+  // generous for a human and crushing for a bot loop.
+  const guard = rateLimit({
+    key: `export:uid:${user.uid}`,
+    limit: 30,
+    windowMs: 60_000,
+  });
+  if (!guard.ok) return rateLimitResponse(guard);
 
   const snap = await adminDb.collection("architectures").doc(params.id).get();
   if (!snap.exists) return new NextResponse("Not found", { status: 404 });

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { doc, onSnapshot } from "firebase/firestore";
-import { getFirebaseDb } from "@/lib/firebase/client";
+import { getFirebaseDb, getFirebaseAuth } from "@/lib/firebase/client";
+import { onAuthStateChanged } from "firebase/auth";
 import { ReportCockpit } from "@/components/workspace/ReportCockpit";
 import { Architecture, type ArchitectureDoc } from "@/types/architecture";
 import { cn } from "@/lib/utils";
@@ -32,19 +33,77 @@ const PHASE_ORDER = [
  */
 export function ArchitectureRunLive({ initial }: { initial: ArchitectureDoc }) {
   const [d, setD] = useState<ArchitectureDoc>(initial);
+  const latestUpdatedAt = useRef<number>(initial.progress?.updatedAt ?? 0);
 
+  // Keep the ref in sync with whatever update wins (snapshot or poll).
+  function applyUpdate(next: ArchitectureDoc) {
+    const incoming = next.progress?.updatedAt ?? 0;
+    if (next.status !== "running" || incoming >= latestUpdatedAt.current) {
+      latestUpdatedAt.current = incoming;
+      setD(next);
+    }
+  }
+
+  // Path A — Firestore onSnapshot (only after the client SDK has restored auth,
+  // otherwise the listener errors on the security rule and silently dies).
   useEffect(() => {
-    const db = getFirebaseDb();
-    const unsub = onSnapshot(doc(db, "architectures", initial.id), (snap) => {
-      if (!snap.exists()) return;
-      setD(snap.data() as ArchitectureDoc);
+    if (initial.status !== "running") return;
+    const auth = getFirebaseAuth();
+    let unsubSnap: (() => void) | null = null;
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      const db = getFirebaseDb();
+      unsubSnap = onSnapshot(
+        doc(db, "architectures", initial.id),
+        (snap) => {
+          if (!snap.exists()) return;
+          applyUpdate(snap.data() as ArchitectureDoc);
+        },
+        (err) => {
+          // Permission-denied / network blip — polling below will still update.
+          console.warn("[run] snapshot listener stopped:", err.message);
+        },
+      );
     });
-    return () => unsub();
-  }, [initial.id]);
+    return () => {
+      unsubAuth();
+      unsubSnap?.();
+    };
+  }, [initial.id, initial.status]);
+
+  // Path B — Polling fallback. Bulletproof against blocked Firestore websockets,
+  // service-worker interference, mobile background-throttling, etc.
+  useEffect(() => {
+    if (d.status !== "running") return;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const res = await fetch(`/api/architect/${initial.id}/status`, {
+          cache: "no-store",
+        });
+        if (!res.ok || cancelled) return;
+        applyUpdate((await res.json()) as ArchitectureDoc);
+      } catch {
+        // network blip — retry next tick
+      }
+    };
+    const handle = window.setInterval(tick, 2500);
+    void tick();
+    return () => {
+      cancelled = true;
+      window.clearInterval(handle);
+    };
+  }, [initial.id, d.status]);
 
   if (d.status === "complete" && d.architecture) {
     const arch = Architecture.parse(d.architecture);
-    return <ReportCockpit arch={arch} architectureId={d.id} />;
+    return (
+      <ReportCockpit
+        arch={arch}
+        architectureId={d.id}
+        publicShare={d.publicShare ?? null}
+      />
+    );
   }
 
   if (d.status === "failed") {
@@ -88,7 +147,7 @@ export function ArchitectureRunLive({ initial }: { initial: ArchitectureDoc }) {
       <div className="mx-auto w-full max-w-3xl px-6 py-14 md:px-10">
         <div className="card-paper p-8 md:p-12">
           <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
-            <span className="section-num">§ Generating</span>
+            <span className="section-num">Generating</span>
             <span className="font-mono text-[11px] tabular-nums text-[hsl(var(--ink-3))] uppercase tracking-wider">
               {tokens.toLocaleString("en-IN")} tokens
             </span>
