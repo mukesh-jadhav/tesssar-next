@@ -2,6 +2,9 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
 import { NewArchitectureForm } from "@/components/architecture/NewArchitectureForm";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
+import { adminDb } from "@/lib/firebase/admin";
+import type { ArchitectureDoc } from "@/types/architecture";
+import type { RecentBrief } from "@/components/architecture/RecentBriefsRail";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "New design" };
@@ -17,6 +20,27 @@ export default async function NewArchitecturePage({
   const firstName =
     (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
   const seed = searchParams.seed ?? searchParams.prompt;
+
+  let recentBriefs: RecentBrief[] = [];
+  try {
+    const snap = await adminDb
+      .collection("architectures")
+      .where("uid", "==", user.uid)
+      .orderBy("createdAt", "desc")
+      .limit(3)
+      .get();
+    recentBriefs = snap.docs.map((d) => {
+      const data = d.data() as ArchitectureDoc;
+      return {
+        id: d.id,
+        prompt: data.prompt ?? "",
+        status: data.status ?? "pending",
+        createdAt: typeof data.createdAt === "number" ? data.createdAt : Date.now(),
+      };
+    });
+  } catch {
+    recentBriefs = [];
+  }
 
   return (
     <ScrollFrame>
@@ -49,7 +73,7 @@ export default async function NewArchitecturePage({
       </section>
 
       <div className="mt-14">
-        <NewArchitectureForm credits={credits} seed={seed} />
+        <NewArchitectureForm credits={credits} seed={seed} recentBriefs={recentBriefs} />
       </div>
       </div>
     </ScrollFrame>

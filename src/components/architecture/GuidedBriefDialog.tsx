@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
 
 /**
  * GuidedBriefDialog — quick-pick alternative to the free-text brief.
@@ -26,6 +28,7 @@ export function GuidedBriefDialog({
   const [scale, setScale] = useState<string>("Up to 100K users");
   const [tier, setTier] = useState<string>("Growth-stage startup");
   const [needs, setNeeds] = useState<string[]>([]);
+  const reduced = useReducedMotionSafe();
 
   // Close on Escape, lock body scroll while open
   useEffect(() => {
@@ -41,8 +44,6 @@ export function GuidedBriefDialog({
       document.body.style.overflow = prev;
     };
   }, [open, onClose]);
-
-  if (!open) return null;
 
   const ready = oneLiner.trim().length >= 6;
 
@@ -66,17 +67,32 @@ export function GuidedBriefDialog({
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Guided brief"
-      className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm p-4 md:p-10"
-      onClick={onClose}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative my-auto w-full max-w-2xl rounded-3xl border border-[hsl(var(--line))] bg-[hsl(var(--paper))] shadow-2xl shadow-black/10 m3-rise"
-      >
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="guided-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Guided brief"
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm p-4 md:p-10"
+          onClick={onClose}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <motion.div
+            onClick={(e) => e.stopPropagation()}
+            className="relative my-auto w-full max-w-2xl rounded-3xl border border-[hsl(var(--line))] bg-[hsl(var(--paper))] shadow-2xl shadow-black/10"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: 6 }}
+            transition={
+              reduced
+                ? { duration: 0.18 }
+                : { type: "spring", stiffness: 280, damping: 24, mass: 0.7 }
+            }
+          >
         {/* Header */}
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] px-7 pt-6 pb-4">
           <div>
@@ -189,8 +205,10 @@ export function GuidedBriefDialog({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 

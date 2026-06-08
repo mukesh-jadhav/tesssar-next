@@ -130,13 +130,13 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 4 — Composer (`/new`)
 
-- [ ] **4.1 Left rail with last 3 briefs** — ghost cards, "Restart this brief" / "Use as template" on hover.
-- [ ] **4.2 Empty-state coaching** — when textarea empty + unfocused >3s, fade in inline prompt "Not sure where to start? Build it together →" linking to GuidedBriefDialog.
-- [ ] **4.3 Word counter** at textarea bottom-right — subtle, shows `230 words · ideal 200-400`, color shifts as user approaches ideal range.
-- [ ] **4.4 Submit button label upgrade** — `Generate · 40 credits` primary + sub-line `~3 min · refunded on failure`.
-- [ ] **4.5 Textarea focus animation** — border accent fade + subtle inner glow (180ms).
-- [ ] **4.6 GuidedBriefDialog open animation** — dialog scales from 0.96 + fades in, 280ms spring-soft.
-- [ ] **4.7 Submit-pressed transition** — button morphs into a horizontal progress bar that fills as the agent streams (Framer `layout`).
+- [x] **4.1 Left rail with last 3 briefs** — ghost cards on `xl:` (`RecentBriefsRail`), sticky, "Use as template" CTA fades in on hover (height-animated), restart-flow handled by click; click loads the brief into the textarea and scrolls it into view. Status dot per card (complete/running/queued/failed) in the accent/warn/ink/bad scale.
+- [x] **4.2 Empty-state coaching** — 3s idle timer in `NewArchitectureForm`; if textarea empty + unfocused, "Not sure where to start? **Build it together** →" fades in below the textarea and opens `GuidedBriefDialog` on click; honours `prefers-reduced-motion`.
+- [x] **4.3 Word counter** — bottom-right monospace pill on the composer header: `230 words · ideal range · 1,432 / 8,000`. Color shifts via animated `motion.span color`: `ink-3` (empty/thin) → `accent` (ideal 200–400) → `warn` (long) → `bad` (verbose).
+- [x] **4.4 Submit button label upgrade** — two-line label `Generate · 40 credits` + sub `~3 min · refunded on failure`; disabled-state uses `paper-3` until min-length met; cost pulled from a single `RUN_COST_CREDITS` constant.
+- [x] **4.5 Textarea focus animation** — `motion.div` card animates `borderColor` to `--ink` and applies a soft accent ring + inset accent glow over 220ms ease-out-expo on focus-within; reverts on blur.
+- [x] **4.6 GuidedBriefDialog open animation** — migrated from `m3-rise` to `AnimatePresence` + `motion.div` spring-soft (`stiffness 280, damping 24, mass 0.7`): overlay opacity-fades, dialog scales 0.96→1 with 8px lift, reduced-motion collapses to a simple opacity fade.
+- [x] **4.7 Submit-pressed transition** — submit button now uses `motion.button layout` with `AnimatePresence mode="wait"` swapping `idle` ↔ `streaming` content; while submitting, a thin paper-tone bar sweeps across the button bottom edge (CSS keyframes) as a true streaming indicator (no fake percentage).
 
 ---
 
