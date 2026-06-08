@@ -79,20 +79,34 @@ export function EditorialDiagram({
   /** Fired when the user clicks any node inside the diagram. */
   onSelect?: (node: DiagramNodeSelection) => void;
 }) {
-  const graph = useMemo(() => parseMermaid(stripClassDefs(chart)), [chart]);
+  const graph = useMemo(() => {
+    try {
+      return parseMermaid(stripClassDefs(chart));
+    } catch (e) {
+      return { kind: "unknown" as const, reason: (e as Error).message || "Parse failed" };
+    }
+  }, [chart]);
   const cfg: FlowLayoutConfig = { ...FLOW_LAYOUT_DEFAULTS, ...layout };
 
   if (graph.kind === "unknown") {
-    return (
-      <div className={cn("w-full p-6 bg-[hsl(var(--paper-2))] border border-[hsl(var(--line))]", className)}>
-        <p className="eyebrow text-[hsl(var(--bad))]">Diagram parse error</p>
-        <p className="mt-2 font-mono text-[12px] text-[hsl(var(--ink-2))]">{graph.reason}</p>
-      </div>
-    );
+    return <DiagramFallback className={className} reason={graph.reason} chart={chart} />;
   }
   if (graph.kind === "flow") return <FlowCanvas graph={graph} cfg={cfg} className={className} onSelect={onSelect} />;
   if (graph.kind === "sequence") return <SequenceCanvas graph={graph} className={className} onSelect={onSelect} />;
   return <ErCanvas graph={graph} className={className} onSelect={onSelect} />;
+}
+
+function DiagramFallback({ className, reason, chart }: { className?: string; reason: string; chart: string }) {
+  return (
+    <div className={cn("w-full p-6 bg-[hsl(var(--paper-2))] border border-[hsl(var(--line))]", className)}>
+      <p className="eyebrow text-[hsl(var(--bad))]">Diagram could not be rendered</p>
+      <p className="mt-2 font-mono text-[12px] text-[hsl(var(--ink-2))]">{reason}</p>
+      <details className="mt-3">
+        <summary className="cursor-pointer text-[12px] text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]">Show diagram source</summary>
+        <pre className="mt-2 max-h-[300px] overflow-auto p-3 bg-[hsl(var(--paper))] border border-[hsl(var(--line))] font-mono text-[11px] leading-[1.5] text-[hsl(var(--ink-2))] whitespace-pre-wrap">{chart}</pre>
+      </details>
+    </div>
+  );
 }
 
 /* ════════════════════════ shared helpers ════════════════════════ */
@@ -256,9 +270,16 @@ function FlowCanvas({ graph, cfg, className, onSelect }: { graph: FlowGraph; cfg
   const gRef = useRef<SVGGElement | null>(null);
   const zoomBehavior = useRef<ZoomBehavior<SVGSVGElement, unknown> | null>(null);
 
-  const layout = useMemo(() => layoutFlow(graph, cfg), [graph, cfg]);
+  const layoutResult = useMemo(() => {
+    try {
+      return { ok: true as const, layout: layoutFlow(graph, cfg) };
+    } catch (e) {
+      return { ok: false as const, reason: (e as Error).message || "Layout failed" };
+    }
+  }, [graph, cfg]);
 
   useEffect(() => {
+    if (!layoutResult.ok) return;
     if (!svgRef.current || !gRef.current) return;
     const svg = select(svgRef.current);
     const g = select(gRef.current);
@@ -267,9 +288,14 @@ function FlowCanvas({ graph, cfg, className, onSelect }: { graph: FlowGraph; cfg
       .on("zoom", (e) => g.attr("transform", e.transform.toString()));
     zoomBehavior.current = z;
     svg.call(z);
-    fitTo(svg as unknown as ReturnType<typeof select<SVGSVGElement, unknown>>, z, svgRef.current, layout.totalW, layout.totalH);
+    fitTo(svg as unknown as ReturnType<typeof select<SVGSVGElement, unknown>>, z, svgRef.current, layoutResult.layout.totalW, layoutResult.layout.totalH);
     return () => { svg.on(".zoom", null); };
-  }, [layout.totalW, layout.totalH]);
+  }, [layoutResult]);
+
+  if (!layoutResult.ok) {
+    return <DiagramFallback className={className} reason={layoutResult.reason} chart="" />;
+  }
+  const layout = layoutResult.layout;
 
   const fit = () => {
     if (!svgRef.current || !zoomBehavior.current) return;
@@ -485,14 +511,34 @@ function layoutFlow(graph: FlowGraph, cfg: FlowLayoutConfig): {
 
   // Register nodes with measured sizes.
   for (const n of graph.nodes) {
+    if (clusterIds.has(n.id)) continue; // a subgraph and a node share an id — keep the cluster
     const { w, h } = measureFlowNode(n, cfg);
     g.setNode(n.id, { label: n.label, width: w, height: h });
     if (n.group && clusterIds.has(n.group)) g.setParent(n.id, n.group);
   }
 
+  // Defensive: drop edges that reference clusters or non-existent nodes.
+  // dagre crashes if an edge endpoint is a compound cluster or has no node.
+  const knownNodeIds = new Set<string>();
+  for (const n of graph.nodes) if (!clusterIds.has(n.id)) knownNodeIds.add(n.id);
+  const safeEdges: FlowEdge[] = [];
+  for (const e of graph.edges) {
+    if (e.from === e.to) continue; // dagre dislikes self-loops in compound graphs
+    if (clusterIds.has(e.from) || clusterIds.has(e.to)) continue;
+    if (!knownNodeIds.has(e.from)) {
+      g.setNode(e.from, { label: e.from, width: cfg.minNodeW, height: cfg.minNodeH });
+      knownNodeIds.add(e.from);
+    }
+    if (!knownNodeIds.has(e.to)) {
+      g.setNode(e.to, { label: e.to, width: cfg.minNodeW, height: cfg.minNodeH });
+      knownNodeIds.add(e.to);
+    }
+    safeEdges.push(e);
+  }
+
   // Register edges. Reserve label box so dagre routes around it.
   const edgeMeta = new Map<string, FlowEdge>();
-  for (const e of graph.edges) {
+  for (const e of safeEdges) {
     const key = `${e.from}\u0001${e.to}`;
     edgeMeta.set(key, e);
     const label = e.label?.trim() ?? "";

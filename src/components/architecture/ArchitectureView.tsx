@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "./EditorialDiagram";
+import { DiagramErrorBoundary } from "./DiagramErrorBoundary";
 import { ExportMenu } from "./ExportMenu";
 import { ScaleExplorer } from "./ScaleExplorer";
 import type { Architecture, Risk } from "@/types/architecture";
@@ -138,7 +139,9 @@ export function ArchitectureView({
                 {currentDiagram.title}
               </h3>
               <div className="mt-6">
-                <EditorialDiagram chart={currentDiagram.mermaid} />
+                <DiagramErrorBoundary chart={currentDiagram.mermaid}>
+                  <EditorialDiagram chart={currentDiagram.mermaid} />
+                </DiagramErrorBoundary>
               </div>
             </div>
           )}

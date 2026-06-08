@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
+import { DiagramErrorBoundary } from "@/components/architecture/DiagramErrorBoundary";
 import { ExportMenu } from "@/components/architecture/ExportMenu";
 import { ShareButton } from "@/components/architecture/ShareButton";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
@@ -256,15 +257,17 @@ function DiagramsPanel({
               {current.description}
             </p>
           </div>
-          <EditorialDiagram
-            chart={current.mermaid}
-            onSelect={(node) => {
-              // Try to resolve to a real component first so the inspector
-              // can show full details; fall back to a raw "node" selection.
-              const match = resolveComponent(arch, node.label);
-              onSelect(match ? { kind: "component", id: match.id } : { kind: "node", label: node.label, subLabel: node.subLabel });
-            }}
-          />
+          <DiagramErrorBoundary chart={current.mermaid}>
+            <EditorialDiagram
+              chart={current.mermaid}
+              onSelect={(node) => {
+                // Try to resolve to a real component first so the inspector
+                // can show full details; fall back to a raw "node" selection.
+                const match = resolveComponent(arch, node.label);
+                onSelect(match ? { kind: "component", id: match.id } : { kind: "node", label: node.label, subLabel: node.subLabel });
+              }}
+            />
+          </DiagramErrorBoundary>
         </>
       )}
     </div>
