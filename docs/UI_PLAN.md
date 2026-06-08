@@ -108,12 +108,12 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 2 — Pricing page (`/pricing`)
 
-- [ ] **2.1 Promote Trio card** — `lg:scale-105`, thicker top accent border, slightly larger headings.
-- [ ] **2.2 Comparison matrix** below the four cards — rows = features (designs, refund-on-fail, expiry, GST invoice, team seats, priority queue), columns = packs, check/dash glyphs.
-- [ ] **2.3 FAQ accordion** — 6-8 items minimum, smooth height animation (Framer `layout`), accent chevron rotates on open.
-- [ ] **2.4 Bulk-credits CTA dressed up** — dark band, sentence about team workflow, primary button with arrow.
-- [ ] **2.5 Card hover motion** — `<Tilt>` + price number subtle scale 1.02.
-- [ ] **2.6 "Free first design" badge** with hand-drawn underline that draws on scroll-into-view.
+- [x] **2.1 Promote Trio card** — accent top stripe, lg lift via shadow + z-10, larger price clamp on popular.
+- [x] **2.2 Comparison matrix** below the four cards — designs, per-design price, bulk discount, full report, PDF, history, refund, no expiry, GST invoice; popular column highlighted dark.
+- [x] **2.3 FAQ accordion** — 8 items, Framer `layout` + AnimatePresence height spring, `+` chevron rotates to × on open, reduced-motion safe.
+- [x] **2.4 Bulk-credits CTA dressed up** — second accent blur orb, fuller copy, Magnetic + arrow slide on the primary button.
+- [x] **2.5 Card hover motion** — `<Tilt max={2}>` wrapper + group-hover price scale (1.025) + arrow translate-x.
+- [x] **2.6 "Free first design" badge** with hand-drawn underline (reused `DrawnUnderline`) anchored to the Solo card, drawing in on scroll.
 
 ---
 
