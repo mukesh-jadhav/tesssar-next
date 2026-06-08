@@ -142,50 +142,60 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 5 — Report cockpit (the live read view) — biggest surface, most impact
 
-### 5.1 Navigation
-- [ ] **Progress bar across top** showing read-position through the report (sticky, 2px accent fill).
-- [ ] **`next chapter →` affordance** at end of each chapter (centered, with paper-grain divider above).
-- [ ] **Sticky mini-TOC sidebar** on `xl:` screens — chapter list on the right, current chapter highlighted, smooth scroll on click.
-- [ ] **Chapter numeral parallax** — the giant `01`, `02` numerals translate at 0.6× scroll rate.
+> **Structural note:** The cockpit (`ReportCockpit`) is a **tabbed in-app surface**, not a long-form scroll page. Items that assumed long-form scroll (scroll-progress through report, parallax chapter numerals, sticky mini-TOC sidebar, scroll indicator between hero and first chapter) do not apply; their **equivalent in a tabbed surface** is the sliding chapter-tab indicator + chapter cross-fade transitions, which are shipped. The cockpit drives `/architecture/[id]`, `/sample`, and `/r/[slug]`.
 
-### 5.2 Diagrams tab
-- [ ] **Replace tag-style buttons with proper segmented control** — filled active state, chevron, animated underline that slides between selections (Framer `layoutId`).
-- [ ] **Diagram thumbnail strip** below tabs — small SVG previews, horizontally scrollable, current diagram highlighted.
-- [ ] **Fullscreen diagram modal** — click any diagram → max-vh modal with existing zoom/pan. Esc closes, animated.
-- [ ] **Per-diagram download SVG/PNG buttons** in top-right of diagram chrome.
-- [ ] **Node hover** — 1-degree neighbors highlight (full opacity), rest dim to 25%, 180ms. Wires connecting them brighten.
-- [ ] **Minimap** in bottom-right corner of large diagrams (>30 nodes) — 120×80px overview with viewport rectangle, draggable.
-- [ ] **Legend** in bottom-left — what each shape means (component, service, datastore, external).
-- [ ] **Diagram tab-switch transition** — current diagram fades + slides out, new one fades + slides in (320ms).
+### 5.1 Navigation — Phase 5A shipped (adapted to tabbed surface)
+- [x] **Sliding chapter-tab indicator** — `framer-motion layoutId="cockpit-chapter-indicator"` spring-slides a 2px accent bar between active tabs (replaces per-tab `border-b-2`). Equivalent of "progress bar" in a tabbed surface.
+- [x] **Chapter cross-fade transitions** — `<AnimatePresence mode="wait">` around the entire canvas content keyed on chapter; content fades+rises 14→0 / fades+exits 0→-8 over 340ms ease-out-expo.
+- [x] **`Up next →` affordance** — already present as `ChapterFooter` with prev/next cards (kept).
+- [~] **Sticky mini-TOC sidebar on xl:** — N/A on tabbed surface (right inspector serves the contextual role; chapter tabs serve as TOC).
+- [~] **Chapter numeral parallax** — N/A (no scroll-driven hero numerals in tabbed cockpit).
 
-### 5.3 Components tab
-- [ ] **Cluster by category visually** — frontend / api / service / data with thin section separators and category headers.
-- [ ] **Card hover** — lifts 4px + accent border + the related diagram nodes pulse (cross-section linking).
-- [ ] **Filter pills at top** — `All · Frontend · API · Service · Data`, animated underline.
+### 5.2 Diagrams tab — Phase 5A partially shipped
+- [x] **Segmented control with animated pill** — `layoutId="cockpit-diagram-segmented-pill"` slides a solid ink pill between diagram kinds.
+- [x] **Diagram tab-switch transition** — `<AnimatePresence mode="wait">` keyed on `current.id`: fade+rise 8→0 / exit 0→-6 over 320ms ease-out-expo.
+- [~] **Diagram thumbnail strip** — DEFERRED to Phase 5B (needs SVG snapshot pipeline).
+- [~] **Fullscreen diagram modal** — DEFERRED to Phase 5B (EditorialDiagram already has zoom/pan; modal wrapper is incremental).
+- [~] **Per-diagram download SVG/PNG buttons** — DEFERRED to Phase 5B.
+- [~] **Node hover neighbor dimming** — DEFERRED to Phase 5B (requires EditorialDiagram graph-traversal work).
+- [~] **Minimap & legend** — DEFERRED to Phase 5B.
 
-### 5.4 Cost breakdown
-- [ ] **Inline horizontal bar in each row** — relative weight against total monthly cost. Bar animates from 0 → width on viewport entry (800ms ease-out-expo).
-- [ ] **Total row** — number counts up.
-- [ ] **Hover row** — bar saturates, row background tints (paper-2 → paper-3).
+### 5.3 Components tab — Phase 5A shipped
+- [x] **Filter pills at top** with animated sliding indicator — `All / Frontend / Backend / Data / Platform`, each shows live count, `layoutId="cockpit-pieces-filter-pill"` springs a soft paper-2 pill between active states. Filter buckets defined by `COMPONENT_FILTERS` regex map over the 15 ArchComponent categories.
+- [x] **Card entry stagger on filter change** — `<AnimatePresence mode="popLayout">` re-animates the grid as the filter narrows; each card lifts 8→0 over 280ms with capped 25ms stagger (max delay 180ms).
+- [~] **Visual cluster headers** — DEFERRED (filter pills serve the same discovery role without breaking the hairline grid).
+- [~] **Cross-section linking (card hover pulses diagram nodes)** — DEFERRED to Phase 5B (needs shared selection-effect channel).
 
-### 5.5 Risk register
-- [ ] **5×5 risk matrix heatmap** above the list — likelihood × impact, dot per risk, click to scroll to list entry.
-- [ ] **Toggle: matrix view ↔ list view** (segmented control).
-- [ ] **List row hover** — highlights matching matrix dot.
+### 5.4 Cost breakdown — Phase 5A shipped
+- [x] **Inline horizontal bar per row** — `CostBreakdown` component; each row's bar animates 0→width on viewport entry over 850ms ease-out-expo with 40ms per-row stagger. Bar sized by `midpoint(low, high) / max(midpoint)`.
+- [x] **Total row with count-up** — sums all midpoints; `<CountUp to={total} duration={1.6}>` with Indian numbering; shows `≈ ₹X` plus full low–high band.
+- [x] **Per-row share %** column shows the row's contribution to total.
+- [x] **Hover row** — bg shifts to `paper-2/40` on hover.
+
+### 5.5 Risk register — Phase 5A shipped
+- [x] **Risk matrix heatmap** above list — `RiskMatrix` 4 impact rows × 3 likelihood cols (matches actual zod enums: impact = low/medium/high/critical, likelihood = low/medium/high). Cell background heat-tinted by `accent / heat * 0.16`.
+- [x] **Click matrix dot → scroll to list entry + select** — `cockpit-risk-{id}` anchors; `scrollIntoView({ behavior: "smooth", block: "center" })`; selection also drives inspector.
+- [x] **Selected dot highlight** — current selection scales 1.5 + accent ring with paper offset.
+- [~] **Toggle: matrix view ↔ list view** — DEFERRED (showing both at once is more useful than toggling; can revisit).
 
 ### 5.6 Scale profiles tab
-- [ ] **Comparative table** instead of 4 side-by-side cards — rows = attributes (MAU, RPS, components, monthly cost, regions), columns = tiers (startup / growth / scale / hyperscale).
-- [ ] **Cell hover** — cross-highlights row and column.
-- [ ] **Delta indicators** between adjacent tiers (`+3 components`, `+₹45,000/mo`).
+- [~] **Comparative table refactor** — DEFERRED to Phase 5B. Current `ScaleExplorer` (a separate 161-line component) already lays out tiers; comparative-table redesign needs its own pass.
 
-### 5.7 Roadmap
-- [ ] **Horizontal timeline** — swim lanes by phase, milestones as nodes on the lane.
-- [ ] **Hover milestone** — tooltip with details.
-- [ ] **Animated drawing** — lanes draw left-to-right on viewport entry, milestones pop in with stagger.
+### 5.7 Roadmap — Phase 5A shipped
+- [x] **Phase cards stagger reveal on viewport entry** — each phase card lifts 12→0 over 500ms ease-out-expo with capped 80ms stagger (max delay 400ms).
+- [x] **Left accent rail draws in per card** — vertical accent line `scaleY: 0→1` over 700ms with `transformOrigin: top`, delayed 150ms after card lands.
+- [x] **Milestones fade-slide in with secondary stagger** — each milestone x:-6→0 + fade over 400ms with 50ms per-milestone stagger.
+- [~] **Horizontal swim-lane timeline** — DEFERRED (vertical phase cards with motion deliver the "drawing" feel without the horizontal-overflow problem in a bounded cockpit canvas).
 
-### 5.8 Cockpit hero
-- [ ] **Scroll indicator** between hero and first chapter (small `↓ the work` chip).
-- [ ] **Lead paragraph fades in word-by-word** (60ms stagger, 480ms each).
+### 5.8 Cockpit hero — Phase 5A shipped
+- [x] **Lead paragraph word-by-word fade** — `WordFade` splits the lead sentence, each word fades+lifts+unblurs over 460ms with 45ms stagger (50ms base delay). Reduced-motion users see the static sentence.
+- [~] **`↓ the work` scroll indicator** — N/A on tabbed surface; user clicks chapter tabs.
+
+### Phase 5A summary
+- 4 new cockpit-local primitives in `src/components/workspace/ReportCockpit.tsx`: `WordFade`, `FilterPills<T>`, `CostBreakdown`, `RiskMatrix`.
+- All animations honor `useReducedMotionSafe()`; bars and word-fade degrade to final state.
+- Bundle impact: `/r/[slug]` 185 → 237 kB First Load (framer-motion + layout). `/sample` 178 → 231 kB.
+- Phase 5B (deferred): diagram thumbnail strip, fullscreen modal, node neighbor-dimming, minimap, legend, per-diagram SVG/PNG download, components↔diagram cross-linking, scale profiles comparative table, horizontal roadmap timeline.
 
 ---
 

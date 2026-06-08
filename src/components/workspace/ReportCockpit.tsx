@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { EditorialDiagram } from "@/components/architecture/EditorialDiagram";
 import { DiagramErrorBoundary } from "@/components/architecture/DiagramErrorBoundary";
@@ -9,15 +10,20 @@ import { ExportMenu } from "@/components/architecture/ExportMenu";
 import { ShareButton } from "@/components/architecture/ShareButton";
 import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
+import { CountUp } from "@/components/motion/CountUp";
+import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
 import type {
   AppliedPattern,
   ArchComponent,
   Architecture,
+  CostLineItem,
   DataFlow,
   Risk,
   SecurityControl,
   TechChoice,
 } from "@/types/architecture";
+
+const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
 /**
  * ReportCockpit — the architecture report rendered as a bounded,
@@ -106,42 +112,52 @@ export function ReportCockpit({
     <div className="flex-1 min-h-0 flex flex-col">
       {/* ─────────────── Chapter tabs (3-act narrative) ─────────────── */}
       <div className="h-11 shrink-0 flex items-stretch border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]">
-        <div className="flex-1 min-w-0 flex items-stretch overflow-x-auto scrollbar-thin">
-          {CHAPTERS.map((c, i) => {
-            const active = chapter === c.id;
-            const prevAct = i > 0 ? CHAPTERS[i - 1].act : null;
-            const startsAct = c.act !== prevAct;
-            return (
-              <div key={c.id} className="flex items-stretch">
-                {startsAct && i > 0 && (
-                  <span
-                    aria-hidden
-                    className="self-center mx-1.5 h-4 w-px bg-[hsl(var(--line))]"
-                  />
-                )}
-                {startsAct && c.act !== "intro" && (
-                  <span className="hidden lg:flex items-center pl-1 pr-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]/70">
-                    {ACT_LABELS[c.act]}
-                  </span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setChapter(c.id)}
-                  title={c.sub}
-                  className={cn(
-                    "shrink-0 px-3.5 flex items-center gap-2 border-b-2 transition-colors text-[12px]",
-                    active
-                      ? "border-[hsl(var(--accent))] text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
-                      : "border-transparent text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
+        <LayoutGroup id="cockpit-chapter-tabs">
+          <div className="flex-1 min-w-0 flex items-stretch overflow-x-auto scrollbar-thin">
+            {CHAPTERS.map((c, i) => {
+              const active = chapter === c.id;
+              const prevAct = i > 0 ? CHAPTERS[i - 1].act : null;
+              const startsAct = c.act !== prevAct;
+              return (
+                <div key={c.id} className="flex items-stretch">
+                  {startsAct && i > 0 && (
+                    <span
+                      aria-hidden
+                      className="self-center mx-1.5 h-4 w-px bg-[hsl(var(--line))]"
+                    />
                   )}
-                >
-                  <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
-                  <span className="font-medium tracking-tight">{c.label}</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                  {startsAct && c.act !== "intro" && (
+                    <span className="hidden lg:flex items-center pl-1 pr-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]/70">
+                      {ACT_LABELS[c.act]}
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setChapter(c.id)}
+                    title={c.sub}
+                    className={cn(
+                      "shrink-0 relative px-3.5 flex items-center gap-2 transition-colors text-[12px]",
+                      active
+                        ? "text-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40"
+                        : "text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]/40",
+                    )}
+                  >
+                    <span className="font-mono text-[10px] tabular-nums opacity-70">{c.n}</span>
+                    <span className="font-medium tracking-tight">{c.label}</span>
+                    {active && (
+                      <motion.span
+                        layoutId="cockpit-chapter-indicator"
+                        aria-hidden
+                        className="absolute inset-x-0 bottom-0 h-[2px] bg-[hsl(var(--accent))]"
+                        transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                      />
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </LayoutGroup>
         {showDownload && architectureId && (
           <div className="shrink-0 flex items-center gap-2 pr-3 pl-3 border-l border-[hsl(var(--line))]">
             <ShareButton architectureId={architectureId} initialShare={publicShare} />
@@ -155,28 +171,38 @@ export function ReportCockpit({
         {/* Canvas */}
         <section className="min-h-0 min-w-0 overflow-auto scrollbar-thin">
           <div className="p-6 md:p-8 lg:p-10">
-            <ChapterIntro chapter={chapter} />
-            {chapter === "story"    && <StoryPanel arch={arch} lead={lead} body={body} onJump={setChapter} />}
-            {chapter === "design"   && <SystemDiagram arch={arch} onSelect={setSelection} selectedId={selection?.kind === "component" ? selection.id : null} />}
-            {chapter === "diagrams" && (
-              <DiagramsPanel
-                diagrams={arch.diagrams}
-                active={activeDiagram}
-                onActive={(id) => { setActiveDiagram(id); setSelection({ kind: "diagram", id }); }}
-                current={currentDiagram}
-                onSelect={setSelection}
-                arch={arch}
-              />
-            )}
-            {chapter === "brief"   && <BriefPanel arch={arch} onSelect={setSelection} selection={selection} />}
-            {chapter === "pieces"  && <PiecesPanel arch={arch} onSelect={setSelection} selection={selection} />}
-            {chapter === "traffic" && <TrafficPanel arch={arch} onSelect={setSelection} selection={selection} />}
-            {chapter === "numbers" && <NumbersPanel arch={arch} />}
-            {chapter === "breaks"  && <RisksPanel arch={arch} onSelect={setSelection} selection={selection} />}
-            {chapter === "guards"  && <GuardsPanel arch={arch} onSelect={setSelection} selection={selection} />}
-            {chapter === "watch"   && <WatchPanel arch={arch} />}
-            {chapter === "next"    && <NextPanel arch={arch} />}
-            <ChapterFooter chapter={chapter} onJump={setChapter} />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={chapter}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.34, ease: EASE_OUT_EXPO }}
+              >
+                <ChapterIntro chapter={chapter} />
+                {chapter === "story"    && <StoryPanel arch={arch} lead={lead} body={body} onJump={setChapter} />}
+                {chapter === "design"   && <SystemDiagram arch={arch} onSelect={setSelection} selectedId={selection?.kind === "component" ? selection.id : null} />}
+                {chapter === "diagrams" && (
+                  <DiagramsPanel
+                    diagrams={arch.diagrams}
+                    active={activeDiagram}
+                    onActive={(id) => { setActiveDiagram(id); setSelection({ kind: "diagram", id }); }}
+                    current={currentDiagram}
+                    onSelect={setSelection}
+                    arch={arch}
+                  />
+                )}
+                {chapter === "brief"   && <BriefPanel arch={arch} onSelect={setSelection} selection={selection} />}
+                {chapter === "pieces"  && <PiecesPanel arch={arch} onSelect={setSelection} selection={selection} />}
+                {chapter === "traffic" && <TrafficPanel arch={arch} onSelect={setSelection} selection={selection} />}
+                {chapter === "numbers" && <NumbersPanel arch={arch} />}
+                {chapter === "breaks"  && <RisksPanel arch={arch} onSelect={setSelection} selection={selection} />}
+                {chapter === "guards"  && <GuardsPanel arch={arch} onSelect={setSelection} selection={selection} />}
+                {chapter === "watch"   && <WatchPanel arch={arch} />}
+                {chapter === "next"    && <NextPanel arch={arch} />}
+                <ChapterFooter chapter={chapter} onJump={setChapter} />
+              </motion.div>
+            </AnimatePresence>
           </div>
         </section>
 
@@ -235,40 +261,67 @@ function DiagramsPanel({
       </header>
 
       {diagrams.length > 1 && (
-        <div className="flex flex-wrap gap-1.5">
-          {diagrams.map((d) => (
-            <button
-              key={d.id}
-              onClick={() => onActive(d.id)}
-              className={cn("tag press", active === d.id ? "tag-solid" : "")}
-            >
-              {d.kind.replace(/-/g, " ")}
-            </button>
-          ))}
-        </div>
+        <LayoutGroup id="cockpit-diagram-segmented">
+          <div className="flex flex-wrap gap-1 p-1 bg-[hsl(var(--paper-2))] border border-[hsl(var(--line))] rounded-full w-fit">
+            {diagrams.map((d) => {
+              const isActive = active === d.id;
+              return (
+                <button
+                  key={d.id}
+                  onClick={() => onActive(d.id)}
+                  className={cn(
+                    "press relative px-3 py-1.5 rounded-full text-[11.5px] font-medium tracking-tight transition-colors",
+                    isActive
+                      ? "text-[hsl(var(--paper))]"
+                      : "text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]",
+                  )}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="cockpit-diagram-segmented-pill"
+                      aria-hidden
+                      className="absolute inset-0 -z-0 rounded-full bg-[hsl(var(--ink))]"
+                      transition={{ type: "spring", stiffness: 420, damping: 34 }}
+                    />
+                  )}
+                  <span className="relative z-10">{d.kind.replace(/-/g, " ")}</span>
+                </button>
+              );
+            })}
+          </div>
+        </LayoutGroup>
       )}
       {current && (
-        <>
-          <div>
-            <h4 className="display text-[clamp(1.15rem,1.6vw,1.45rem)] leading-tight tracking-[-0.02em]">
-              {current.title}
-            </h4>
-            <p className="mt-2 max-w-[64ch] text-[13.5px] leading-relaxed text-[hsl(var(--ink-2))]">
-              {current.description}
-            </p>
-          </div>
-          <DiagramErrorBoundary chart={current.mermaid}>
-            <EditorialDiagram
-              chart={current.mermaid}
-              onSelect={(node) => {
-                // Try to resolve to a real component first so the inspector
-                // can show full details; fall back to a raw "node" selection.
-                const match = resolveComponent(arch, node.label);
-                onSelect(match ? { kind: "component", id: match.id } : { kind: "node", label: node.label, subLabel: node.subLabel });
-              }}
-            />
-          </DiagramErrorBoundary>
-        </>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={current.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.32, ease: EASE_OUT_EXPO }}
+            className="flex flex-col gap-5"
+          >
+            <div>
+              <h4 className="display text-[clamp(1.15rem,1.6vw,1.45rem)] leading-tight tracking-[-0.02em]">
+                {current.title}
+              </h4>
+              <p className="mt-2 max-w-[64ch] text-[13.5px] leading-relaxed text-[hsl(var(--ink-2))]">
+                {current.description}
+              </p>
+            </div>
+            <DiagramErrorBoundary chart={current.mermaid}>
+              <EditorialDiagram
+                chart={current.mermaid}
+                onSelect={(node) => {
+                  // Try to resolve to a real component first so the inspector
+                  // can show full details; fall back to a raw "node" selection.
+                  const match = resolveComponent(arch, node.label);
+                  onSelect(match ? { kind: "component", id: match.id } : { kind: "node", label: node.label, subLabel: node.subLabel });
+                }}
+              />
+            </DiagramErrorBoundary>
+          </motion.div>
+        </AnimatePresence>
       )}
     </div>
   );
@@ -314,39 +367,73 @@ function BriefPanel({ arch, onSelect, selection }: { arch: Architecture; onSelec
 function PiecesPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
   const selId = selection?.kind === "component" ? selection.id : null;
   const selTech = selection?.kind === "tech" ? selection.index : -1;
+  const [filter, setFilter] = useState<ComponentFilter>("all");
+  const filtered = useMemo(
+    () => arch.components.filter((c) => COMPONENT_FILTERS[filter].test(c.category)),
+    [arch.components, filter],
+  );
+  const counts = useMemo(() => {
+    const out: Record<ComponentFilter, number> = { all: arch.components.length, frontend: 0, backend: 0, data: 0, platform: 0 };
+    for (const c of arch.components) {
+      for (const k of ["frontend", "backend", "data", "platform"] as const) {
+        if (COMPONENT_FILTERS[k].test(c.category)) out[k] += 1;
+      }
+    }
+    return out;
+  }, [arch.components]);
+
   return (
     <div className="flex flex-col gap-8">
       <PanelHead n="03a" title={`${arch.components.length} services, working together`} />
+      <FilterPills
+        layoutId="cockpit-pieces-filter"
+        value={filter}
+        onChange={setFilter}
+        options={[
+          { id: "all",      label: "All",      count: counts.all },
+          { id: "frontend", label: "Frontend", count: counts.frontend },
+          { id: "backend",  label: "Backend",  count: counts.backend },
+          { id: "data",     label: "Data",     count: counts.data },
+          { id: "platform", label: "Platform", count: counts.platform },
+        ]}
+      />
       <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2 2xl:grid-cols-3">
-        {arch.components.map((c, i) => (
-          <button
-            key={c.id}
-            type="button"
-            onClick={() => onSelect({ kind: "component", id: c.id })}
-            className={cn(
-              "text-left bg-[hsl(var(--paper))] p-5 flex flex-col gap-2 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
-              selId === c.id && "ring-1 ring-[hsl(var(--accent))]/60 ring-inset bg-[hsl(var(--paper-2))]/40",
-            )}
-          >
-            <div className="flex items-baseline justify-between gap-2">
-              <div className="flex items-baseline gap-2 min-w-0">
-                <span className="font-mono text-[10px] tabular-nums text-[hsl(var(--ink-3))]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h4 className="display text-[15px] tracking-[-0.02em] truncate">{c.name}</h4>
+        <AnimatePresence mode="popLayout" initial={false}>
+          {filtered.map((c, i) => (
+            <motion.button
+              layout
+              key={c.id}
+              type="button"
+              onClick={() => onSelect({ kind: "component", id: c.id })}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.28, ease: EASE_OUT_EXPO, delay: Math.min(i * 0.025, 0.18) }}
+              className={cn(
+                "text-left bg-[hsl(var(--paper))] p-5 flex flex-col gap-2 transition-colors hover:bg-[hsl(var(--paper-2))]/60",
+                selId === c.id && "ring-1 ring-[hsl(var(--accent))]/60 ring-inset bg-[hsl(var(--paper-2))]/40",
+              )}
+            >
+              <div className="flex items-baseline justify-between gap-2">
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="font-mono text-[10px] tabular-nums text-[hsl(var(--ink-3))]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h4 className="display text-[15px] tracking-[-0.02em] truncate">{c.name}</h4>
+                </div>
+                <span className="tag !h-5 !text-[10px] shrink-0">{c.category}</span>
               </div>
-              <span className="tag !h-5 !text-[10px] shrink-0">{c.category}</span>
-            </div>
-            <div className="font-mono text-[10.5px] text-[hsl(var(--ink-3))] uppercase tracking-wider">
-              {c.technology}
-            </div>
-            <p className="text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{c.responsibility}</p>
-            <div className="mt-1 pt-2 border-t border-[hsl(var(--line))]">
-              <p className="eyebrow">Scaling</p>
-              <p className="mt-1 text-[12px] text-[hsl(var(--ink))]">{c.scaling}</p>
-            </div>
-          </button>
-        ))}
+              <div className="font-mono text-[10.5px] text-[hsl(var(--ink-3))] uppercase tracking-wider">
+                {c.technology}
+              </div>
+              <p className="text-[13px] leading-relaxed text-[hsl(var(--ink-2))]">{c.responsibility}</p>
+              <div className="mt-1 pt-2 border-t border-[hsl(var(--line))]">
+                <p className="eyebrow">Scaling</p>
+                <p className="mt-1 text-[12px] text-[hsl(var(--ink))]">{c.scaling}</p>
+              </div>
+            </motion.button>
+          ))}
+        </AnimatePresence>
       </div>
 
       <PanelHead n="03b" title="Tech stack rationale" />
@@ -459,29 +546,27 @@ function NumbersPanel({ arch }: { arch: Architecture }) {
       </div>
 
       <PanelHead n="05b" title="Monthly cost — growth tier baseline" />
-      <DataTable
-        headers={["Service", "Estimated qty", "Monthly INR", "Notes"]}
-        rows={arch.cost_breakdown.map((c) => [
-          <span key="s" className="font-medium">{c.service}</span>,
-          <span key="q" className="text-[12px] text-[hsl(var(--ink-2))]">{c.estimated_qty}</span>,
-          <span key="i" className="font-mono text-[12px] tabular-nums">
-            ₹{c.monthly_inr_low.toLocaleString("en-IN")} – ₹{c.monthly_inr_high.toLocaleString("en-IN")}
-          </span>,
-          <span key="n" className="text-[12px] text-[hsl(var(--ink-3))]">{c.notes}</span>,
-        ])}
-      />
+      <CostBreakdown items={arch.cost_breakdown} />
     </div>
   );
 }
 
 function RisksPanel({ arch, onSelect, selection }: { arch: Architecture; onSelect: SelectHandler; selection: Selection }) {
   const selId = selection?.kind === "risk" ? selection.id : null;
+  const handleJump = (id: string) => {
+    onSelect({ kind: "risk", id });
+    if (typeof document !== "undefined") {
+      const el = document.getElementById(`cockpit-risk-${id}`);
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
   return (
     <div className="flex flex-col gap-6">
       <PanelHead n="06" title={`${arch.risks.length} ways this can go wrong — and the mitigation`} />
+      <RiskMatrix risks={arch.risks} onJump={handleJump} selectedId={selId} />
       <ul className="divide-y divide-[hsl(var(--line))] border-y border-[hsl(var(--line))]">
         {arch.risks.map((r, i) => (
-          <li key={r.id}>
+          <li key={r.id} id={`cockpit-risk-${r.id}`} className="scroll-mt-6">
             <button
               type="button"
               onClick={() => onSelect({ kind: "risk", id: r.id })}
@@ -613,7 +698,23 @@ function NextPanel({ arch }: { arch: Architecture }) {
       <PanelHead n="09a" title="Roadmap" />
       <ol className="space-y-px bg-[hsl(var(--line))] border border-[hsl(var(--line))]">
         {arch.roadmap.map((r, i) => (
-          <li key={i} className="bg-[hsl(var(--paper))] p-5">
+          <motion.li
+            key={i}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: EASE_OUT_EXPO, delay: Math.min(i * 0.08, 0.4) }}
+            className="relative bg-[hsl(var(--paper))] p-5 pl-7"
+          >
+            <motion.span
+              aria-hidden
+              initial={{ scaleY: 0 }}
+              whileInView={{ scaleY: 1 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, ease: EASE_OUT_EXPO, delay: Math.min(i * 0.08, 0.4) + 0.15 }}
+              style={{ transformOrigin: "top" }}
+              className="absolute left-3 top-5 bottom-5 w-px bg-[hsl(var(--accent))]/40"
+            />
             <div className="flex items-baseline justify-between gap-3">
               <h4 className="display text-[17px] tracking-[-0.02em]">
                 <span className="text-[hsl(var(--ink-3))] mr-2 tabular-nums">{String(i + 1).padStart(2, "0")}</span>
@@ -623,13 +724,20 @@ function NextPanel({ arch }: { arch: Architecture }) {
             </div>
             <ul className="mt-3 space-y-1.5">
               {r.milestones.map((m, j) => (
-                <li key={j} className="flex gap-2 text-[13px]">
+                <motion.li
+                  key={j}
+                  initial={{ opacity: 0, x: -6 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.4, ease: EASE_OUT_EXPO, delay: Math.min(i * 0.08, 0.4) + 0.25 + j * 0.05 }}
+                  className="flex gap-2 text-[13px]"
+                >
                   <span className="ms mt-0.5 text-[14px] accent" aria-hidden>check</span>
                   <span>{m}</span>
-                </li>
+                </motion.li>
               ))}
             </ul>
-          </li>
+          </motion.li>
         ))}
       </ol>
 
@@ -1226,7 +1334,7 @@ function StoryPanel({
         </p>
         {lead && (
           <p className="mt-7 serif text-[clamp(1.15rem,1.7vw,1.4rem)] leading-[1.45] text-[hsl(var(--ink))] max-w-[60ch]">
-            {lead}
+            <WordFade text={lead} />
           </p>
         )}
         {body && (
@@ -1320,4 +1428,285 @@ function formatINRCompact(paiseOrRupees: number): string {
   if (n >= 1_00_000)    return `${(n / 1_00_000).toFixed(1)}L`;
   if (n >= 1_000)       return `${(n / 1_000).toFixed(0)}K`;
   return String(Math.round(n));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Phase 5A — motion + interactivity primitives (cockpit-local)
+   ════════════════════════════════════════════════════════════════ */
+
+/**
+ * Word-by-word fade-in for serif lead sentences. Splits on whitespace,
+ * preserves spaces as plain spans (no animation cost), and degrades to
+ * static text for reduced-motion users.
+ */
+function WordFade({
+  text,
+  delayBase = 0.05,
+  stagger = 0.045,
+  className,
+}: {
+  text: string;
+  delayBase?: number;
+  stagger?: number;
+  className?: string;
+}) {
+  const reduce = useReducedMotionSafe();
+  if (reduce) return <span className={className}>{text}</span>;
+  const parts = text.split(/(\s+)/);
+  let wordIdx = 0;
+  return (
+    <span className={className}>
+      {parts.map((p, i) => {
+        if (!/\S/.test(p)) return <span key={i}>{p}</span>;
+        const idx = wordIdx++;
+        return (
+          <motion.span
+            key={i}
+            initial={{ opacity: 0, y: 6, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.46, delay: delayBase + idx * stagger, ease: EASE_OUT_EXPO }}
+            style={{ display: "inline-block" }}
+          >
+            {p}
+          </motion.span>
+        );
+      })}
+    </span>
+  );
+}
+
+/* ─────────────── Components-tab filter pills ─────────────── */
+
+type ComponentFilter = "all" | "frontend" | "backend" | "data" | "platform";
+
+const COMPONENT_FILTERS: Record<ComponentFilter, RegExp> = {
+  all:      /.*/,
+  frontend: /^(frontend|cdn|edge)$/,
+  backend:  /^(api|service|worker|auth|integration)$/,
+  data:     /^(database|cache|queue|storage)$/,
+  platform: /^(observability|ml|other)$/,
+};
+
+function FilterPills<T extends string>({
+  options,
+  value,
+  onChange,
+  layoutId,
+}: {
+  options: { id: T; label: string; count?: number }[];
+  value: T;
+  onChange: (v: T) => void;
+  layoutId: string;
+}) {
+  return (
+    <LayoutGroup id={layoutId}>
+      <div className="flex flex-wrap items-center gap-1">
+        {options.map((o) => {
+          const active = o.id === value;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => onChange(o.id)}
+              className={cn(
+                "relative px-3 py-1.5 text-[12px] font-medium tracking-tight transition-colors",
+                active ? "text-[hsl(var(--ink))]" : "text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink-2))]",
+              )}
+            >
+              {active && (
+                <motion.span
+                  layoutId={`${layoutId}-pill`}
+                  aria-hidden
+                  className="absolute inset-0 rounded-full bg-[hsl(var(--paper-2))] ring-1 ring-[hsl(var(--line))]"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative inline-flex items-baseline gap-1.5">
+                {o.label}
+                {o.count !== undefined && (
+                  <span className="font-mono text-[10px] tabular-nums opacity-60">{o.count}</span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </LayoutGroup>
+  );
+}
+
+/* ─────────────── Cost breakdown — bars + count-up total ─────────────── */
+
+function CostBreakdown({ items }: { items: CostLineItem[] }) {
+  const reduce = useReducedMotionSafe();
+  const mids = items.map((c) => (c.monthly_inr_low + c.monthly_inr_high) / 2);
+  const max = Math.max(1, ...mids);
+  const total = mids.reduce((s, n) => s + n, 0);
+  const totalLow = items.reduce((s, c) => s + c.monthly_inr_low, 0);
+  const totalHigh = items.reduce((s, c) => s + c.monthly_inr_high, 0);
+  return (
+    <div className="bg-[hsl(var(--paper))] border border-[hsl(var(--line))] overflow-hidden">
+      <div className="hidden md:grid grid-cols-[1.4fr_0.7fr_1.6fr_0.4fr] gap-x-4 px-4 py-2.5 bg-[hsl(var(--paper-2))] font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))] border-b border-[hsl(var(--line))]">
+        <div>Service</div>
+        <div className="text-right">Qty</div>
+        <div>Monthly INR</div>
+        <div className="text-right">Share</div>
+      </div>
+      {items.map((c, i) => {
+        const mid = mids[i];
+        const pct = (mid / max) * 100;
+        const sharePct = total > 0 ? (mid / total) * 100 : 0;
+        const shareLabel = sharePct >= 1 ? `${Math.round(sharePct)}%` : "<1%";
+        return (
+          <div
+            key={i}
+            className="grid md:grid-cols-[1.4fr_0.7fr_1.6fr_0.4fr] grid-cols-[1.6fr_0.6fr] gap-x-4 gap-y-2 items-center px-4 py-3 border-b border-[hsl(var(--line))] last:border-b-0 hover:bg-[hsl(var(--paper-2))]/40 transition-colors"
+          >
+            <div className="min-w-0">
+              <div className="text-[13px] font-medium truncate">{c.service}</div>
+              {c.notes && <div className="text-[11px] text-[hsl(var(--ink-3))] truncate">{c.notes}</div>}
+            </div>
+            <div className="text-[12px] text-[hsl(var(--ink-2))] tabular-nums whitespace-nowrap text-right md:text-left">
+              {c.estimated_qty}
+            </div>
+            <div className="col-span-2 md:col-span-1 flex items-center gap-3 min-w-0">
+              <div className="relative h-1.5 flex-1 bg-[hsl(var(--paper-2))] overflow-hidden">
+                <motion.div
+                  className="h-full bg-[hsl(var(--accent))]"
+                  initial={reduce ? { width: `${pct}%` } : { width: 0 }}
+                  whileInView={{ width: `${pct}%` }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.85, delay: i * 0.04, ease: EASE_OUT_EXPO }}
+                />
+              </div>
+              <div className="font-mono text-[11.5px] tabular-nums whitespace-nowrap shrink-0">
+                ₹{c.monthly_inr_low.toLocaleString("en-IN")}–₹{c.monthly_inr_high.toLocaleString("en-IN")}
+              </div>
+            </div>
+            <div className="font-mono text-[11.5px] tabular-nums text-[hsl(var(--ink-2))] text-right whitespace-nowrap col-start-2 md:col-start-auto row-start-1 md:row-start-auto">
+              {shareLabel}
+            </div>
+          </div>
+        );
+      })}
+      {/* Total row */}
+      <div className="grid grid-cols-[1.4fr_2.6fr] md:grid-cols-[1.4fr_0.7fr_1.6fr_0.4fr] gap-x-4 items-baseline px-4 py-4 border-t-2 border-[hsl(var(--ink))] bg-[hsl(var(--paper-2))]/40">
+        <div className="text-[12px] font-mono uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+          Total · midpoint
+        </div>
+        <div className="hidden md:block" />
+        <div className="display tabular-nums tracking-[-0.02em] text-[clamp(1.1rem,1.8vw,1.5rem)]">
+          ≈ ₹<CountUp to={Math.round(total)} duration={1.6} />
+          <span className="ml-3 font-mono text-[11px] tracking-wider text-[hsl(var(--ink-3))] normal-case">
+            band ₹{totalLow.toLocaleString("en-IN")}–₹{totalHigh.toLocaleString("en-IN")}
+          </span>
+        </div>
+        <div className="font-mono text-[11.5px] tabular-nums text-[hsl(var(--ink-3))] text-right hidden md:block">
+          100%
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────── Risk matrix heatmap ─────────────── */
+
+function RiskMatrix({
+  risks,
+  onJump,
+  selectedId,
+}: {
+  risks: Risk[];
+  onJump: (id: string) => void;
+  selectedId: string | null;
+}) {
+  const impacts: Risk["impact"][] = ["critical", "high", "medium", "low"];
+  const likelihoods: Risk["likelihood"][] = ["low", "medium", "high"];
+  const cellRisks = (im: Risk["impact"], lk: Risk["likelihood"]) =>
+    risks.filter((r) => r.impact === im && r.likelihood === lk);
+  // Heat 0..1 — critical+high lights up, low+low stays neutral.
+  const heat = (im: Risk["impact"], lk: Risk["likelihood"]) => {
+    const ix = { low: 0, medium: 1, high: 2, critical: 3 }[im];
+    const lx = { low: 0, medium: 1, high: 2 }[lk];
+    return (ix + lx * 1.2) / 5.4;
+  };
+  const dotColor = (im: Risk["impact"]) =>
+    im === "critical" ? "bg-[hsl(var(--ink))]"
+    : im === "high"   ? "bg-[hsl(var(--bad))]"
+    : im === "medium" ? "bg-[hsl(var(--warn))]"
+    :                   "bg-[hsl(var(--ink-3))]";
+
+  return (
+    <div className="card-paper p-5 md:p-6">
+      <div className="flex items-baseline justify-between gap-3 mb-5">
+        <div>
+          <p className="eyebrow">Risk matrix</p>
+          <p className="mt-1 text-[12.5px] text-[hsl(var(--ink-2))]">
+            Likelihood × impact. Click a dot to jump to the risk.
+          </p>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+          {risks.length} risks
+        </span>
+      </div>
+      <div className="grid grid-cols-[auto_1fr] gap-3">
+        {/* y-axis label */}
+        <div className="hidden md:flex items-center justify-end pr-1">
+          <span className="[writing-mode:vertical-rl] rotate-180 font-mono text-[9.5px] uppercase tracking-[0.22em] text-[hsl(var(--ink-3))]">
+            ← higher impact
+          </span>
+        </div>
+        <div className="min-w-0">
+          <div className="grid grid-cols-[auto_repeat(3,minmax(0,1fr))] gap-1.5">
+            {impacts.flatMap((im) => [
+              <div
+                key={`${im}-label`}
+                className="flex items-center justify-end pr-2 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))] min-w-[68px]"
+              >
+                {im}
+              </div>,
+              ...likelihoods.map((lk) => {
+                const cell = cellRisks(im, lk);
+                const h = heat(im, lk);
+                return (
+                  <div
+                    key={`${im}-${lk}`}
+                    className="aspect-[2/1] relative border border-[hsl(var(--line))] flex flex-wrap items-center justify-center gap-1 p-1.5 transition-colors"
+                    style={{ background: `hsl(var(--accent) / ${(h * 0.16).toFixed(3)})` }}
+                  >
+                    {cell.map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => onJump(r.id)}
+                        title={`${r.title} · ${r.impact} impact · ${r.likelihood} likelihood`}
+                        className={cn(
+                          "size-2.5 rounded-full transition-all duration-200 hover:scale-150",
+                          dotColor(r.impact),
+                          selectedId === r.id &&
+                            "ring-2 ring-[hsl(var(--accent))] ring-offset-1 ring-offset-[hsl(var(--paper))] scale-150",
+                        )}
+                      />
+                    ))}
+                  </div>
+                );
+              }),
+            ])}
+            <div />
+            {likelihoods.map((lk) => (
+              <div
+                key={lk}
+                className="text-center font-mono text-[9.5px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))] pt-1"
+              >
+                {lk}
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-center font-mono text-[9.5px] uppercase tracking-[0.22em] text-[hsl(var(--ink-3))]">
+            higher likelihood →
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
