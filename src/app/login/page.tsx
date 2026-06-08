@@ -68,7 +68,7 @@ export default async function LoginPage({
             <p className="display mt-10 text-[clamp(1.8rem,3vw,2.8rem)] leading-[1.1] tracking-[-0.025em]">
               <span className="serif font-normal italic">“It used to take a week</span> to
               produce a defensible architecture doc. Tessar gives you a draft
-              you can argue with in <span className="accent">four minutes.</span>”
+              you can argue with in <span className="accent">minutes.</span>”
             </p>
 
             <div className="mt-10 flex items-center gap-4">
@@ -82,9 +82,9 @@ export default async function LoginPage({
             </div>
 
             <div className="mt-16 grid grid-cols-3 gap-6 border-t border-[hsl(var(--line))] pt-8">
-              <Stat n="~4m" k="median run" />
-              <Stat n="3×" k="scale tiers" />
-              <Stat n="14" k="categories" />
+              <Stat n="14"  k="sections" />
+              <Stat n="6+"  k="diagrams" />
+              <Stat n="42"  k="patterns" />
             </div>
           </div>
         </aside>

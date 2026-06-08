@@ -43,7 +43,7 @@ export default async function NewArchitecturePage({
             the math, and the patterns that hold it together.
           </p>
           <p className="text-[13px] text-[hsl(var(--ink-3))]">
-            About four minutes per run · refunded automatically if something breaks.
+            A few minutes per run · refunded automatically if something breaks.
           </p>
         </div>
       </section>

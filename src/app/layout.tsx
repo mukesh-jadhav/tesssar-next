@@ -47,11 +47,11 @@ export const metadata: Metadata = {
     template: "%s · Tessar",
   },
   description:
-    "Describe your system in plain English. Get a production-grade cloud architecture in minutes — diagrams, scale tiers, cost estimates, risks, and patterns. Built on Google Cloud.",
+    "Brief in. A 14-section, schema-validated cloud architecture out — components, diagrams, monthly cost in INR, scored risks, applied patterns, roadmap. Sized to your scale. Built on Google Cloud.",
   openGraph: {
     title: "Tessar — AI Cloud Architect",
     description:
-      "Production-grade cloud architectures, designed by an AI principal architect in minutes. First design free for new accounts.",
+      "Senior cloud architect, on tap. Brief in, board-ready report out. First design free for new accounts.",
     type: "website",
   },
   twitter: { card: "summary_large_image", title: "Tessar — AI Cloud Architect" },

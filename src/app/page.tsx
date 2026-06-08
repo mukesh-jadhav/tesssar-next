@@ -3,9 +3,9 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { TessarLogo } from "@/components/shared/TessarLogo";
 
 export const metadata = {
-  title: "Tessar — Production cloud architecture in four minutes",
+  title: "Tessar — Senior cloud architect, on tap",
   description:
-    "Write a paragraph. Get a defensible cloud architecture — components, diagrams, INR costs, risks, security model — in four minutes. ₹300 a design. First one on us.",
+    "Brief in. A 14-section, schema-validated cloud architecture out — components, C4 diagrams, scored risks, applied patterns, monthly cost in INR, roadmap. Sized to your scale. ₹300 a design. First one on us.",
 };
 
 export default async function HomePage() {
@@ -29,14 +29,15 @@ export default async function HomePage() {
           </div>
 
           <h1 className="m3-page-enter mt-8 display-tight text-[clamp(3.2rem,9.2vw,8.5rem)] leading-[0.88] tracking-[-0.045em] max-w-[16ch]">
-            Write a paragraph.{" "}
-            <span className="serif font-normal italic accent">Get an architecture.</span>
+            Senior architect,{" "}
+            <span className="serif font-normal italic accent">on tap.</span>
           </h1>
 
           <p className="m3-page-enter mt-10 max-w-[58ch] text-[18px] leading-[1.55] text-[hsl(var(--ink-2))]">
-            Components, diagrams, cost tiers, risks, security model, and the patterns that
-            justify every choice. A defensible cloud design in four minutes — not a chatbot
-            reply, a complete report your engineers will actually read.
+            Tessar reads your brief and writes a 14-section, schema-validated cloud architecture — components,
+            diagrams, monthly cost in INR, scored risks, security controls, applied patterns, roadmap. Sized to
+            your scale automatically: 8 services for a side-project, 50+ for hyperscale. Downloadable as PDF,
+            PowerPoint, or Markdown. A complete report your engineers will actually read.
           </p>
 
           <div className="m3-page-enter mt-12 flex flex-wrap items-center gap-4">
@@ -55,47 +56,59 @@ export default async function HomePage() {
           </p>
 
           <div className="mt-20 grid grid-cols-2 gap-x-10 gap-y-6 md:grid-cols-4 border-t border-[hsl(var(--line))] pt-10">
-            <Stat n="~4m" k="median run" />
-            <Stat n="14" k="report sections" />
-            <Stat n="3×" k="scale tiers" />
+            <Stat n="14"   k="sections per report" />
+            <Stat n="6+"   k="named diagrams" />
+            <Stat n="42"   k="cloud patterns" />
             <Stat n="₹300" k="per design" />
           </div>
         </div>
       </section>
 
-      {/* BEFORE / AFTER */}
+      {/* WHAT'S IN EVERY REPORT */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px]">
           <div className="rule-dots flex items-baseline justify-between pb-4">
-            <p className="section-num">The math</p>
+            <p className="section-num">The deliverable</p>
           </div>
 
           <h2 className="mt-14 display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[26ch]">
-            Most architecture docs die in a Notion tab.{" "}
-            <span className="serif italic accent">Tessar ships one before the meeting ends.</span>
+            What lands in your downloads folder.{" "}
+            <span className="serif italic accent">Same shape, every time.</span>
           </h2>
 
+          <p className="mt-6 max-w-[58ch] text-[16px] leading-[1.6] text-[hsl(var(--ink-2))]">
+            Every Tessar report follows the same 14-section contract — nothing missing, nothing improvised.
+            What changes is the depth: a side-project gets a clean, focused report; a hyperscale brief gets a
+            decomposed system with bounded contexts, multiple diagrams, and 30+ services.
+          </p>
+
           <div className="mt-14 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2">
-            <Compare
-              label="Without Tessar"
-              tone="muted"
+            <ReportFacet
+              label="What you get"
+              tone="paper"
               items={[
-                "Five days drawing in Lucid + Miro",
-                "Cost guesses pulled from blog posts",
-                "Risks discovered in production",
-                "Diagrams that drift the moment you ship",
-                "A doc no one reads end-to-end",
+                "14 sections, structured the same every time",
+                "8–50 components, sized to the brief",
+                "6+ diagrams: C4-context, C4-container, sequence, ER, deployment, data-flow",
+                "Tech stack with rationale and alternatives per layer",
+                "Monthly cost in INR — per service, with line items",
+                "Risk register scored by likelihood × impact",
+                "Security controls across identity, network, data, secrets, supply chain",
+                "Observability plan: metrics, logs, traces, SLOs, alerts",
+                "Phased roadmap with milestones and open questions",
               ]}
             />
-            <Compare
-              label="With Tessar"
+            <ReportFacet
+              label="How it's built"
               tone="ink"
               items={[
-                "A defensible draft in four minutes",
-                "Three cost tiers — Starter / Growth / Scale",
-                "Risk register scored by likelihood × impact",
-                "Diagrams + components + APIs, one source of truth",
-                "PDF, PowerPoint, Markdown — share with anyone",
+                "Schema-validated by Zod — failed runs auto-refund your credit",
+                "Scale-adaptive: 8 services for a side-project, 50+ for hyperscale",
+                "42 named cloud patterns from the canon, mapped into your risks",
+                "India-native: asia-south1 SKUs, INR pricing, DPDP-aware",
+                "Downloadable as PDF, PowerPoint, or Markdown — same source of truth",
+                "Permanent, versioned, public-shareable URL — link it in a PR",
+                "Defensive layout, structured logs, and a verified Razorpay receipt per pack",
               ]}
             />
           </div>
@@ -123,7 +136,7 @@ export default async function HomePage() {
             <Step
               n="02"
               title="Tessar designs"
-              body="The architect reads your brief and produces the full report: components, diagrams, three cost tiers, risks, security, patterns."
+              body="The architect reads your brief and produces the full report: components, diagrams, monthly cost in INR, risks, security, patterns."
             />
             <Step
               n="03"
@@ -142,7 +155,7 @@ export default async function HomePage() {
           </div>
 
           <h2 className="mt-14 display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[26ch]">
-            Not a chatbot reply. <span className="serif italic">A complete report.</span>
+            A complete report. <span className="serif italic">Same shape, every time.</span>
           </h2>
 
           <div className="mt-16 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-2 lg:grid-cols-3">
@@ -159,7 +172,7 @@ export default async function HomePage() {
             <Feature
               icon="payments"
               title="Costs in INR"
-              body="Starter, Growth, Scale — three tiers with realistic monthly costs for Indian operators."
+              body="Monthly cost modelling in INR — per service, asia-south1 SKUs, GST inclusive. No translating from US dollars."
             />
             <Feature
               icon="report"
@@ -201,7 +214,7 @@ export default async function HomePage() {
           <blockquote className="mt-12 display text-[clamp(2rem,4vw,3.4rem)] leading-[1.12] tracking-[-0.025em] max-w-[26ch]">
             <span className="serif italic">“It used to take a week</span> to produce a defensible
             architecture doc. Tessar gives you a draft you can argue with in{" "}
-            <span className="accent">four minutes.”</span>
+            <span className="accent">minutes.”</span>
           </blockquote>
           <div className="mt-12 flex items-center gap-4">
             <div className="grid size-12 place-items-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--paper))]">
@@ -232,7 +245,7 @@ export default async function HomePage() {
               </h2>
               <p className="mt-8 text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[58ch]">
                 ScribeStack — a Notion-meets-Google-Docs collaborative writing platform.
-                Fully architected: 12 components, 3 scale tiers, 9 risks, 14 patterns.
+                Fully architected: 12 components, 9 risks, 14 patterns.
                 Open it and scroll — that&rsquo;s exactly what you get for your own brief.
               </p>
               <div className="mt-10">
@@ -249,7 +262,6 @@ export default async function HomePage() {
                 {[
                   ["Components", "12"],
                   ["System diagrams", "2"],
-                  ["Scale tiers", "Starter · Growth · Scale"],
                   ["Risks scored", "9"],
                   ["Cloud patterns", "14"],
                   ["Security controls", "11"],
@@ -281,7 +293,7 @@ export default async function HomePage() {
             <div>
               <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[52ch]">
                 A freelance architect charges ₹50,000+ and takes two weeks for this report.
-                Tessar ships it in four minutes for ₹300. Pay only when you generate —
+                Tessar ships it in minutes for ₹300. Pay only when you generate —
                 no subscription, no seats, no annual lock-in. Failed runs auto-refund.
               </p>
               <ul className="mt-8 grid gap-3 text-[14px]">
@@ -421,6 +433,54 @@ function Compare({
               aria-hidden
             >
               {dark ? "check_circle" : "remove_circle"}
+            </span>
+            <span className={dark ? "text-[hsl(var(--paper))]" : "text-[hsl(var(--ink-2))]"}>{t}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ReportFacet({
+  label,
+  tone,
+  items,
+}: {
+  label: string;
+  tone: "paper" | "ink";
+  items: string[];
+}) {
+  const dark = tone === "ink";
+  return (
+    <div
+      className={
+        dark
+          ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] p-8 md:p-10"
+          : "bg-[hsl(var(--paper))] p-8 md:p-10"
+      }
+    >
+      <p
+        className={
+          dark
+            ? "font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/65"
+            : "font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]"
+        }
+      >
+        {label}
+      </p>
+      <ul className="mt-7 space-y-3">
+        {items.map((t, i) => (
+          <li key={i} className="flex items-start gap-3 text-[14.5px] leading-[1.55]">
+            <span
+              className={
+                dark
+                  ? "ms text-[18px] text-[hsl(var(--accent))] mt-0.5"
+                  : "ms text-[18px] text-[hsl(var(--ink))] mt-0.5"
+              }
+              aria-hidden
+            >
+              check_circle
             </span>
             <span className={dark ? "text-[hsl(var(--paper))]" : "text-[hsl(var(--ink-2))]"}>{t}</span>
           </li>
