@@ -143,6 +143,17 @@ const config: Config = {
         "m3-fast-spatial": "350ms",
         "m3-default-spatial": "500ms",
         "m3-slow-spatial": "650ms",
+        // Editorial motion scale (Phase 0). Use these for new work; M3 set above kept for legacy.
+        instant: "80ms",
+        fast: "180ms",
+        base: "280ms",
+        slow: "480ms",
+        cinematic: "800ms",
+      },
+      transitionDelay: {
+        stagger: "80ms",
+        "stagger-sm": "40ms",
+        "stagger-lg": "120ms",
       },
       boxShadow: {
         // M3 Expressive 3 — flat. All elevation collapses to none.
