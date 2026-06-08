@@ -201,15 +201,20 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 6 — App shell, global, navigation
 
-- [ ] **6.1 Unified persistent shell** across `/dashboard`, `/new`, `/history`, `/r/[slug]` — left wordmark, center breadcrumb, right credits + profile.
-- [ ] **6.2 cmd+k command palette** — fuzzy-search architectures, jump to dashboard / new / history / pricing, recent briefs. Built on `cmdk` or custom.
-- [ ] **6.3 Keyboard shortcuts** — `g h` (history), `g d` (dashboard), `g n` (new), `?` (help overlay).
-- [ ] **6.4 Help overlay** — pressing `?` shows a styled keyboard cheat-sheet.
-- [ ] **6.5 Mobile hamburger drawer** — slides in from right (320ms spring-snappy), backdrop fades in.
-- [ ] **6.6 Route transitions** — every route change does a 280ms crossfade + 8px upward translate. Use Next.js template + Framer.
-- [ ] **6.7 Toast positioning** — Sonner top-center on architecture-generation success (user reads result, not corner).
-- [ ] **6.8 Page-load skeletons** — every route gets a suspense boundary with shape-matching skeletons.
-- [ ] **6.9 Cursor accent** — on `/` and `/sample`, a 12px accent ring follows cursor with 80ms lag (decorative, gated behind reduced-motion).
+### Phase 6A shipped
+
+- [x] **6.1 Unified persistent shell** — `AppHeader` (already global) gains a centered breadcrumb slot (`HeaderBreadcrumb`) that resolves the pathname into editorial crumbs. Confirmed persistent across `/dashboard`, `/new`, `/history`, `/architecture/[id]`, `/r/[slug]`, `/pricing`, `/sample`, `/studio`, `/admin`.
+- [x] **6.2 cmd+k command palette** — already shipped (`CommandMenu` with Radix Dialog, fuzzy filter, group sections, kbd hints, arrow nav).
+- [x] **6.3 Keyboard shortcuts** — `GlobalShortcuts` mounted in root layout. `g d/n/h/p/s` sequence with 900ms reset window, `?` opens help overlay, suppressed inside editable fields, never collides with modifier-key combos.
+- [x] **6.4 Help overlay** — `HelpOverlay` Radix Dialog with three-section cheat-sheet (Navigate / Search & help / Inside a report), animated kbd glyphs, opens on `?` window event, also reachable from mobile drawer.
+- [x] **6.5 Mobile hamburger drawer** — `MobileNavMenu` (md:hidden) opens a right sheet (300ms slide-from-right, blurred overlay backdrop), groups Workspace + Explore links, deep links into Help. Auto-closes on route change.
+- [x] **6.6 Route transitions** — `src/app/template.tsx` Framer 280ms opacity + 8px upward translate on every route change. Composes cleanly with section-level `m3-page-enter` springs.
+- [x] **6.7 Toast positioning** — `<Toaster position="top-center" />` globally (was top-right). Reads naturally above content; doesn't compete with cockpit chrome.
+- [x] **6.9 Cursor accent** — `CursorAccent` 12px vermillion ring trails the pointer with rAF-lerp on `/` and `/sample`. Gated behind reduced-motion, coarse pointer, and narrow viewport. `mix-blend-multiply` keeps it readable on both paper and ink surfaces.
+
+### Phase 6B (deferred)
+
+- [ ] **6.8 Page-load skeletons** — every route gets a suspense boundary with shape-matching skeletons (foundation `src/components/skeleton/*` already exists; needs per-route `loading.tsx` files with the right column shapes).
 
 ---
 

@@ -5,6 +5,9 @@ import { Toaster } from "sonner";
 import { CommandMenu } from "@/components/shared/CommandMenu";
 import { RouteProgress } from "@/components/shared/RouteProgress";
 import { AppHeader } from "@/components/shared/AppHeader";
+import { GlobalShortcuts } from "@/components/shared/GlobalShortcuts";
+import { HelpOverlay } from "@/components/shared/HelpOverlay";
+import { CursorAccent } from "@/components/shared/CursorAccent";
 
 // Display — modern editorial sans with SOFT axis (rounded corners) and
 // variable width. The personality typeface of the whole product.
@@ -76,8 +79,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="flex-1 min-h-0 flex flex-col">
           {children}
         </div>
+        <GlobalShortcuts />
         <CommandMenu />
-        <Toaster richColors position="top-right" />
+        <HelpOverlay />
+        <CursorAccent />
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
