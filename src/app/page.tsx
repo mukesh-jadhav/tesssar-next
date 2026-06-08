@@ -5,7 +5,7 @@ import { TessarLogo } from "@/components/shared/TessarLogo";
 export const metadata = {
   title: "Tessar — Production cloud architecture in four minutes",
   description:
-    "Write a paragraph. Get a defensible cloud architecture — components, diagrams, INR costs, risks, security model — in four minutes. ₹299 a design. First three on us.",
+    "Write a paragraph. Get a defensible cloud architecture — components, diagrams, INR costs, risks, security model — in four minutes. ₹300 a design. First one on us.",
 };
 
 export default async function HomePage() {
@@ -51,14 +51,14 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-6 text-[12.5px] text-[hsl(var(--ink-3))]">
-            Google sign-in. Your first design free, no card. Then ₹299 a design — no subscription, no seats, refunded if a run fails.
+            Google sign-in. Your first design free, no card. Then ₹300 a design — no subscription, no seats, refunded if a run fails.
           </p>
 
           <div className="mt-20 grid grid-cols-2 gap-x-10 gap-y-6 md:grid-cols-4 border-t border-[hsl(var(--line))] pt-10">
             <Stat n="~4m" k="median run" />
             <Stat n="14" k="report sections" />
             <Stat n="3×" k="scale tiers" />
-            <Stat n="₹299" k="per design" />
+            <Stat n="₹300" k="per design" />
           </div>
         </div>
       </section>
@@ -276,17 +276,17 @@ export default async function HomePage() {
           <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
             <h2 className="display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[18ch]">
               First design on us.{" "}
-              <span className="serif italic accent">Then ₹299 each.</span>
+              <span className="serif italic accent">Then ₹300 each.</span>
             </h2>
             <div>
               <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[52ch]">
                 A freelance architect charges ₹50,000+ and takes two weeks for this report.
-                Tessar ships it in four minutes for ₹299. Pay only when you generate —
+                Tessar ships it in four minutes for ₹300. Pay only when you generate —
                 no subscription, no seats, no annual lock-in. Failed runs auto-refund.
               </p>
               <ul className="mt-8 grid gap-3 text-[14px]">
                 <Bullet>1 free design the moment you sign in</Bullet>
-                <Bullet>₹299 / design — packs of 3 (₹800) and 10 (₹2,699)</Bullet>
+                <Bullet>₹300 / design — packs of 3 (₹840), 10 (₹2,500) and 50 (₹10,000 — ₹200 each)</Bullet>
                 <Bullet>Failed runs refund automatically</Bullet>
                 <Bullet>Credits never expire</Bullet>
                 <Bullet>One Razorpay invoice per pack</Bullet>

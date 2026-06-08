@@ -123,7 +123,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   }
 
   return (
-    <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
+    <div className="grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] sm:grid-cols-2 lg:grid-cols-4">
       {CREDIT_PACKS.map((pack, idx) => {
         const popular = pack.badge === "Most popular";
         return (
