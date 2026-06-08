@@ -183,12 +183,18 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(4px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "status-ping": {
+          "0%":   { transform: "scale(1)",   opacity: "0.6" },
+          "80%":  { transform: "scale(2.4)", opacity: "0" },
+          "100%": { transform: "scale(2.4)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         shimmer: "shimmer 2.5s linear infinite",
         "fade-in": "fade-in 0.4s ease-out",
+        "status-ping": "status-ping 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite",
       },
     },
   },

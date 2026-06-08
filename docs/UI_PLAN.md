@@ -235,9 +235,18 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 8 — Footer & trust
 
-- [ ] **8.1 4-column footer** — Product / Resources / Company / Connect.
-- [ ] **8.2 `Status: All systems operational` indicator** with green dot (footer-right).
-- [ ] **8.3 Copyright + craft line** — `Designed in India. Hosted on Google Cloud asia-south1.`
+- [x] **8.1 4-column footer** — `src/components/shared/Footer.tsx` rebuilt: oversized wordmark + tagline up top, then a four-column link grid (`Product / Resources / Company / Connect`). Product surfaces Sample / Pricing / Design / Dashboard; Resources surfaces FAQ (anchored), Privacy, Terms, plus a "Press `?` anywhere" hint for the help overlay; Company holds the manifesto blurb; Connect surfaces three subject-tagged mailto links (general, bulk credits, press). Pure server component; external `mailto:` links use `<a>`, internal use `<Link>`.
+- [x] **8.2 Live status pill** — bottom-utility-row centre: `All systems operational` mono caps inside a paper-2 pill with a `--good` dot. Dot pulses via a custom Tailwind keyframe `animate-status-ping` (scale 1 → 2.4, opacity 0.6 → 0, 2.6s ease-out-expo, infinite). Pill links out to `status.tessar.dev`. Global reduced-motion block in `globals.css` already kills the ping for users who opted out.
+- [x] **8.3 Craft line** — bottom-utility-row right: `Designed in India · Hosted on Google Cloud · asia-south1` in mono caps, region word picked out in `--ink-2`. Bottom-utility-row left: `© {year} Tessar`.
+
+### Phase 8 — applied to surfaces
+- Replaced the inline footer in `src/app/page.tsx` (landing).
+- Mounted on `src/app/pricing/page.tsx` (added `id="faq"` + `scroll-mt-24` so the footer FAQ link lands cleanly).
+- Rewrote `src/app/legal/terms/page.tsx` and `src/app/legal/privacy/page.tsx` from the old `prose` block to the editorial masthead + numbered-clause format, and mounted the new footer.
+- Intentionally NOT mounted on `/login` (auth-funnel, full-screen), `/sample` (cockpit chrome), or any `(app)/*` cockpit/composer surface.
+
+### Phase 8 — token addition
+- `tailwind.config.ts`: new `status-ping` keyframe + `animate-status-ping` animation utility.
 
 ---
 

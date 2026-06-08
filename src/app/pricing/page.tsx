@@ -3,6 +3,7 @@ import { CreditPacksGrid } from "@/components/billing/CreditPacksGrid";
 import { ComparisonMatrix } from "@/components/billing/ComparisonMatrix";
 import { FAQ, type FAQItem } from "@/components/billing/FAQ";
 import { Magnetic } from "@/components/motion/Magnetic";
+import { Footer } from "@/components/shared/Footer";
 
 export const metadata = { title: "Credits" };
 
@@ -175,7 +176,7 @@ export default async function PricingPage() {
       </section>
 
       {/* FAQ */}
-      <section className="mt-24">
+      <section id="faq" className="mt-24 scroll-mt-24">
         <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-5">
           <p className="section-num">Questions, answered</p>
           <p className="eyebrow hidden md:inline">Tap to expand</p>
@@ -213,6 +214,7 @@ export default async function PricingPage() {
         </div>
       </section>
       </div>
+      <Footer />
     </div>
   );
 }

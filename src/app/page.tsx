@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
-import { TessarLogo } from "@/components/shared/TessarLogo";
+import { Footer } from "@/components/shared/Footer";
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { FadeIn } from "@/components/motion/FadeIn";
 import {
@@ -350,23 +350,7 @@ export default async function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-12 md:px-12">
-        <div className="mx-auto max-w-[1320px] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Tessar home">
-            <TessarLogo variant="wordmark" size={30} className="text-[hsl(var(--ink))]" />
-          </Link>
-          <nav className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[13px] text-[hsl(var(--ink-2))]">
-            <Link href="/sample" className="hover:text-[hsl(var(--ink))]">Sample</Link>
-            <Link href="/pricing" className="hover:text-[hsl(var(--ink))]">Pricing</Link>
-            <Link href="/legal/privacy" className="hover:text-[hsl(var(--ink))]">Privacy</Link>
-            <Link href="/legal/terms" className="hover:text-[hsl(var(--ink))]">Terms</Link>
-            <a href="mailto:hello@tessar.dev" className="hover:text-[hsl(var(--ink))]">hello@tessar.dev</a>
-          </nav>
-          <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-            © 2026 Tessar · Bengaluru · IST
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
