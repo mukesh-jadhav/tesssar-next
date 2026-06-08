@@ -6,6 +6,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { getFirebaseDb, getFirebaseAuth } from "@/lib/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
 import { ReportCockpit } from "@/components/workspace/ReportCockpit";
+import { FailedRunHero } from "@/components/architecture/FailedRunHero";
 import { Architecture, type ArchitectureDoc } from "@/types/architecture";
 import { cn } from "@/lib/utils";
 
@@ -107,27 +108,7 @@ export function ArchitectureRunLive({ initial }: { initial: ArchitectureDoc }) {
   }
 
   if (d.status === "failed") {
-    return (
-      <div className="flex-1 min-h-0 overflow-auto scrollbar-thin">
-        <div className="mx-auto max-w-xl px-6 py-16">
-          <div className="rounded-2xl border border-[hsl(var(--bad))]/30 bg-[hsl(var(--bad))]/5 p-6">
-            <div className="flex items-center gap-2 text-[hsl(var(--bad))]">
-              <span className="ms text-[20px]" aria-hidden>warning</span>
-              <span className="font-medium">Generation failed</span>
-            </div>
-            <p className="mt-2 text-[14px] text-[hsl(var(--ink-2))]">
-              {d.errorMessage ?? "Unknown error"}
-            </p>
-            <p className="mt-1 text-[12px] text-[hsl(var(--ink-3))]">
-              Your credit has been refunded.
-            </p>
-            <Link href="/new" className="btn-pill-accent btn-pill-sm mt-4 w-fit">
-              Try again
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+    return <FailedRunHero prompt={d.prompt} errorMessage={d.errorMessage} />;
   }
 
   const phase = d.progress?.phase ?? "analyzing";

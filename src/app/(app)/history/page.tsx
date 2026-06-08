@@ -5,6 +5,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { formatDate, truncate } from "@/lib/utils";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
+import { EmptyHero } from "@/components/empty/EmptyHero";
 
 export const metadata = { title: "Library" };
 
@@ -147,21 +148,14 @@ function StatusBadge({ status }: { status: ArchitectureDoc["status"] }) {
 
 function EmptyState() {
   return (
-    <div className="m3-page-enter mt-20 card-paper p-16 text-center">
-      <p className="section-num">The library is empty</p>
-      <h2 className="display-tight mt-8 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] tracking-[-0.04em]">
-        Nothing in here<br />
-        <span className="serif font-normal italic">— yet.</span>
-      </h2>
-      <p className="mt-6 max-w-md mx-auto text-[16px] text-[hsl(var(--ink-2))]">
-        Start designing — your first architecture lands here in a few minutes.
-      </p>
-      <div className="mt-10">
-        <Link href="/new" className="btn-pill-accent btn-pill-lg">
-          Design my first system
-          <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
-        </Link>
-      </div>
-    </div>
+    <EmptyHero
+      tag="The library is empty"
+      illustration="library"
+      title="Nothing in here"
+      italic="— yet."
+      lead="Each design you ship gets archived here as a back-issue. Searchable, permanent, exportable. Start your first to break the seal."
+      primary={{ href: "/new", label: "Design my first system" }}
+      secondary={{ href: "/sample", label: "See a sample" }}
+    />
   );
 }

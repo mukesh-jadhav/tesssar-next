@@ -7,6 +7,7 @@ import { formatDate, truncate } from "@/lib/utils";
 import { getBalance } from "@/lib/credits/ledger";
 import { formatDesigns, canAffordRun, isUnlimited } from "@/lib/credits/display";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
+import { EmptyHero } from "@/components/empty/EmptyHero";
 
 const SUGGESTIONS = [
   {
@@ -95,7 +96,8 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Stats row */}
+      {/* Stats row — hidden on first run; the EmptyHero below tells that story instead */}
+      {totalRuns > 0 && (
       <section className="mt-20 grid gap-px bg-[hsl(var(--line))] border border-[hsl(var(--line))] md:grid-cols-3">
         <StatCell
           k="Designs"
@@ -126,6 +128,25 @@ export default async function DashboardPage() {
           cta={recent[0] ? "Open report →" : "Start one →"}
         />
       </section>
+      )}
+
+      {/* First-run editorial empty state — sits between the warm hero and the
+          Quick start ladder. Visual only; the hero already has the primary CTA. */}
+      {totalRuns === 0 && (
+        <EmptyHero
+          tag="Issue 001 awaits"
+          illustration="workspace"
+          title="A clean"
+          italic="slate."
+          lead={
+            <>
+              Your library is empty. The moment you ship your first design it
+              lands here as <span className="text-[hsl(var(--ink))] font-medium">Issue 001</span>,
+              with stats and quick re-opens slotting in around it.
+            </>
+          }
+        />
+      )}
 
       {/* Quick start */}
       <section className="mt-24">

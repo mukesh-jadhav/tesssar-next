@@ -220,10 +220,16 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 7 — Empty states & first-run
 
-- [ ] **7.1 First-time `/dashboard`** — editorial line illustration + "Your workspace is empty. Start your first design →".
-- [ ] **7.2 First-time `/history`** — same treatment.
-- [ ] **7.3 Zero-credits state on `/new`** — clear ladder to `/pricing` with the 4 packs preview.
-- [ ] **7.4 Failed-architecture state** — clean error illustration + "Refunded · try again" + the brief pre-filled.
+- [x] **7.1 First-time `/dashboard`** — when `totalRuns === 0` the stats grid is suppressed and an `EmptyHero` (workspace illustration: layered paper sheets with ghosted-node sketch, accent pencil, breathing motion) slots in between the warm hero and the Quick start ladder. Editorial copy: `Issue 001 awaits — A clean slate.`
+- [x] **7.2 First-time `/history`** — replaced the plain card with `EmptyHero` (library illustration: three fanned back-issues with masthead + ghosted diagram blocks, accent ribbon on the front issue), `Design my first system` primary + `See a sample` secondary CTAs.
+- [x] **7.3 Zero-credits state on `/new`** — when `!isUnlimited(credits) && !canAffordRun(credits)` the composer is replaced by `ZeroCreditsLadder`: workspace illustration + headline `The studio's ready — your meter isn't.` + an inline grid of all 4 `CREDIT_PACKS` (Solo / Trio / Sprint / Studio) with price, per-design unit, badge, and per-pack `Top up →` deep-link to `/pricing#{slug}`. Masthead tag flips to `Out of credits`.
+- [x] **7.4 Failed-architecture state** — replaced the small bad-tinted card on `/architecture/[id]` with `FailedRunHero`: broken-wire illustration (two nodes, snapped dashed wire, vermillion X at the break), full editorial masthead `Credit refunded · safe to retry`, `Try again` CTA that pre-fills the brief via `/new?seed=<prompt>`, a brief readback block, and a collapsible `Diagnostic details` `<details>` for the raw error.
+
+### Phase 7 new primitives
+- `src/components/empty/EditorialIllustration.tsx` — single SVG component with three kinds: `workspace` / `library` / `broken-wire`. Same visual vocabulary as `AmbientDiagram` (dashed wires, rounded mono-stroke nodes, vermillion accent). Path-length-grow on entry, subtle breathing pulse, full `prefers-reduced-motion` short-circuit.
+- `src/components/empty/EmptyHero.tsx` — composer: illustration + section-num + display headline (with italic accent line) + lead + optional primary/secondary CTAs + optional children slot. Used by both `/dashboard` and `/history` empty states.
+- `src/components/empty/ZeroCreditsLadder.tsx` — out-of-credits surface for `/new`.
+- `src/components/architecture/FailedRunHero.tsx` — failed-run editorial surface.
 
 ---
 
