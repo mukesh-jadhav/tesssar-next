@@ -1,6 +1,18 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { TessarLogo } from "@/components/shared/TessarLogo";
+import { ScrollProgress } from "@/components/motion/ScrollProgress";
+import { FadeIn } from "@/components/motion/FadeIn";
+import {
+  AmbientDiagram,
+  DrawnUnderline,
+  HeroStats,
+  MagneticCTA,
+  PricingChips,
+  RotatingQuotes,
+  StepVisual,
+  TiltCard,
+} from "@/components/landing";
 
 export const metadata = {
   title: "Tessar — Senior cloud architect, on tap",
@@ -16,9 +28,18 @@ export default async function HomePage() {
 
   return (
     <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
+      <ScrollProgress thickness={2} />
       {/* HERO */}
       <section className="relative px-6 pt-20 pb-20 md:px-12 md:pt-28 md:pb-28">
-        <div className="mx-auto max-w-[1320px]">
+        {/* Ambient diagram in negative space — lg+ only, behind text, soft opacity. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-[7%] hidden h-[60%] w-[44%] max-w-[560px] opacity-[0.55] lg:block xl:opacity-65"
+        >
+          <AmbientDiagram className="h-full w-full" />
+        </div>
+
+        <div className="relative mx-auto max-w-[1320px]">
           <div className="m3-page-enter flex items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1 text-[11.5px]">
               <span className="size-1.5 rounded-full bg-[hsl(var(--accent))]" />
@@ -30,7 +51,10 @@ export default async function HomePage() {
 
           <h1 className="m3-page-enter mt-8 display-tight text-[clamp(3.2rem,9.2vw,8.5rem)] leading-[0.88] tracking-[-0.045em] max-w-[16ch]">
             Senior architect,{" "}
-            <span className="serif font-normal italic accent">on tap.</span>
+            <span className="relative inline-block">
+              <span className="serif font-normal italic accent">on tap.</span>
+              <DrawnUnderline delay={0.6} thickness={3} />
+            </span>
           </h1>
 
           <p className="m3-page-enter mt-10 max-w-[58ch] text-[18px] leading-[1.55] text-[hsl(var(--ink-2))]">
@@ -41,10 +65,10 @@ export default async function HomePage() {
           </p>
 
           <div className="m3-page-enter mt-12 flex flex-wrap items-center gap-4">
-            <Link href={primaryHref} className="btn-pill btn-pill-accent btn-pill-lg">
+            <MagneticCTA href={primaryHref} variant="accent" size="lg">
               {primaryLabel}
               <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
-            </Link>
+            </MagneticCTA>
             <Link href="/sample" className="btn-pill btn-pill-ghost btn-pill-lg">
               See a real sample
               <span className="ms text-[18px]" aria-hidden>north_east</span>
@@ -55,18 +79,13 @@ export default async function HomePage() {
             Google sign-in. Your first design free, no card. Then ₹300 a design — no subscription, no seats, refunded if a run fails.
           </p>
 
-          <div className="mt-20 grid grid-cols-2 gap-x-10 gap-y-6 md:grid-cols-4 border-t border-[hsl(var(--line))] pt-10">
-            <Stat n="14"   k="sections per report" />
-            <Stat n="6+"   k="named diagrams" />
-            <Stat n="42"   k="cloud patterns" />
-            <Stat n="₹300" k="per design" />
-          </div>
+          <HeroStats />
         </div>
       </section>
 
       {/* WHAT'S IN EVERY REPORT */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1320px]">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
           <div className="rule-dots flex items-baseline justify-between pb-4">
             <p className="section-num">The deliverable</p>
           </div>
@@ -117,7 +136,7 @@ export default async function HomePage() {
 
       {/* HOW IT WORKS */}
       <section id="how" className="border-t border-[hsl(var(--line))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1320px]">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
           <div className="rule-dots flex items-baseline justify-between pb-4">
             <p className="section-num">How it works</p>
           </div>
@@ -131,16 +150,19 @@ export default async function HomePage() {
             <Step
               n="01"
               title="Describe"
+              kind="describe"
               body="One paragraph. Plain English. Scale, geography, integrations, budget — whatever you know. Vague is fine."
             />
             <Step
               n="02"
               title="Tessar designs"
+              kind="design"
               body="The architect reads your brief and produces the full report: components, diagrams, monthly cost in INR, risks, security, patterns."
             />
             <Step
               n="03"
               title="You ship"
+              kind="ship"
               body="Export as PDF, PowerPoint, or Markdown. Iterate. Hand the BOM to engineering. Argue with it — that's the point."
             />
           </div>
@@ -149,7 +171,7 @@ export default async function HomePage() {
 
       {/* WHAT YOU GET */}
       <section id="why" className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1320px]">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
           <div className="rule-dots flex items-baseline justify-between pb-4">
             <p className="section-num">What you get</p>
           </div>
@@ -210,29 +232,14 @@ export default async function HomePage() {
 
       {/* QUOTE */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1100px]">
-          <blockquote className="mt-12 display text-[clamp(2rem,4vw,3.4rem)] leading-[1.12] tracking-[-0.025em] max-w-[26ch]">
-            <span className="serif italic">“It used to take a week</span> to produce a defensible
-            architecture doc. Tessar gives you a draft you can argue with in{" "}
-            <span className="accent">minutes.”</span>
-          </blockquote>
-          <div className="mt-12 flex items-center gap-4">
-            <div className="grid size-12 place-items-center rounded-full bg-[hsl(var(--accent))] text-[hsl(var(--paper))]">
-              <span className="display text-[16px]">PR</span>
-            </div>
-            <div>
-              <div className="text-[14px] font-medium">Priya R.</div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--paper))]/55">
-                Principal engineer · Bengaluru
-              </div>
-            </div>
-          </div>
+        <div className="mx-auto max-w-[1100px] scroll-reveal">
+          <RotatingQuotes />
         </div>
       </section>
 
       {/* SAMPLE CTA */}
       <section className="border-t border-[hsl(var(--line))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1320px]">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
           <div className="rule-dots flex items-baseline justify-between pb-4">
             <p className="section-num">See it built</p>
           </div>
@@ -249,38 +256,40 @@ export default async function HomePage() {
                 Open it and scroll — that&rsquo;s exactly what you get for your own brief.
               </p>
               <div className="mt-10">
-                <Link href="/sample" className="btn-pill btn-pill-accent btn-pill-lg">
+                <MagneticCTA href="/sample" variant="accent" size="lg">
                   Open the sample
-                  <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
-                </Link>
+                  <span className="ms text-[20px] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" aria-hidden>arrow_forward</span>
+                </MagneticCTA>
               </div>
             </div>
 
-            <div className="card-paper p-7 md:p-9">
-              <p className="section-num text-[10.5px]">Inside the sample</p>
-              <ul className="mt-5 divide-y divide-[hsl(var(--line))]">
-                {[
-                  ["Components", "12"],
-                  ["System diagrams", "2"],
-                  ["Risks scored", "9"],
-                  ["Cloud patterns", "14"],
-                  ["Security controls", "11"],
-                  ["Export formats", "PDF · PPTX · MD"],
-                ].map(([k, v]) => (
-                  <li key={k as string} className="flex items-baseline justify-between py-3">
-                    <span className="text-[13.5px] text-[hsl(var(--ink-2))]">{k}</span>
-                    <span className="display text-[15px] tabular-nums">{v}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <TiltCard max={4} className="">
+              <div className="card-paper p-7 md:p-9">
+                <p className="section-num text-[10.5px]">Inside the sample</p>
+                <ul className="mt-5 divide-y divide-[hsl(var(--line))]">
+                  {[
+                    ["Components", "12"],
+                    ["System diagrams", "2"],
+                    ["Risks scored", "9"],
+                    ["Cloud patterns", "14"],
+                    ["Security controls", "11"],
+                    ["Export formats", "PDF · PPTX · MD"],
+                  ].map(([k, v]) => (
+                    <li key={k as string} className="flex items-baseline justify-between py-3">
+                      <span className="text-[13.5px] text-[hsl(var(--ink-2))]">{k}</span>
+                      <span className="display text-[15px] tabular-nums">{v}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </TiltCard>
           </div>
         </div>
       </section>
 
       {/* PRICING */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
-        <div className="mx-auto max-w-[1320px]">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
           <div className="rule-dots flex items-baseline justify-between pb-4">
             <p className="section-num">Pricing</p>
           </div>
@@ -303,6 +312,7 @@ export default async function HomePage() {
                 <Bullet>Credits never expire</Bullet>
                 <Bullet>One Razorpay invoice per pack</Bullet>
               </ul>
+              <PricingChips />
               <div className="mt-10 flex flex-wrap items-center gap-4">
                 <Link href="/pricing" className="btn-pill btn-pill-lg">
                   See pricing
@@ -319,7 +329,7 @@ export default async function HomePage() {
 
       {/* FINAL CTA */}
       <section className="border-t border-[hsl(var(--line))] px-6 py-32 md:px-12">
-        <div className="mx-auto max-w-[1320px] text-center">
+        <div className="mx-auto max-w-[1320px] text-center scroll-reveal">
           <h2 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
             Your first design{" "}
             <span className="serif font-normal italic accent">is on us.</span>
@@ -328,10 +338,10 @@ export default async function HomePage() {
             No credit card. Sign in with Google, bring a system, leave with a report you can ship.
           </p>
           <div className="mt-12 flex flex-wrap items-center justify-center gap-4">
-            <Link href={primaryHref} className="btn-pill btn-pill-accent btn-pill-lg">
+            <MagneticCTA href={primaryHref} variant="accent" size="lg">
               {primaryLabel}
               <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
-            </Link>
+            </MagneticCTA>
             <Link href="/sample" className="btn-pill btn-pill-ghost btn-pill-lg">
               See the sample first
             </Link>
@@ -361,22 +371,28 @@ export default async function HomePage() {
   );
 }
 
-function Stat({ n, k }: { n: string; k: string }) {
-  return (
-    <div>
-      <div className="display text-[clamp(1.5rem,2.4vw,2rem)] tracking-[-0.02em] leading-none">{n}</div>
-      <div className="mt-2 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-        {k}
-      </div>
-    </div>
-  );
-}
-
-function Step({ n, title, body }: { n: string; title: string; body: string }) {
+function Step({
+  n,
+  title,
+  body,
+  kind,
+}: {
+  n: string;
+  title: string;
+  body: string;
+  kind?: "describe" | "design" | "ship";
+}) {
   return (
     <div className="bg-[hsl(var(--paper))] p-8 md:p-10">
-      <div className="display-tight text-[clamp(3rem,5vw,4.5rem)] leading-none tracking-[-0.05em] text-[hsl(var(--ink-3))]">
-        {n}
+      <div className="flex items-start justify-between gap-4">
+        <div className="display-tight text-[clamp(3rem,5vw,4.5rem)] leading-none tracking-[-0.05em] text-[hsl(var(--ink-3))]">
+          {n}
+        </div>
+        {kind && (
+          <div className="w-[44%] max-w-[180px] shrink-0">
+            <StepVisual kind={kind} />
+          </div>
+        )}
       </div>
       <h3 className="mt-6 display text-[22px] tracking-[-0.02em]">{title}</h3>
       <p className="mt-3 text-[14.5px] leading-[1.6] text-[hsl(var(--ink-2))]">{body}</p>
@@ -386,58 +402,22 @@ function Step({ n, title, body }: { n: string; title: string; body: string }) {
 
 function Feature({ icon, title, body }: { icon: string; title: string; body: string }) {
   return (
-    <div className="bg-[hsl(var(--paper))] p-7 md:p-8">
-      <span className="ms text-[28px] text-[hsl(var(--ink))]" aria-hidden>{icon}</span>
-      <h3 className="mt-5 display text-[18px] tracking-[-0.02em]">{title}</h3>
-      <p className="mt-2 text-[13.5px] leading-[1.6] text-[hsl(var(--ink-2))]">{body}</p>
-    </div>
-  );
-}
-
-function Compare({
-  label,
-  tone,
-  items,
-}: {
-  label: string;
-  tone: "muted" | "ink";
-  items: string[];
-}) {
-  const dark = tone === "ink";
-  return (
-    <div
-      className={
-        dark
-          ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] p-8 md:p-10"
-          : "bg-[hsl(var(--paper))] p-8 md:p-10"
-      }
-    >
-      <p
-        className={
-          dark
-            ? "font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--paper))]/65"
-            : "font-mono text-[11px] uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]"
-        }
+    <div className="group relative bg-[hsl(var(--paper))] p-7 transition-colors duration-300 hover:bg-[hsl(var(--card))] md:p-8">
+      {/* Top accent rail that draws in on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 h-px w-0 bg-[hsl(var(--accent))] transition-[width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full"
+      />
+      <span
+        className="ms inline-block text-[28px] text-[hsl(var(--ink))] transition-[transform,color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.12] group-hover:text-[hsl(var(--accent))]"
+        aria-hidden
       >
-        {label}
-      </p>
-      <ul className="mt-7 space-y-3">
-        {items.map((t, i) => (
-          <li key={i} className="flex items-start gap-3 text-[14.5px] leading-[1.55]">
-            <span
-              className={
-                dark
-                  ? "ms text-[18px] text-[hsl(var(--accent))] mt-0.5"
-                  : "ms text-[18px] text-[hsl(var(--ink-3))] mt-0.5"
-              }
-              aria-hidden
-            >
-              {dark ? "check_circle" : "remove_circle"}
-            </span>
-            <span className={dark ? "text-[hsl(var(--paper))]" : "text-[hsl(var(--ink-2))]"}>{t}</span>
-          </li>
-        ))}
-      </ul>
+        {icon}
+      </span>
+      <h3 className="mt-5 display text-[18px] tracking-[-0.02em] transition-colors duration-300 group-hover:text-[hsl(var(--accent-ink))]">
+        {title}
+      </h3>
+      <p className="mt-2 text-[13.5px] leading-[1.6] text-[hsl(var(--ink-2))]">{body}</p>
     </div>
   );
 }

@@ -530,15 +530,15 @@
 
 
 /* ============================================================================
-   PHASE 0 FOUNDATIONS — appended additions
+   PHASE 0 FOUNDATIONS ï¿½ appended additions
    -----------------------------------------------------------------------------
-   • Dark-mode token shelf (staged, opt-in via [data-theme="dark"] on <html>)
-   • Reduced-motion: kills all transitions/animations to near-zero
-   • Print stylesheet: collapses chrome, expands content, fits diagrams
+   ï¿½ Dark-mode token shelf (staged, opt-in via [data-theme="dark"] on <html>)
+   ï¿½ Reduced-motion: kills all transitions/animations to near-zero
+   ï¿½ Print stylesheet: collapses chrome, expands content, fits diagrams
    ============================================================================ */
 
 /* Dark-mode token shelf.
-   Not wired into <html> yet — values are defined so we can flip a switch later
+   Not wired into <html> yet ï¿½ values are defined so we can flip a switch later
    without re-tuning every surface. To preview locally: <html data-theme="dark">. */
 @layer base {
   [data-theme="dark"] {
@@ -579,7 +579,7 @@
   .m3-wavy::after { animation: none !important; }
 }
 
-/* Print stylesheet — the report cockpit is a deliverable; people will print it.
+/* Print stylesheet ï¿½ the report cockpit is a deliverable; people will print it.
    Collapse chrome, expand any collapsibles, force black-on-white, fit diagrams. */
 @media print {
   :root { --paper: 0 0% 100%; --paper-2: 0 0% 100%; --paper-3: 0 0% 100%; --ink: 0 0% 0%; --ink-2: 0 0% 12%; --ink-3: 0 0% 30%; }
@@ -611,4 +611,27 @@
   a[href^="#"]::after, a[href^="/"]::after { content: ""; }
   /* Page margins */
   @page { margin: 18mm 14mm; }
+}
+
+
+/* ============================================================================
+   PHASE 1 — scroll-driven section reveal
+   -----------------------------------------------------------------------------
+   Pure-CSS reveal-on-scroll using animation-timeline: view(). Modern Chrome &
+   Edge animate; Safari/Firefox gracefully degrade to static content (no JS
+   fallback needed because static is the correct end state).
+   ============================================================================ */
+@keyframes section-reveal-rise {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .scroll-reveal {
+      animation: section-reveal-rise 900ms cubic-bezier(0.22, 1.4, 0.36, 1) both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 28%;
+    }
+  }
 }

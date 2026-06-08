@@ -40,54 +40,69 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ---
 
-## Phase 1 — Landing page (`/`)
+## Phase 1 — Landing page (`/`)  ✅ SHIPPED
 
 ### 1.1 Hero motion
-- [ ] **Wordmark + headline reveal** — clip-path-based reveal, 90ms stagger between words, 800ms.
-- [ ] **Headline italic accent (`on tap.`)** — drawn-underline that paints in 600ms after headline lands.
-- [ ] **Hero stat row count-up** — `14`, `6+`, `42`, `₹300` tick from 0 on viewport entry.
-- [ ] **Ambient diagram in negative space** — slow-drifting editorial mini-architecture diagram on the right of headline at `lg:` breakpoint. Nodes pulse subtly (4s breathing), wires shimmer. Not interactive. Adds life without distraction.
-- [ ] **Primary CTA `Start your first design`** — `<Magnetic>` wrapper + 60ms ripple on click.
-- [ ] **Scroll-progress line** at very top of viewport (1px accent, fills as user scrolls page).
+- [~] **Wordmark + headline reveal** — DEFERRED to Phase 10 (kept existing `m3-page-enter` for now; clip-path reveal would replace it).
+- [x] **Headline italic accent (`on tap.`)** — drawn-underline (`DrawnUnderline`) paints in 600ms after headline lands.
+- [x] **Hero stat row count-up** — `HeroStats` ticks `14`, `6+`, `42`, `₹300` from 0 on viewport entry (1.8s, `en-IN` locale).
+- [x] **Ambient diagram in negative space** — `AmbientDiagram` SVG (5 nodes, dashed bezier wires, travelling accent dots, slow breathing pulse) at `lg:` opacity-55 / `xl:` opacity-65, hidden on mobile.
+- [x] **Primary CTA** — wrapped in `MagneticCTA` (strength 0.22, maxDistance 10px). Ripple on click DEFERRED.
+- [x] **Scroll-progress line** — `ScrollProgress` (2px accent, top-fixed).
 
 ### 1.2 "How it works" 3-step grid
-- [ ] **Replace plain text bodies with tiny visuals:**
-  - Step 1 — textarea silhouette with caret blinking.
-  - Step 2 — streaming-text animation that resolves into a 3-node diagram.
-  - Step 3 — stack of three document chips (PDF/PPTX/MD) that fan out on hover.
-- [ ] **Stagger reveal** of all three on scroll-in (120ms between steps).
+- [x] **Tiny visuals per step** — `StepVisual` with `kind="describe"` (textarea + blinking caret), `kind="design"` (3-node mini-arch with drawn wires), `kind="ship"` (3 fanning doc chips MD/PPTX/PDF).
+- [~] **Stagger reveal of all three on scroll-in** — DEFERRED to Phase 10 (currently all three lift as one block via `scroll-reveal`).
 
 ### 1.3 Feature grid (`What you get`)
-- [ ] **Break the uniform 3×3 grid.** Promote 3 cells to span 2:
-  - `System diagrams` — embed actual mini SVG diagram (5 nodes, animated wires).
-  - `Pattern library` — chip cloud of 42 pattern names that gently float.
-  - `PDF · PPTX · Markdown` — three layered document corners with hover separation.
-- [ ] Remaining 6 cells stay 1×1 text + icon.
-- [ ] **Card hover** — `<Tilt>` 3° + accent border fade-in (180ms).
-- [ ] **Stagger entry** on scroll-into-view, 80ms.
+- [~] **Break the uniform 3×3 grid (span-2 rich cells)** — DEFERRED. Hairline grid (`gap-px bg-line`) and rich span-2 cells need a structural refactor; tracked as sub-phase 1.3b.
+- [x] **Card hover treatment** — chose CSS-only over `<Tilt>` (tilt would expose hairline through rotated corners): top accent rail draws in 500ms ease-out-expo on `group-hover`, icon scales 1.12 + accent color shift, title accent-ink shift, bg paper→card.
+- [~] **Stagger entry on scroll-into-view** — DEFERRED to Phase 10 (currently grid lifts as one block via `scroll-reveal`).
 
 ### 1.4 Quote section
-- [ ] **Replace single Priya R. quote with rotating set of 3 quotes** — auto-cycle every 7s, fade+slide transition (480ms). Crossfade, not pop.
-- [ ] **Avatar circle** scales 1 → 1.05 on quote change (320ms spring).
-- [ ] **Quote-mark glyph** (oversized italic vermillion `"`) floats in top-left of quote, parallax 0.3.
+- [x] **Rotating set of 3 quotes** — `RotatingQuotes` auto-cycles every 7s, AnimatePresence crossfade+slide (480ms ease-out-expo), pause-on-hover/focus, progress-dot tab strip.
+- [~] **Avatar circle scale on quote change** — n/a (current design has no avatar circle); progress-dot width animation serves the same beat.
+- [~] **Oversized italic vermillion quote-mark with parallax** — DEFERRED (depends on dropping current ink-band background).
 
 ### 1.5 Sample CTA
-- [ ] **Replace right-column stat list with an actual cropped screenshot** of the sample report — diagram + heading + part of cost table.
-- [ ] **Screenshot tilts subtly on cursor proximity** (perspective wrapper).
-- [ ] **`Open the sample` button** with arrow that slides 4px on hover.
+- [~] **Replace right-column stat list with cropped screenshot** — DEFERRED (needs actual screenshot asset; tracked separately).
+- [x] **Cursor-proximity tilt** — `TiltCard` (max 4°, perspective 1000) wraps the right `card-paper`.
+- [x] **`Open the sample` arrow slides 4px on hover** — `group-hover:translate-x-1` on the `MagneticCTA` arrow.
 
 ### 1.6 Pricing teaser strip
-- [ ] **Add 4 pack chips** below pricing copy: `Solo ₹300 · Trio ₹840 · Sprint ₹2,500 · Studio ₹10,000`.
-- [ ] Trio chip scaled 1.05 + accent ring (`Most popular`).
-- [ ] Hover: chip lifts 4px with shadow.
+- [x] **4 pack chips** — `PricingChips` renders Solo ₹300 / Trio ₹840 / Sprint ₹2,500 / Studio ₹10,000, each links `/pricing#{slug}`.
+- [x] **Trio chip scaled + accent ring** — Trio at `scale-1.04` with `ring-1 ring-[hsl(var(--accent))]`.
+- [x] **Hover: chip lifts** — `whileHover y:-3` via framer.
 
 ### 1.7 Final CTA section
-- [ ] **Differentiate from hero** — smaller headline, full-bleed dark band, single primary button.
-- [ ] **Background paper-grain shifts** slowly (8s loop, parallax 0.4 on scroll).
+- [~] **Differentiated framing (smaller headline, full-bleed dark band, single button)** — DEFERRED (current section is already distinct enough; full redesign deferred).
+- [x] **Primary CTA as Magnetic** — `MagneticCTA` (variant=accent, size=lg).
+- [~] **Background paper-grain parallax** — DEFERRED to Phase 10.
 
 ### 1.8 Section transitions
-- [ ] Every section divider — paper-grain seam that reveals on scroll.
-- [ ] Long horizontal `rule-dots` should draw left-to-right when entering viewport (800ms).
+- [x] **Section content reveal on scroll** — `scroll-reveal` CSS class (modern `animation-timeline: view()`) applied to 6 section content blocks. Modern Chrome/Edge animate (`section-reveal-rise` 900ms cubic-bezier expo-out, range entry 5% → cover 28%); Safari/Firefox degrade gracefully to static. Respects `prefers-reduced-motion`.
+- [~] **Rule-dots draw left-to-right on viewport entry** — DEFERRED to Phase 10 (needs clip-path animation primitive).
+
+### Phase 1 motion primitives shipped (in addition to plan)
+- `src/components/landing/AmbientDiagram.tsx`
+- `src/components/landing/DrawnUnderline.tsx`
+- `src/components/landing/HeroStats.tsx`
+- `src/components/landing/MagneticCTA.tsx`
+- `src/components/landing/RotatingQuotes.tsx`
+- `src/components/landing/TiltCard.tsx`
+- `src/components/landing/StepVisual.tsx`
+- `src/components/landing/PricingChips.tsx`
+- `.scroll-reveal` CSS-only scroll-driven reveal in `globals.css`
+
+### Phase 1 deferred work (rolled into Phase 10 polish or sub-phases)
+- 1.1 wordmark/headline clip-path reveal
+- 1.2 / 1.3 per-card stagger entry (currently whole-section reveal)
+- 1.3b feature grid asymmetric span-2 rich cells
+- 1.4 oversized quote-mark parallax
+- 1.5 actual sample screenshot asset
+- 1.7 final CTA full-bleed differentiation
+- 1.7 paper-grain background parallax
+- 1.8 rule-dots draw-in animation
 
 ---
 
