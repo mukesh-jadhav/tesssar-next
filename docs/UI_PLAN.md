@@ -119,12 +119,12 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ## Phase 3 — Login page (`/login`)
 
-- [ ] **3.1 Rotating testimonials** — 3 quotes, auto-cycle every 7s, crossfade.
-- [ ] **3.2 Mini dashboard preview** below the Google button — 3-row miniature of what they'll see after sign-in.
-- [ ] **3.3 Back link** to `/` (top-left, `← tessar.dev`, subtle).
-- [ ] **3.4 Google button** — `<Magnetic>` + Google-G icon that subtly rotates on hover (12°, 320ms).
-- [ ] **3.5 Sign-in success transition** — fade-out + accent paint sweep before route change.
-- [ ] **3.6 Aside scroll-parallax** — quote drifts up at 0.4× scroll rate.
+- [x] **3.1 Rotating testimonials** — `RotatingTestimonials` cycles 3 quotes every 7s with AnimatePresence crossfade (opacity + 12→0 y), expanding-dash tab indicators, hover/focus pauses the cycle. Reduced-motion shows quote 1 only.
+- [x] **3.2 Mini dashboard preview** — `MiniDashboardPreview` static editorial render of the post-sign-in dashboard (faux browser chrome, sidebar, 3 architecture cards, quick stats) under the Google button.
+- [x] **3.3 Back link to `/`** — replaced ad-hoc top-bar with a quiet mono `← tessar.dev` chip above the headline.
+- [x] **3.4 Google button** — wrapped in `<Magnetic>` (strength 0.18, max 8px); the Google-G chip rotates `12deg` over 320ms on hover.
+- [x] **3.5 Sign-in success transition** — `SuccessSweep` vermillion paint sweep (scaleX 0→1 over 360ms, hold, fade); button delays the hard-nav by 520ms so the sweep lands before the route change.
+- [x] **3.6 Aside scroll-parallax** — `Parallax speed={0.4}` wraps the right column quote block + decorative `“` glyph; on viewports with scroll headroom the quote drifts slower than the page.
 
 ---
 
