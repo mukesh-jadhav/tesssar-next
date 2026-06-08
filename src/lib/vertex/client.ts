@@ -22,7 +22,7 @@ export function getArchitectModel(): GenerativeModel {
     generationConfig: {
       temperature: 0.45,
       topP: 0.95,
-      maxOutputTokens: 32_768,
+      maxOutputTokens: 65_536,
       responseMimeType: "application/json",
     },
     safetySettings: [
