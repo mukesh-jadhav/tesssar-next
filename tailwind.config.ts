@@ -156,15 +156,13 @@ const config: Config = {
         "stagger-lg": "120ms",
       },
       boxShadow: {
-        // M3 Expressive 3 — flat. All elevation collapses to none.
-        // Hierarchy comes from surface tones + borders, never shadows.
-        "hover-card": "none",
+        // Phase 9.5 — flat-shadow contract.
+        // Hierarchy comes from surface tones + hairline borders, never shadows.
+        // Only the `ring` outline survives, as an escape hatch for components
+        // that need a 1px outline on the same surface tone (used sparingly).
+        // Any incoming `shadow-*` class is neutralised by a global rule in
+        // `globals.css` so the flat decision can't drift via copy/paste.
         ring: "0 0 0 1px hsl(var(--md-sys-color-outline-variant))",
-        "m3-1": "none",
-        "m3-2": "none",
-        "m3-3": "none",
-        "m3-4": "none",
-        "m3-5": "none",
       },
       keyframes: {
         "accordion-down": {

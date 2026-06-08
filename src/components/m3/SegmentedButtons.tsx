@@ -49,7 +49,7 @@ export function SegmentedButtons({
               "state-layer press relative inline-flex items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium",
               "transition-colors duration-m3-default-effects ease-m3-default-effects",
               active
-                ? "bg-m3-secondary-container text-m3-on-secondary-container shadow-m3-1"
+                ? "bg-m3-secondary-container text-m3-on-secondary-container"
                 : "text-m3-on-surface-variant hover:text-m3-on-surface",
             )}
           >

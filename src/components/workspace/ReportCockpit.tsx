@@ -783,7 +783,7 @@ function BulletList({ items, muted }: { items: string[]; muted?: boolean }) {
     <ul className="space-y-2">
       {items.map((it, i) => (
         <li key={i} className="flex gap-2.5 text-[13px] leading-relaxed">
-          <span className="mt-1.5 size-1 shrink-0 rounded-full bg-[hsl(var(--accent))]" />
+          <span className="mt-1.5 size-1 shrink-0 rounded-full bg-[hsl(var(--ink-3))]" />
           <span className={muted ? "text-[hsl(var(--ink-2))]" : "text-[hsl(var(--ink))]"}>{it}</span>
         </li>
       ))}

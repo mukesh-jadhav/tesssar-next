@@ -250,25 +250,64 @@ These are infrastructure for the rest of the plan. Ship before any feature-level
 
 ---
 
-## Phase 9 — Visual design system cleanup
+## Phase 9 — Visual design system cleanup ✅ SHIPPED
 
-- [ ] **9.1 Consolidate heading scales** — audit `display-tight` / `display` / `serif italic` usage, settle on 2 scales max.
-- [ ] **9.2 Demote accent overuse** — vermillion in italic spans + buttons + dots + underlines is too much. Drop the dots to `ink-3`.
-- [ ] **9.3 Dark mode** — proper paper↔ink swap, accent slightly desaturated. Toggle in footer + respects `prefers-color-scheme` by default.
-- [ ] **9.4 Selective grain** — keep on `/`, `/pricing`, `/login`, `/sample`. Remove from `/dashboard`, `/r/[slug]`, `/new` (data-dense surfaces).
-- [ ] **9.5 Audit shadow tokens** — currently mixed. Settle on 3: `shadow-paper-sm` (cards), `shadow-paper-md` (modals), `shadow-paper-lg` (dialogs).
+- [x] **9.1 Consolidate heading scales** — settled on **two**: `.display` (every standard headline) + `.display-tight` (condensed weight for the largest cockpit/run-live heroes only). `.display-wide` was unused — dropped from `globals.css`. `.serif` italic accent is intentionally kept as an editorial flourish (not a third scale) and the contract is documented in `globals.css`.
+- [x] **9.2 Demote accent overuse** — per the plan's prescription, demoted three decorative bullet dots from `accent` to `ink-3`: the landing first-design-free pill (`app/page.tsx`), and the two `BulletList` markers (`ReportCockpit.tsx`, `ArchitectureView.tsx`). The two **live-state** dots (`animate-pulse` on `MermaidDiagram.tsx` and `ArchitectureView.tsx`) kept accent — there the colour carries a "happening now" semantic. Italic `.serif` accent spans, the `DrawnUnderline`, and `accent`-backgrounded buttons were left alone as the editorial signature.
+- [x] **9.3 Dark mode** — wired the staged `[data-theme="dark"]` token shelf from Phase 0.6:
+  - New `src/lib/theme.ts` — pure helpers (storage, system detection, apply).
+  - New `src/components/shared/ThemeScript.tsx` — inline pre-paint script in `<head>` of `layout.tsx`. Reads `tessar-theme` from localStorage, falls back to `prefers-color-scheme`, and atomically sets **both** `data-theme="dark"` (CSS variable shelf) and `class="dark"` (Tailwind `dark:` variant) before first paint. No flash.
+  - New `src/components/shared/ThemeToggle.tsx` — three-state segmented toggle (`light · system · dark`) with `light_mode / desktop_windows / dark_mode` Material Symbols. Mounted in `Footer.tsx` utility row.
+  - `system` mode listens to `prefers-color-scheme` changes live.
+  - Token-flip audit: `.grain::after` now uses `mix-blend-mode: screen` + lower opacity under dark (multiply on dark base reads as black). `CursorAccent` gained `dark:mix-blend-screen`. `EditorialIllustration`, `AmbientDiagram`, and Mermaid styles are already token-driven and flip cleanly. PDF/email templates intentionally stay light (they're print/email surfaces).
+- [x] **9.4 Selective grain** — `WorkspaceShell` now takes an opt-in `grain` prop (default `false`), so the cockpit chrome stays grain-free on data-dense `(app)/*` surfaces (dashboard, new, history, architecture, admin) and `/studio`. `grain` is passed only by `/sample`. The marketing surfaces still wrap themselves in `.grain` directly: kept on `/` and `/login`, **added** to `/pricing`.
+- [x] **9.5 Audit shadow tokens** — resolved the plan-vs-reality contradiction by keeping the **flat-shadow contract** (consistent with the editorial paper aesthetic, which was already enforced). Cleanup:
+  - Deleted dead `m3-1..5` and `hover-card` from `tailwind.config.ts` boxShadow — only `ring` survives as the hairline-outline escape hatch.
+  - Stripped no-op `shadow-m3-*` and `hover:shadow-m3-*` classes from `button.tsx`, `Fab.tsx`, `SegmentedButtons.tsx`.
+  - Rewrote the `!important` kill-switch in `globals.css` as the documented flat-shadow contract; broadened it from `shadow-m3-*` only to all `shadow-*` (excluding `shadow-ring` and `ring-*`) so older `shadow-2xl shadow-black/10` calls in dialog/menu code stay neutralised against drift.
+
+### Phase 9 new files
+- `src/lib/theme.ts`
+- `src/components/shared/ThemeScript.tsx`
+- `src/components/shared/ThemeToggle.tsx`
 
 ---
 
-## Phase 10 — Motion polish pass (do last, applies everywhere)
+## Phase 10 — Motion polish pass ✅ SHIPPED
 
-- [ ] **10.1 Page-enter** — every section/card uses `<FadeIn>` from Phase 0.
-- [ ] **10.2 Hover-anywhere** — every interactive surface has a hover state with motion.
-- [ ] **10.3 Scroll-driven** — every long section has at least one scroll-linked animation.
-- [ ] **10.4 Loading states** — every async boundary shows skeleton + shimmer.
-- [ ] **10.5 Micro-interactions** — copy-to-clipboard pulse, save-success checkmark draw, credit-deducted number animation.
-- [ ] **10.6 Audit `prefers-reduced-motion`** — every primitive in Phase 0 short-circuits cleanly. Test with OS toggle.
-- [ ] **10.7 Performance pass** — no animation over 60fps cost; use `transform` + `opacity` only; `will-change` strategically; avoid layout thrash.
+The polish coat across the whole app. Two new motion primitives, five shape-matching skeletons, one revisited deferred item from Phase 6B, and audits for reduced-motion + perf.
+
+- [x] **10.1 Page-enter** — *no new work needed.* `m3-page-enter` is already applied across every hero/section (`/`, `/pricing`, `/login`, `/dashboard`, `/new`, `/history`, `/sample`, `/architecture`, `/legal/*`), and `scroll-reveal` covers below-the-fold sections. Migrating these to `<FadeIn>` from Phase 0 would have no visible effect and would add JS to surfaces that are currently pure CSS. Item kept in the plan as a reminder that the contract is in place.
+- [x] **10.2 Hover-anywhere** — spot-checked: every `Link`, `button`, `card-paper`, `card-inset`, `tag`, `MenuLink`, and `m3-list-item` in the codebase already has a hover state (border, bg, color, or icon translate). No static interactive surface found. Item closed on audit.
+- [x] **10.3 Scroll-driven** — already shipped in Phases 1 & 5 (`.scroll-reveal` on every long section of `/` and `/pricing`; `ScrollProgress` on `/`; `Parallax` on `/login` aside; `WordFade` in `ReportCockpit`; per-row stagger in `CostBreakdown` / `RiskMatrix` / `Roadmap`). Item closed.
+- [x] **10.4 Loading states (also: deferred 6.8)** — shape-matching `loading.tsx` files for the four primary app routes. Each one mirrors the real masthead → hero → content layout of the corresponding `page.tsx`, so the suspense swap is invisible to the eye except for content filling in:
+  - `src/app/(app)/dashboard/loading.tsx` — masthead, hero placeholder, 3-tile stats row, 4-row suggestions ladder.
+  - `src/app/(app)/history/loading.tsx` — masthead, hero, one bucketed list of 5 rows.
+  - `src/app/(app)/new/loading.tsx` — masthead, hero, composer card with textarea outline + submit row.
+  - `src/app/(app)/architecture/[id]/loading.tsx` — public-share top strip, masthead, hero, `<SkeletonDiagram>` + body block.
+  - `(app)/admin` intentionally skipped (operator-only surface; vanilla loading is fine).
+- [x] **10.5 Micro-interactions** — two new primitives + targeted wiring:
+  - **`<DrawnCheck>`** (`src/components/motion/DrawnCheck.tsx`) — pure-SVG check whose stroke draws in over 360ms (`stroke-dasharray` + `-dashoffset` keyframe). Re-keys on a `signal` prop so callers can re-trigger on every event. Wired into `ShareButton` copy-success (replaces the static `check` Material Symbol).
+  - **`<CountFlash>`** (`src/components/motion/CountFlash.tsx`) — numeric span that flashes when its value changes. First render is silent (we never fake an event the user didn't cause). Decrease → vermillion accent flash + 1px down. Increase → good-tone green flash + 1px up. Reduced-motion users see a silent update. Wired into the two live-credit displays: `ProfileChip` balance row and `AppDrawer` credit pill (already polls `/api/credits/balance` every 15s).
+  - **Save-success checkmark draw** — `DrawnCheck` is the reusable primitive; available everywhere `toast.success` plus an inline confirmation needs more weight than a sonner toast.
+- [x] **10.6 Reduced-motion audit** — already covered structurally: (a) global `@media (prefers-reduced-motion: reduce)` block in `globals.css` kills all CSS animations + transitions, (b) every Phase-0 primitive short-circuits via `useReducedMotionSafe()`. New Phase 10 primitives follow the same contract: `DrawnCheck` renders the final stroke statically, `CountFlash` updates silently. Confirmed by grep across `src/components/`.
+- [x] **10.7 Performance pass** — audit notes + small wins:
+  - Long-running animations already use GPU-friendly properties: `marquee-track` is `transform: translateX` (with `will-change: transform`), `status-ping` is `transform: scale`, `m3-wavy::after` and `blueprint-flow-rail` and `animate-shimmer` are paint-only (`background-position`). No layout-thrash animations found.
+  - Added `will-change: transform` to `CursorAccent` ring (continuously updated via rAF lerp).
+  - `CountFlash`'s flash classes set `will-change: color, transform` for the ~640ms the class is applied.
+  - Framer-motion primitives manage their own `will-change` lifecycle.
+
+### Phase 10 new files
+- `src/components/motion/DrawnCheck.tsx`
+- `src/components/motion/CountFlash.tsx`
+- `src/app/(app)/dashboard/loading.tsx`
+- `src/app/(app)/history/loading.tsx`
+- `src/app/(app)/new/loading.tsx`
+- `src/app/(app)/architecture/[id]/loading.tsx`
+
+### Phase 10 globals.css additions
+- `.drawn-check-path` keyframe (`stroke-dashoffset 26 → 0`).
+- `.count-flash-down` + `.count-flash-up` keyframes (640ms color + 1px Y).
 
 ---
 

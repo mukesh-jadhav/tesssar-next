@@ -34,7 +34,7 @@ export function DrawnUnderline({
       aria-hidden
       role="presentation"
       className={
-        "pointer-events-none absolute -bottom-1 left-0 right-0 h-[0.45em] w-full " +
+        "pointer-events-none absolute -bottom-[0.1em] left-0 right-0 h-[0.2em] w-full " +
         (className ?? "")
       }
     >

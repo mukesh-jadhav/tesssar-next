@@ -45,7 +45,6 @@ export function Fab(props: FabProps) {
 
   const classes = cn(
     "state-layer press m3-squircle-press inline-flex items-center justify-center",
-    "shadow-m3-3 hover:shadow-m3-4",
     "transition-all duration-m3-default-effects ease-m3-fast-spatial",
     VARIANT[variant],
     SIZE[size],

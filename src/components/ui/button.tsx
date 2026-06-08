@@ -30,13 +30,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        filled: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
-        default: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
-        brand: "bg-m3-primary text-m3-on-primary shadow-m3-1 hover:shadow-m3-2",
+        filled: "bg-m3-primary text-m3-on-primary",
+        default: "bg-m3-primary text-m3-on-primary",
+        brand: "bg-m3-primary text-m3-on-primary",
         tonal: "bg-m3-secondary-container text-m3-on-secondary-container",
         secondary: "bg-m3-secondary-container text-m3-on-secondary-container",
         elevated:
-          "bg-m3-surface-container-low text-m3-primary shadow-m3-1 hover:shadow-m3-2",
+          "bg-m3-surface-container-low text-m3-primary",
         outlined:
           "border border-m3-outline bg-transparent text-m3-primary hover:border-m3-primary",
         outline:
@@ -44,9 +44,9 @@ const buttonVariants = cva(
         text: "bg-transparent text-m3-primary",
         ghost: "bg-transparent text-m3-on-surface",
         destructive:
-          "bg-m3-error text-m3-on-error shadow-m3-1 hover:shadow-m3-2",
+          "bg-m3-error text-m3-on-error",
         link: "text-m3-primary underline-offset-4 hover:underline",
-        fab: "bg-m3-primary-container text-m3-on-primary-container shadow-m3-3 hover:shadow-m3-4",
+        fab: "bg-m3-primary-container text-m3-on-primary-container",
       },
       size: {
         xs: "h-8 rounded-full px-3 text-xs",

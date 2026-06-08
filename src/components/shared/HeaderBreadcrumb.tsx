@@ -34,26 +34,29 @@ export function HeaderBreadcrumb() {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-2 text-[12px] font-mono uppercase tracking-[0.18em] text-[hsl(var(--ink-3))]"
+      className="hidden lg:flex items-center gap-2 text-[12px] font-mono uppercase tracking-[0.18em] text-[hsl(var(--ink-3))] min-w-0"
     >
+      <span aria-hidden className="text-[hsl(var(--ink-3))]/60 shrink-0">
+        /
+      </span>
       {crumbs.map((c, i) => {
         const isLast = i === crumbs.length - 1;
         return (
-          <span key={i} className="flex items-center gap-2">
+          <span key={i} className="flex items-center gap-2 min-w-0">
             {c.href && !isLast ? (
               <Link
                 href={c.href}
-                className="transition-colors hover:text-[hsl(var(--ink))]"
+                className="truncate transition-colors hover:text-[hsl(var(--ink))]"
               >
                 {c.label}
               </Link>
             ) : (
-              <span className={isLast ? "text-[hsl(var(--ink))]" : ""}>
+              <span className={"truncate " + (isLast ? "text-[hsl(var(--ink))]" : "")}>
                 {c.label}
               </span>
             )}
             {!isLast && (
-              <span aria-hidden className="text-[hsl(var(--ink-3))]/60">
+              <span aria-hidden className="text-[hsl(var(--ink-3))]/60 shrink-0">
                 /
               </span>
             )}

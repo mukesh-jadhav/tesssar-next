@@ -171,12 +171,10 @@
     letter-spacing: -0.04em;
     line-height: 0.92;
   }
-  .display-wide {
-    font-family: var(--font-display), "Bricolage Grotesque", system-ui, sans-serif;
-    font-weight: 500;
-    font-variation-settings: "wdth" 200, "opsz" 96, "SOFT" 100;
-    letter-spacing: -0.02em;
-  }
+  /* Heading scale contract (Phase 9.1):
+       .display       — every standard display headline (hero, section, card title).
+       .display-tight — condensed weight for the largest cockpit/run-live heroes only.
+     `.serif` is an editorial accent for a few italic words; it is NOT a third scale. */
   .serif {
     font-family: "Instrument Serif", "EB Garamond", Georgia, serif;
     font-weight: 400; font-style: italic; letter-spacing: -0.01em;
@@ -204,6 +202,13 @@
     mix-blend-mode: multiply;
     opacity: 0.05;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  /* Phase 9.3 — dark-mode grain: multiply on a dark base reads as ~black
+     and kills the texture. Screen blend keeps the grain visible as a
+     subtle highlight noise instead. Lower opacity so it stays editorial. */
+  [data-theme="dark"] .grain::after {
+    mix-blend-mode: screen;
+    opacity: 0.035;
   }
 
   .rule-dots {
@@ -379,8 +384,18 @@
   /* Kill legacy ornaments */
   .m3-mesh, .m3-shape-a, .m3-shape-b, .m3-blob { display: none !important; }
 
-  /* Flat: kill all shadows */
-  [class*="shadow-m3-"], .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; }
+  /* Phase 9.5 — flat-shadow contract.
+     Editorial paper aesthetic: hierarchy comes from surface tones (paper/
+     paper-2/paper-3/card) and 1px hairline borders, never drop shadows.
+     The `m3-*` shadow tokens have been deleted from `tailwind.config.ts`;
+     this rule catches any stray `shadow-*` Tailwind utility (including
+     `shadow-2xl shadow-black/10` left in older dialog/menu code) so the
+     flat decision can't drift via copy/paste. The `ring` shadow utility
+     and any `ring-*` classes are intentionally excluded — they remain
+     the escape hatch for hairline 1px outlines on the same surface tone. */
+  [class*="shadow-"]:not([class*="shadow-ring"]):not([class*="ring-"]) {
+    box-shadow: none !important;
+  }
   .elev-1, .elev-2, .elev-3, .elev-4, .elev-5 { box-shadow: none !important; }
 }
 
@@ -615,7 +630,7 @@
 
 
 /* ============================================================================
-   PHASE 1 � scroll-driven section reveal
+   PHASE 1 � scroll-driven section reveal
    -----------------------------------------------------------------------------
    Pure-CSS reveal-on-scroll using animation-timeline: view(). Modern Chrome &
    Edge animate; Safari/Firefox gracefully degrade to static content (no JS
@@ -635,3 +650,36 @@
     }
   }
 }
+
+
+/* ============================================================================
+   PHASE 10 — micro-interaction primitives
+   -----------------------------------------------------------------------------
+   • .drawn-check-path   stroke draws in once (used by DrawnCheck).
+   • .count-flash-up     brief good-tone halo + 1px lift (used by CountFlash).
+   • .count-flash-down   brief vermillion halo + 1px drop (used by CountFlash).
+   All three short-circuit cleanly under the global reduced-motion rule above.
+   ============================================================================ */
+
+@keyframes drawn-check-draw {
+  from { stroke-dashoffset: 26; }
+  to   { stroke-dashoffset: 0; }
+}
+.drawn-check-path {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: drawn-check-draw 360ms cubic-bezier(0.22, 1.4, 0.36, 1) forwards;
+}
+
+@keyframes count-flash-down {
+  0%   { color: hsl(var(--ink));   transform: translateY(0);    text-shadow: 0 0 0 transparent; }
+  20%  { color: hsl(var(--accent)); transform: translateY(1px);  text-shadow: 0 0 12px hsl(var(--accent) / 0.30); }
+  100% { color: hsl(var(--ink));   transform: translateY(0);    text-shadow: 0 0 0 transparent; }
+}
+@keyframes count-flash-up {
+  0%   { color: hsl(var(--ink));   transform: translateY(0);    text-shadow: 0 0 0 transparent; }
+  20%  { color: hsl(var(--good));  transform: translateY(-1px); text-shadow: 0 0 12px hsl(var(--good) / 0.28); }
+  100% { color: hsl(var(--ink));   transform: translateY(0);    text-shadow: 0 0 0 transparent; }
+}
+.count-flash-down { animation: count-flash-down 640ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: color, transform; }
+.count-flash-up   { animation: count-flash-up   640ms cubic-bezier(0.16, 1, 0.3, 1) both; will-change: color, transform; }

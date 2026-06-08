@@ -9,6 +9,7 @@ import { signOut } from "@/lib/firebase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { formatDesigns } from "@/lib/credits/display";
+import { CountFlash } from "@/components/motion/CountFlash";
 
 /**
  * SideRail — slim editorial sidebar (left side, 72px collapsed → 264px expanded).
@@ -123,7 +124,9 @@ export function AppDrawer({
           className="flex flex-col items-center gap-0.5 rounded-2xl px-3 py-2 hover:bg-[hsl(var(--paper-2))]"
           title={`${formatDesigns(credits)} designs remaining`}
         >
-          <span className="display text-[20px] tabular-nums">{formatDesigns(credits)}</span>
+          <span className="display text-[20px] tabular-nums">
+            <CountFlash value={credits} format={(v) => formatDesigns(v)} />
+          </span>
           <span className="text-[9px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">designs</span>
         </Link>
 

@@ -14,7 +14,7 @@ export default async function SamplePage() {
   const user = await getSessionUser();
   const credits = user ? await getBalance(user.uid) : undefined;
   return (
-    <WorkspaceShell user={user} credits={credits}>
+    <WorkspaceShell user={user} credits={credits} grain>
       <ReportCockpit arch={SAMPLE_ARCHITECTURE} showDownload={false} />
     </WorkspaceShell>
   );

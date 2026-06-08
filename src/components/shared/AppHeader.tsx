@@ -37,11 +37,12 @@ export async function AppHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-[hsl(var(--line))] bg-[hsl(var(--paper))]/85 backdrop-blur supports-[backdrop-filter]:bg-[hsl(var(--paper))]/70">
       <div className="relative flex h-14 w-full items-center justify-between gap-4 pl-4 pr-3 md:pl-6 md:pr-5">
-        <Link href="/" className="flex items-center gap-2.5 -ml-0.5" aria-label="Tessar home">
-          <TessarLogo variant="wordmark" size={30} className="text-[hsl(var(--ink))]" />
-        </Link>
-
-        <HeaderBreadcrumb />
+        <div className="flex items-center gap-4 min-w-0">
+          <Link href="/" className="flex items-center gap-2.5 -ml-0.5 shrink-0" aria-label="Tessar home">
+            <TessarLogo variant="wordmark" size={30} className="text-[hsl(var(--ink))]" />
+          </Link>
+          <HeaderBreadcrumb />
+        </div>
 
         <nav className="hidden md:flex items-center gap-1">
           <HeaderLink href="/studio" label="Studio" />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 /**
  * Editorial site footer for the marketing surfaces (`/`, `/pricing`,
@@ -73,9 +74,12 @@ export function Footer() {
 
           <StatusPill />
 
-          <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-            Designed in India <span className="opacity-60">·</span> Hosted on Google Cloud <span className="opacity-60">·</span>{" "}
-            <span className="text-[hsl(var(--ink-2))]">asia-south1</span>
+          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center">
+            <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
+              Designed in India <span className="opacity-60">·</span> Hosted on Google Cloud <span className="opacity-60">·</span>{" "}
+              <span className="text-[hsl(var(--ink-2))]">asia-south1</span>
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </div>
@@ -120,7 +124,7 @@ function StatusPill() {
     <a
       href="https://status.tessar.dev"
       target="_blank"
-      rel="noopener"
+      rel="noopener noreferrer"
       className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1.5 transition-colors hover:border-[hsl(var(--line-2))]"
     >
       <span className="relative inline-flex size-2">

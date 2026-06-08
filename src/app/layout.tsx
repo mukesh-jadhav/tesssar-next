@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/shared/AppHeader";
 import { GlobalShortcuts } from "@/components/shared/GlobalShortcuts";
 import { HelpOverlay } from "@/components/shared/HelpOverlay";
 import { CursorAccent } from "@/components/shared/CursorAccent";
+import { ThemeScript } from "@/components/shared/ThemeScript";
 
 // Display — modern editorial sans with SOFT axis (rounded corners) and
 // variable width. The personality typeface of the whole product.
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <head>
+        <ThemeScript />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=block"
           rel="stylesheet"

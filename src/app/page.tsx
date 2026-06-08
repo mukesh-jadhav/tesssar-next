@@ -42,7 +42,7 @@ export default async function HomePage() {
         <div className="relative mx-auto max-w-[1320px]">
           <div className="m3-page-enter flex items-center gap-3">
             <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1 text-[11.5px]">
-              <span className="size-1.5 rounded-full bg-[hsl(var(--accent))]" />
+              <span className="size-1.5 rounded-full bg-[hsl(var(--ink-3))]" />
               <span className="font-mono uppercase tracking-[0.16em] text-[hsl(var(--ink-2))]">
                 First design free, no credit card
               </span>

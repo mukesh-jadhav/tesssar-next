@@ -4,14 +4,17 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 /**
- * Decorative cursor accent — a 12px vermillion ring that trails the cursor
- * with ~80ms lag using rAF lerp. Mounted only on landing surfaces (`/`,
- * `/sample`). Disabled for touch-only devices, narrow viewports, and users
- * who have `prefers-reduced-motion: reduce`.
+ * Soft spotlight that follows the cursor 1:1 on landing surfaces (`/`,
+ * `/sample`). A radial vermillion-tinted glow ~320px across, blended
+ * against the paper. Tracks the pointer with no lag (was previously a
+ * trailing 12px ring whose visible lerp read as "the UI feels slow").
+ *
+ * Disabled for touch-only devices, narrow viewports, and users with
+ * `prefers-reduced-motion: reduce`.
  */
 export function CursorAccent() {
   const pathname = usePathname();
-  const ringRef = useRef<HTMLDivElement>(null);
+  const spotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -22,14 +25,12 @@ export function CursorAccent() {
     const narrow = window.matchMedia("(max-width: 768px)").matches;
     if (reduce || coarse || narrow) return;
 
-    const ring = ringRef.current;
-    if (!ring) return;
+    const el = spotRef.current;
+    if (!el) return;
 
-    let mx = window.innerWidth / 2;
-    let my = window.innerHeight / 2;
-    let rx = mx;
-    let ry = my;
     let raf = 0;
+    let mx = -9999;
+    let my = -9999;
     let visible = false;
 
     const onMove = (e: MouseEvent) => {
@@ -37,18 +38,18 @@ export function CursorAccent() {
       my = e.clientY;
       if (!visible) {
         visible = true;
-        ring.style.opacity = "0.7";
+        el.style.opacity = "1";
       }
     };
     const onLeave = () => {
       visible = false;
-      ring.style.opacity = "0";
+      el.style.opacity = "0";
     };
 
+    // Position via rAF so we coalesce mousemove into one paint per frame
+    // without introducing perceptible lag.
     const tick = () => {
-      rx += (mx - rx) * 0.18;
-      ry += (my - ry) * 0.18;
-      ring.style.transform = `translate3d(${rx - 6}px, ${ry - 6}px, 0)`;
+      el.style.transform = `translate3d(${mx - 200}px, ${my - 200}px, 0)`;
       raf = requestAnimationFrame(tick);
     };
 
@@ -60,7 +61,7 @@ export function CursorAccent() {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseleave", onLeave);
-      ring.style.opacity = "0";
+      el.style.opacity = "0";
     };
   }, [pathname]);
 
@@ -68,10 +69,16 @@ export function CursorAccent() {
 
   return (
     <div
-      ref={ringRef}
+      ref={spotRef}
       aria-hidden
-      className="pointer-events-none fixed top-0 left-0 z-[60] size-3 rounded-full mix-blend-multiply ring-2 ring-[hsl(var(--accent))]"
-      style={{ opacity: 0, transition: "opacity 240ms ease-out" }}
+      className="pointer-events-none fixed top-0 left-0 z-[60] size-[400px] rounded-full mix-blend-multiply dark:mix-blend-screen"
+      style={{
+        opacity: 0,
+        transition: "opacity 320ms ease-out",
+        willChange: "transform",
+        background:
+          "radial-gradient(circle at center, hsl(var(--accent) / 0.11) 0%, hsl(var(--accent) / 0.05) 28%, transparent 68%)",
+      }}
     />
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { DrawnCheck } from "@/components/motion/DrawnCheck";
 import { cn } from "@/lib/utils";
 
 const SHARE_COST = 2;
@@ -236,9 +237,11 @@ export function ShareButton({
               onClick={handleCopy}
               className="inline-flex items-center gap-1.5 rounded-xl border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))] px-3 text-[12.5px] font-medium transition-colors hover:bg-[hsl(var(--ink-2))]"
             >
-              <span className="ms text-[16px]" aria-hidden>
-                {copied ? "check" : "content_copy"}
-              </span>
+              {copied ? (
+                <DrawnCheck size={16} signal={copied ? "copied" : "idle"} />
+              ) : (
+                <span className="ms text-[16px]" aria-hidden>content_copy</span>
+              )}
               {copied ? "Copied" : "Copy"}
             </button>
           </div>

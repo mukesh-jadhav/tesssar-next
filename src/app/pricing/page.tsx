@@ -113,7 +113,7 @@ export default async function PricingPage() {
   const user = await getSessionUser();
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--paper))]">
+    <div className="grain min-h-screen bg-[hsl(var(--paper))]">
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">

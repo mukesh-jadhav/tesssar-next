@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/firebase/client";
 import { toast } from "sonner";
 import { formatDesigns } from "@/lib/credits/display";
+import { CountFlash } from "@/components/motion/CountFlash";
 
 export type ProfileChipUser = {
   displayName: string | null;
@@ -123,7 +124,8 @@ export function ProfileChip({
             <div className="flex items-baseline justify-between px-4 py-3 border-b border-[hsl(var(--line))]">
               <span className="eyebrow">Balance</span>
               <span className="display tabular-nums text-[18px] tracking-[-0.02em]">
-                {formatDesigns(credits)} <span className="eyebrow">designs</span>
+                <CountFlash value={credits} format={(v) => formatDesigns(v)} />{" "}
+                <span className="eyebrow">designs</span>
               </span>
             </div>
           )}
