@@ -3,12 +3,15 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import { consumeCredit, refundCredit, InsufficientCreditsError } from "@/lib/credits/ledger";
 import { runArchitect } from "@/lib/agent/orchestrator";
+import { installShutdownDrain, trackRun, untrackRun } from "@/lib/agent/shutdown";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
 import { requestLogger, type RequestLogger } from "@/lib/security/log";
 
 export const runtime = "nodejs";
 export const maxDuration = 900;
+
+installShutdownDrain();
 
 /**
  * POST /api/architect/generate
@@ -97,8 +100,10 @@ export async function POST(req: NextRequest) {
     })
     .finally(() => {
       inflight.delete(work);
+      untrackRun(docRef.id);
     });
   inflight.add(work);
+  trackRun(docRef.id, { docRef, uid: user.uid });
 
   log.info("generation started", { archId: docRef.id, uid: user.uid });
   return NextResponse.json({ id: docRef.id });

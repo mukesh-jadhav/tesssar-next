@@ -20,3 +20,9 @@ service-account*.json
 
 # Local AI agent skills (workspace tooling, not app code)
 .agents/
+
+# Local debug artifacts
+filter.txt
+logs.json
+timeline.txt
+scripts/inspect-logs.ps1
