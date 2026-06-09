@@ -17,9 +17,6 @@ import {
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
-/** A run costs 40 credits — kept in lockstep with `RUN_COST_CREDITS`. */
-const RUN_COST_CREDITS = 40;
-
 const EXAMPLES = [
   {
     n: "01",
@@ -397,15 +394,10 @@ function SubmitButton({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
-            className="flex flex-col items-start leading-tight"
+            className="flex items-center gap-2"
           >
-            <span className="flex items-center gap-2">
-              Generate · {RUN_COST_CREDITS} credits
-              <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
-            </span>
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-80">
-              ~3 min · refunded on failure
-            </span>
+            Generate
+            <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
           </motion.span>
         )}
       </AnimatePresence>
