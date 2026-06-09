@@ -287,6 +287,49 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* COMPARISON STUDIES */}
+      <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper))] px-6 py-28 md:px-12">
+        <div className="mx-auto max-w-[1320px] scroll-reveal">
+          <div className="rule-dots flex items-baseline justify-between pb-4">
+            <p className="section-num">Comparison studies</p>
+            <span className="hidden md:inline font-mono text-[11px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+              New
+            </span>
+          </div>
+
+          <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
+            <h2 className="display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[22ch]">
+              Can&apos;t decide between AWS, Azure and GCP?{" "}
+              <span className="serif italic accent">Run them side by side.</span>
+            </h2>
+            <div>
+              <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[54ch]">
+                Pick a dimension — cloud, style, datastore, deployment, cost posture —
+                and Tessar runs the same brief through every variant in parallel. You
+                land in a nine-lens cockpit: verdict, architecture, performance, scale,
+                cost, reliability, security, ops burden, lock-in. Pick your favourite
+                slice from each variant and synthesize one final architecture.
+              </p>
+              <ul className="mt-8 grid gap-3 text-[14px]">
+                <Bullet>3 parallel variants · same brief, different cloud or style</Bullet>
+                <Bullet>9 lenses — every number clickable for the agent&apos;s reasoning</Bullet>
+                <Bullet>Live scenario slider — see costs and latency repaint at your load</Bullet>
+                <Bullet>Decision tray — keep what works from each, synthesize the rest</Bullet>
+              </ul>
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <Link href={signedIn ? "/studies/new" : "/login?next=/studies/new"} className="btn-pill btn-pill-accent btn-pill-lg">
+                  Start a study
+                  <span className="ms text-[18px]" aria-hidden>compare_arrows</span>
+                </Link>
+                <Link href="/studio" className="link-ink text-[14px]">
+                  Or design a single system
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* PRICING */}
       <section className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-[1320px] scroll-reveal">

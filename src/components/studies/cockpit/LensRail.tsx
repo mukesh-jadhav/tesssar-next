@@ -35,8 +35,10 @@ export const LENS_CATALOG: readonly LensEntry[] = [
 export function LensRail() {
   const { currentLens, setCurrentLens } = useCockpit();
 
-  // Keyboard: 1-9 jump between lenses. Skip when focus is in a typeable
-  // element so the user can still type into refine fields / drawers.
+  // Keyboard: 1-9 jump between lenses, ←/→ cycle. Skip when focus is in
+  // a typeable element so the user can still type into refine fields /
+  // drawers, and skip when a modifier is held so it doesn't fight with
+  // browser back/forward.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -52,6 +54,15 @@ export function LensRail() {
           return;
         }
       }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        const idx = LENS_CATALOG.findIndex((l) => l.id === currentLens);
+        if (idx < 0) return;
+        const delta = e.key === "ArrowRight" ? 1 : -1;
+        const next = (idx + delta + LENS_CATALOG.length) % LENS_CATALOG.length;
+        e.preventDefault();
+        setCurrentLens(LENS_CATALOG[next].id);
+        return;
+      }
       const lens = LENS_CATALOG.find((l) => l.shortcut === e.key);
       if (!lens) return;
       e.preventDefault();
@@ -59,7 +70,7 @@ export function LensRail() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setCurrentLens]);
+  }, [currentLens, setCurrentLens]);
 
   return (
     <nav

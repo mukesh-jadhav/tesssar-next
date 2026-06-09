@@ -3,10 +3,11 @@
 /**
  * Architecture lens — three Mermaid diagrams side-by-side.
  *
- * Phase 5 ships the basic diagram-per-column layout + the C4-container
- * default selector. The cross-column linked-highlight wiring lands in
- * Phase 9 — `buildEquivalenceIndex` is already imported so the wiring
- * call site is in place.
+ * Phase 5 shipped the diagram-per-column layout + the C4-container
+ * default selector. Phase 9 adds cross-column linked highlight: hovering
+ * a component chip in one variant glows its equivalents in the others,
+ * computed from `buildEquivalenceIndex` (category + vendor family +
+ * responsibility token overlap).
  *
  * Each column also surfaces the variant's total component count and
  * category histogram so the user can compare structural complexity at
@@ -14,8 +15,13 @@
  */
 
 import { useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/architecture/MermaidDiagram";
 import type { ArchComponent, Diagram } from "@/types/architecture";
+import {
+  buildEquivalenceIndex,
+  type EquivalenceKey,
+} from "@/lib/studies/equivalence";
 import { LensColumns } from "../LensColumns";
 import { useCockpit } from "../state";
 import { MiniChip, StatBlock } from "./primitives";
@@ -73,6 +79,7 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
   }, [variants]);
 
   const [kind, setKind] = useState<Diagram["kind"]>(initialKind);
+  const [hover, setHover] = useState<EquivalenceKey | null>(null);
   const { openDrawer } = useCockpit();
 
   const availableKinds = useMemo<Diagram["kind"][]>(() => {
@@ -84,6 +91,29 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
     }
     return PREFERRED_KIND.filter((k) => set.has(k));
   }, [variants]);
+
+  const equivalenceIndex = useMemo(
+    () =>
+      buildEquivalenceIndex(
+        variants.map((v) => ({
+          variantId: v.variantId,
+          arch: v.architecture,
+        })),
+      ),
+    [variants],
+  );
+
+  // Pre-compute the highlighted (variantId, componentId) set when a chip
+  // is hovered. O(matches) on hover; O(1) on every chip's lookup.
+  const highlighted = useMemo<Set<string> | null>(() => {
+    if (!hover) return null;
+    const out = new Set<string>();
+    out.add(`${hover.variantId}::${hover.componentId}`);
+    for (const m of equivalenceIndex.lookup(hover)) {
+      out.add(`${m.key.variantId}::${m.key.componentId}`);
+    }
+    return out;
+  }, [hover, equivalenceIndex]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -164,6 +194,42 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
                   </MiniChip>
                 ))}
               </div>
+
+              {/* Per-component chip strip — hover-linked across columns. */}
+              {components.length > 0 && (
+                <div
+                  className="flex flex-col gap-1.5"
+                  onMouseLeave={() => setHover(null)}
+                >
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
+                    components · hover to link
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {components.map((c) => (
+                      <ComponentChip
+                        key={c.id}
+                        component={c}
+                        variantLabel={v.label}
+                        isHighlighted={
+                          !!highlighted &&
+                          highlighted.has(`${v.variantId}::${c.id}`)
+                        }
+                        isDimmed={!!highlighted && !highlighted.has(`${v.variantId}::${c.id}`)}
+                        onHover={() =>
+                          setHover({ variantId: v.variantId, componentId: c.id })
+                        }
+                        onClick={() =>
+                          openDrawer({
+                            title: c.name,
+                            caption: `${v.label} · ${c.category} · ${c.technology}`,
+                            body: <SingleComponentDrawer component={c} />,
+                          })
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           );
         }}
@@ -216,5 +282,78 @@ function ComponentsDrawer({ components }: { components: ArchComponent[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function SingleComponentDrawer({ component }: { component: ArchComponent }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-2">
+        <MiniChip>
+          <span
+            className={`inline-block size-2 rounded-full ${CATEGORY_TONE[component.category] ?? "bg-[hsl(var(--ink-3))]"}`}
+            aria-hidden
+          />
+          {component.category}
+        </MiniChip>
+        <span className="text-[12px] text-[hsl(var(--ink-3))]">{component.technology}</span>
+      </div>
+      <p className="text-[13px] text-[hsl(var(--ink-2))] leading-relaxed">
+        {component.responsibility}
+      </p>
+      {component.scaling && (
+        <p className="font-mono text-[11px] text-[hsl(var(--ink-3))]">
+          scale · {component.scaling}
+        </p>
+      )}
+      <p className="mt-1 text-[11px] text-[hsl(var(--ink-3))] leading-relaxed">
+        Equivalent components in the other variants are glowing in their
+        chip strips — they share this category and (when relevant) the
+        same vendor family.
+      </p>
+    </div>
+  );
+}
+
+function ComponentChip({
+  component,
+  variantLabel,
+  isHighlighted,
+  isDimmed,
+  onHover,
+  onClick,
+}: {
+  component: ArchComponent;
+  variantLabel: string;
+  isHighlighted: boolean;
+  isDimmed: boolean;
+  onHover: () => void;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onMouseEnter={onHover}
+      onFocus={onHover}
+      onClick={onClick}
+      title={`${component.name} — ${variantLabel}`}
+      className={cn(
+        "group inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-mono lowercase tracking-[0.04em] transition-all duration-200",
+        isHighlighted
+          ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent-paper))] text-[hsl(var(--accent-ink))] shadow-[0_0_0_3px_hsl(var(--accent)/0.18)]"
+          : isDimmed
+          ? "border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 text-[hsl(var(--ink-3))]/60 opacity-50"
+          : "border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/40 text-[hsl(var(--ink-2))] hover:border-[hsl(var(--ink-3))]/40",
+      )}
+    >
+      <span
+        className={cn(
+          "inline-block size-1.5 rounded-full",
+          CATEGORY_TONE[component.category] ?? "bg-[hsl(var(--ink-3))]",
+        )}
+        aria-hidden
+      />
+      <span className="max-w-[12ch] truncate">{component.name}</span>
+    </button>
   );
 }
