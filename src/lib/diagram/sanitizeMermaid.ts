@@ -79,13 +79,12 @@ function normalizeLabelBody(s: string): string {
 }
 
 function labelNeedsQuoting(body: string): boolean {
-  return (
-    body.includes("[") ||
-    body.includes("]") ||
-    body.includes("\\n") ||
-    body.includes("\n") ||
-    /[<>]/.test(body)
-  );
+  // Quote unless the body is exclusively safe punctuation. Anything
+  // outside this set (parens, colons, slashes, ampersands, commas,
+  // semicolons, angle brackets, newlines, etc.) can trip the Mermaid
+  // parser depending on shape — quoting always renders correctly so we
+  // err on the safe side.
+  return !/^[A-Za-z0-9 _\-.+#%]*$/.test(body);
 }
 
 /**

@@ -21,18 +21,10 @@ import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCockpit, type Scenario } from "./state";
-import { LiveCounter } from "./LiveCounter";
-import {
-  projectCost,
-  projectLatency,
-  projectCeiling,
-  estimatedMonthlyRequests,
-} from "@/lib/studies/scenario";
-import {
-  computeVerdict,
-  headcountAtTier,
-  formatInr,
-} from "@/lib/studies/insights";
+import { KpiHero } from "./KpiHero";
+import { MetricMatrix } from "./MetricMatrix";
+import { estimatedMonthlyRequests } from "@/lib/studies/scenario";
+import { computeVerdict } from "@/lib/studies/insights";
 import type { CockpitVariant } from "./StudyCockpit";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
@@ -259,26 +251,11 @@ export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
           regionDown={scenario.regionFailureSim}
         />
 
-        {/* ────────── Row 3: variant scorecards ────────── */}
-        <div
-          className={cn(
-            "grid gap-3",
-            variants.length === 2 ? "md:grid-cols-2" :
-            variants.length === 3 ? "md:grid-cols-3" :
-            "md:grid-cols-2 lg:grid-cols-4",
-          )}
-        >
-          {variants.map((v) => (
-            <VariantScorecard
-              key={v.variantId}
-              variant={v}
-              scenario={scenario}
-              isCheapest={verdict.cheapest?.label === v.label}
-              isLowestOps={verdict.lowestOps?.label === v.label}
-              isFastest={verdict.fastestToShip?.label === v.label}
-            />
-          ))}
-        </div>
+        {/* ────────── Row 3: KPI hero band ────────── */}
+        <KpiHero variants={variants} />
+
+        {/* ────────── Row 4: comparison matrix ────────── */}
+        <MetricMatrix variants={variants} />
       </div>
     </section>
   );
@@ -388,200 +365,5 @@ function WinnerWord({
         </AnimatePresence>
       </span>
     </>
-  );
-}
-
-/* ────────────────── Variant scorecard ────────────────── */
-
-function VariantScorecard({
-  variant,
-  scenario,
-  isCheapest,
-  isLowestOps,
-  isFastest,
-}: {
-  variant: CockpitVariant;
-  scenario: Scenario;
-  isCheapest: boolean;
-  isLowestOps: boolean;
-  isFastest: boolean;
-}) {
-  if (variant.failed || !variant.architecture) {
-    return (
-      <div className="rounded-lg border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/30 p-3.5">
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-            {variant.label}
-          </span>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--bad))]">
-            failed
-          </span>
-        </div>
-        <p className="mt-2 text-[12px] text-[hsl(var(--ink-3))] line-clamp-2">
-          {variant.errorMessage ?? "Variant did not complete. Retry from the lens panel below."}
-        </p>
-      </div>
-    );
-  }
-
-  const arch = variant.architecture;
-  const cost = projectCost(arch, scenario);
-  const latency = projectLatency(arch, scenario);
-  const ceiling = projectCeiling(arch);
-  const tier = headcountTierForMau(scenario.loadMau);
-  const eng = headcountAtTier(arch, tier);
-
-  const overBudget = latency.p95Ms > scenario.latencyBudgetMs;
-  const overCeiling =
-    scenario.costCeilingInr != null && cost.totalInr > scenario.costCeilingInr;
-
-  // Saturation: 0 = plenty of room, 100 = at ceiling
-  const saturation = ceiling.maxSustainableMau > 0
-    ? Math.min(100, Math.round((scenario.loadMau / ceiling.maxSustainableMau) * 100))
-    : 0;
-
-  return (
-    <motion.div
-      layout
-      className={cn(
-        "relative rounded-lg border bg-[hsl(var(--card))] p-3.5 transition-colors",
-        isCheapest
-          ? "border-[hsl(var(--accent))]/40 shadow-[0_0_0_1px_hsl(var(--accent)/0.15)]"
-          : "border-[hsl(var(--line))]",
-      )}
-    >
-      {/* Header: label + winner badges */}
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-medium text-[13px] tracking-tight truncate">
-          {variant.label}
-        </h3>
-        <div className="flex items-center gap-1 shrink-0">
-          {isCheapest && (
-            <span
-              className="ms text-[14px] text-[hsl(var(--accent-ink))]"
-              title="Cheapest at this scenario"
-              aria-label="Cheapest"
-            >
-              payments
-            </span>
-          )}
-          {isLowestOps && (
-            <span
-              className="ms text-[14px] text-[hsl(var(--ink-2))]"
-              title="Lowest ops burden"
-              aria-label="Lowest ops"
-            >
-              build
-            </span>
-          )}
-          {isFastest && (
-            <span
-              className="ms text-[14px] text-[hsl(var(--ink-2))]"
-              title="Fastest to ship"
-              aria-label="Fastest"
-            >
-              rocket_launch
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Cost — primary number */}
-      <div className="mt-2.5 flex items-baseline gap-1.5">
-        <span className="text-[11px] text-[hsl(var(--ink-3))]">₹</span>
-        <LiveCounter
-          to={cost.totalInr}
-          duration={0.6}
-          decimals={0}
-          className={cn(
-            "display-tight text-[26px] leading-none tracking-[-0.02em]",
-            overCeiling ? "text-[hsl(var(--bad))]" : "text-[hsl(var(--ink))]",
-          )}
-        />
-        <span className="text-[11px] text-[hsl(var(--ink-3))] ml-0.5">/mo</span>
-      </div>
-
-      {/* Secondary stats: latency · saturation · headcount */}
-      <dl className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
-        <ScoreCell
-          label="p95"
-          value={
-            <LiveCounter
-              to={latency.p95Ms}
-              duration={0.55}
-              decimals={0}
-              suffix="ms"
-              className={cn(
-                "tabular-nums",
-                overBudget ? "text-[hsl(var(--bad))]" : "text-[hsl(var(--ink))]",
-              )}
-            />
-          }
-        />
-        <ScoreCell
-          label="Used"
-          value={
-            <span className="tabular-nums text-[hsl(var(--ink))]">
-              <LiveCounter to={saturation} duration={0.5} suffix="%" />
-            </span>
-          }
-        />
-        <ScoreCell
-          label="Eng"
-          value={
-            <span className="tabular-nums text-[hsl(var(--ink))]">
-              <LiveCounter to={eng} duration={0.5} />
-            </span>
-          }
-        />
-      </dl>
-
-      {/* Saturation meter */}
-      <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-[hsl(var(--paper-2))]">
-        <motion.div
-          className={cn(
-            "h-full rounded-full",
-            saturation >= 90
-              ? "bg-[hsl(var(--bad))]"
-              : saturation >= 70
-              ? "bg-[hsl(var(--warn))]"
-              : "bg-[hsl(var(--accent))]",
-          )}
-          initial={false}
-          animate={{ width: `${Math.max(2, saturation)}%` }}
-          transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
-        />
-      </div>
-
-      {/* Caption */}
-      <div className="mt-2 flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
-        <span>tier · {tierForMau(scenario.loadMau)}</span>
-        {ceiling.saturatingComponentName && (
-          <span
-            className="truncate max-w-[55%]"
-            title={`First to saturate: ${ceiling.saturatingComponentName}`}
-          >
-            bn · {ceiling.saturatingComponentName}
-          </span>
-        )}
-      </div>
-
-      {overCeiling && (
-        <p className="mt-2 text-[11px] text-[hsl(var(--bad))]">
-          over ceiling by ₹{formatInr(cost.totalInr - scenario.costCeilingInr!)}/mo
-        </p>
-      )}
-    </motion.div>
-  );
-}
-
-function ScoreCell({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div>
-      <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-        {label}
-      </dt>
-      <dd className="mt-0.5 text-[12px]">{value}</dd>
-    </div>
   );
 }
