@@ -131,10 +131,11 @@ export function ProfileChip({
           )}
 
           <ul className="py-1.5 text-[13px]">
-            <MenuLink href="/new"       icon="add_circle" label="New design"  onClick={() => setOpen(false)} accent />
-            <MenuLink href="/studio"    icon="workspaces" label="Studio"      onClick={() => setOpen(false)} />
-            <MenuLink href="/history"   icon="history"    label="Past runs"   onClick={() => setOpen(false)} />
-            <MenuLink href="/dashboard" icon="dashboard"  label="Dashboard"   onClick={() => setOpen(false)} />
+            <MenuLink href="/new"        icon="add_circle"      label="New design"     onClick={() => setOpen(false)} accent />
+            <MenuLink href="/studies/new" icon="compare_arrows" label="Compare designs" onClick={() => setOpen(false)} />
+            <MenuLink href="/studio"     icon="workspaces"      label="Studio"         onClick={() => setOpen(false)} />
+            <MenuLink href="/history"    icon="history"         label="Past runs"      onClick={() => setOpen(false)} />
+            <MenuLink href="/dashboard"  icon="dashboard"       label="Dashboard"      onClick={() => setOpen(false)} />
           </ul>
 
           <div className="border-t border-[hsl(var(--line))] py-1.5">
