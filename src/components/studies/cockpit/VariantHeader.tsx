@@ -50,7 +50,7 @@ export function VariantHeader({
       }}
       transition={{ duration: 0.18, ease: EASE_OUT_EXPO }}
       className={cn(
-        "flex items-center justify-between gap-2 rounded-t-2xl border-x border-t border-[hsl(var(--line))] px-3 py-2",
+        "flex items-center justify-between gap-2 rounded-t-lg border-x border-t border-[hsl(var(--line))] px-3 py-2",
         failed && "opacity-60",
       )}
     >

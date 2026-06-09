@@ -178,7 +178,7 @@ function WinnerChip({
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: EASE_OUT_EXPO, delay }}
-        className="rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-3 opacity-60"
+        className="rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-3 opacity-60"
       >
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
@@ -197,7 +197,7 @@ function WinnerChip({
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: EASE_OUT_EXPO, delay }}
-      className="rounded-2xl border border-[hsl(var(--accent))]/30 bg-[hsl(var(--card))] p-3 shadow-[0_1px_0_0_hsl(var(--line))]"
+      className="rounded-lg border border-[hsl(var(--accent))]/30 bg-[hsl(var(--card))] p-3 shadow-[0_1px_0_0_hsl(var(--line))]"
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
@@ -232,7 +232,7 @@ function DrawerBody({
   void field; // referenced for future per-field drawer expansion
   return (
     <div className="flex flex-col gap-3 text-[13px] text-[hsl(var(--ink-2))] leading-relaxed">
-      <div className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
+      <div className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
         {rationale}
       </div>
       {verdict.gaps.length > 0 && (
@@ -259,7 +259,7 @@ function ComplianceCallout({
     grouped.get(key)!.push(g);
   }
   return (
-    <section className="rounded-2xl border border-[hsl(var(--warn))]/30 bg-[hsl(var(--warn))]/5 p-4">
+    <section className="rounded-lg border border-[hsl(var(--warn))]/30 bg-[hsl(var(--warn))]/5 p-4">
       <div className="flex items-center gap-2">
         <StatBlock
           label="Compliance gaps"
@@ -292,7 +292,7 @@ function ComplianceCallout({
 
 function EmptyVerdict() {
   return (
-    <div className="rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
+    <div className="rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
       <span className="ms text-[28px] text-[hsl(var(--ink-3))]" aria-hidden>
         scoreboard
       </span>

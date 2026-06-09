@@ -70,7 +70,7 @@ export function SecurityLens({ variants }: { variants: CockpitVariant[] }) {
   return (
     <div className="flex flex-col gap-5">
       {/* Compliance matrix */}
-      <div className="overflow-x-auto scrollbar-thin rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))]">
+      <div className="overflow-x-auto scrollbar-thin rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))]">
         <table className="w-full min-w-[640px] border-separate border-spacing-0 text-[13px]">
           <thead>
             <tr>
@@ -163,7 +163,7 @@ function GapsDrawer({ gaps }: { gaps: ComplianceGap[] }) {
       {gaps.map((g, i) => (
         <li
           key={`${g.regime}-${i}`}
-          className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
+          className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
         >
           <span className="ms text-[16px] text-[hsl(var(--warn))]" aria-hidden>warning</span>
           <span className="ml-1">{g.gap}</span>
@@ -175,7 +175,7 @@ function GapsDrawer({ gaps }: { gaps: ComplianceGap[] }) {
 
 function EmptyMatrix({ message }: { message: string }) {
   return (
-    <div className="rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
+    <div className="rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
       <span className="ms text-[28px] text-[hsl(var(--ink-3))]" aria-hidden>encrypted</span>
       <p className="mt-3 text-[13px] text-[hsl(var(--ink-2))]">{message}</p>
     </div>

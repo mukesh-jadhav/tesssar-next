@@ -86,7 +86,7 @@ export function LockInLens({ variants }: { variants: CockpitVariant[] }) {
                             {sticky.map((s) => (
                               <li
                                 key={s.componentId}
-                                className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
+                                className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
                               >
                                 <div className="flex items-center justify-between">
                                   <strong className="text-[hsl(var(--ink))]">{s.name}</strong>

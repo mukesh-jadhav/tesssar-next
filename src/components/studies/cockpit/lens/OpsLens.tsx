@@ -50,7 +50,7 @@ export function OpsLens({ variants }: { variants: CockpitVariant[] }) {
             <ScoreMeter value={score} max={100} tone={tone} caption={`${managedPct}% managed services`} />
 
             {/* Headcount per tier */}
-            <div className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
+            <div className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
                 Engineers needed
               </span>

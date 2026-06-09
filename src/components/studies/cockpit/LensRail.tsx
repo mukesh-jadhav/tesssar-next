@@ -87,7 +87,7 @@ export function LensRail() {
             aria-pressed={active}
             aria-label={`${l.label} (press ${l.shortcut})`}
             className={cn(
-              "group relative shrink-0 flex items-center gap-2 md:gap-2.5 rounded-xl px-3 py-2 text-[13px] transition-colors",
+              "group relative shrink-0 flex items-center gap-2 md:gap-2.5 rounded-md px-3 py-2 text-[13px] transition-colors",
               active
                 ? "text-[hsl(var(--ink))]"
                 : "text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))]",
@@ -96,7 +96,7 @@ export function LensRail() {
             {active && (
               <motion.span
                 layoutId="lens-active"
-                className="absolute inset-0 rounded-xl bg-[hsl(var(--card))] border border-[hsl(var(--line))] shadow-[0_1px_0_hsl(var(--line))]"
+                className="absolute inset-0 rounded-md bg-[hsl(var(--card))] border border-[hsl(var(--line))] shadow-[0_1px_0_hsl(var(--line))]"
                 transition={{ duration: 0.32, ease: EASE_OUT_EXPO }}
               />
             )}

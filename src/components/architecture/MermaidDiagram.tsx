@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { sanitizeMermaid } from "@/lib/diagram/sanitizeMermaid";
 
 let mermaidInitialized = false;
 
@@ -127,7 +128,7 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
           });
           mermaidInitialized = true;
         }
-        const { svg: rendered } = await mermaid.render(`m_${id}`, stripClassDefs(chart));
+        const { svg: rendered } = await mermaid.render(`m_${id}`, sanitizeMermaid(stripClassDefs(chart)));
         if (!cancelled) setSvg(rendered);
       } catch (e) {
         if (!cancelled) setErr((e as Error).message || "Failed to render");

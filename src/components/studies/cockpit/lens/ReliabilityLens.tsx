@@ -83,7 +83,7 @@ export function ReliabilityLens({ variants }: { variants: CockpitVariant[] }) {
 
   if (live.length === 0) {
     return (
-      <div className="rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
+      <div className="rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))] p-8 text-center">
         <span className="ms text-[28px] text-[hsl(var(--ink-3))]" aria-hidden>verified</span>
         <p className="mt-3 text-[13px] text-[hsl(var(--ink-2))]">
           At least one completed variant is needed for the reliability matrix.
@@ -94,7 +94,7 @@ export function ReliabilityLens({ variants }: { variants: CockpitVariant[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="overflow-x-auto scrollbar-thin rounded-2xl border border-[hsl(var(--line))] bg-[hsl(var(--card))]">
+      <div className="overflow-x-auto scrollbar-thin rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))]">
         <table className="w-full min-w-[640px] border-separate border-spacing-0 text-[13px]">
           <thead>
             <tr>
@@ -235,7 +235,7 @@ function ReliabilityDrawer({
   return (
     <div className="flex flex-col gap-3 text-[13px] text-[hsl(var(--ink-2))]">
       {isRegionDown && mode.scenarioGlow === "regionFailure" && (
-        <div className="rounded-xl border border-[hsl(var(--bad))]/30 bg-[hsl(var(--bad))]/5 p-3 text-[12px]">
+        <div className="rounded-md border border-[hsl(var(--bad))]/30 bg-[hsl(var(--bad))]/5 p-3 text-[12px]">
           Primary region <strong>{arch.deployment?.primary_region || "—"}</strong> is
           assumed offline. Additional regions:
           {" "}
@@ -252,7 +252,7 @@ function ReliabilityDrawer({
           </h3>
           <ul className="mt-2 flex flex-col gap-2">
             {relatedRisks.map((r) => (
-              <li key={r.id} className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
+              <li key={r.id} className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3">
                 <strong className="text-[hsl(var(--ink))]">{r.title}</strong>
                 <p className="mt-1">{r.mitigation}</p>
               </li>

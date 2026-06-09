@@ -56,7 +56,7 @@ export function LensColumns<T extends ColumnVariant>({
           <VariantHeader label={v.label} runId={v.runId} variantId={v.variantId} failed={v.failed} />
           <div
             className={cn(
-              "flex-1 rounded-b-2xl border-x border-b border-[hsl(var(--line))] bg-[hsl(var(--card))] p-5",
+              "flex-1 rounded-b-lg border-x border-b border-[hsl(var(--line))] bg-[hsl(var(--card))] p-5",
               v.failed && "bg-[repeating-linear-gradient(135deg,transparent_0_8px,hsl(var(--bad)/0.04)_8px_16px)]",
             )}
           >

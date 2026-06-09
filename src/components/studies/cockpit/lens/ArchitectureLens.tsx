@@ -17,6 +17,7 @@
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { MermaidDiagram } from "@/components/architecture/MermaidDiagram";
+import { DiagramLightbox } from "@/components/architecture/DiagramLightbox";
 import type { ArchComponent, Diagram } from "@/types/architecture";
 import {
   buildEquivalenceIndex,
@@ -149,11 +150,19 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
           return (
             <div className="flex flex-col gap-3">
               {diagram ? (
-                <div className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper))] p-2 overflow-x-auto scrollbar-thin">
-                  <MermaidDiagram chart={diagram.mermaid} />
-                </div>
+                <DiagramLightbox
+                  caption={`${v.label} · ${KIND_LABEL[diagram.kind]}`}
+                  trigger={
+                    <div className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper))] p-2 overflow-x-auto scrollbar-thin">
+                      <MermaidDiagram chart={diagram.mermaid} />
+                    </div>
+                  }
+                  content={
+                    <MermaidDiagram chart={diagram.mermaid} />
+                  }
+                />
               ) : (
-                <div className="rounded-xl border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-6 text-center text-[12px] text-[hsl(var(--ink-3))]">
+                <div className="rounded-md border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-6 text-center text-[12px] text-[hsl(var(--ink-3))]">
                   No {KIND_LABEL[kind]} diagram in this variant.
                 </div>
               )}
@@ -260,7 +269,7 @@ function ComponentsDrawer({ components }: { components: ArchComponent[] }) {
       {components.map((c) => (
         <li
           key={c.id}
-          className="rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
+          className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30 p-3"
         >
           <div className="flex items-center justify-between gap-2">
             <span className="text-[13px] font-medium text-[hsl(var(--ink))]">{c.name}</span>

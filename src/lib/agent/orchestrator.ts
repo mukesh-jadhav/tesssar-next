@@ -3,6 +3,7 @@ import "server-only";
 import { getArchitectModel } from "@/lib/vertex/client";
 import { ARCHITECT_SYSTEM_PROMPT, buildUserPrompt } from "./prompts";
 import { Architecture } from "@/types/architecture";
+import { sanitizeMermaid } from "@/lib/diagram/sanitizeMermaid";
 
 export type ProgressEvent =
   | { type: "phase"; phase: ArchitectPhase; message: string }
@@ -97,7 +98,19 @@ export async function* runArchitect(brief: string): AsyncGenerator<ProgressEvent
     return;
   }
 
-  yield { type: "complete", architecture: validation.data };
+  // Mermaid sanitizer pass: scrub common LLM-output bugs (leaked fences,
+  // hyphen IDs, unstable C4 syntax, nested parens in labels) before we
+  // persist. Render-time also calls this, so old stored architectures
+  // are still safe — but doing it once at write keeps Firestore clean.
+  const sanitizedArch = {
+    ...validation.data,
+    diagrams: validation.data.diagrams.map((d) => ({
+      ...d,
+      mermaid: sanitizeMermaid(d.mermaid),
+    })),
+  };
+
+  yield { type: "complete", architecture: sanitizedArch };
 }
 
 function stripMarkdownFences(s: string): string {

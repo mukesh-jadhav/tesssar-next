@@ -11,7 +11,7 @@ import { CockpitProvider, useCockpit, type LensId, type CockpitPicks } from "./s
 import { LensRail, LENS_CATALOG } from "./LensRail";
 import { ScenarioBar } from "./ScenarioBar";
 import { DecisionTray } from "./DecisionTray";
-import { ExplainDrawer } from "./ExplainDrawer";
+import { InspectorPane, InspectorSheet } from "./InspectorPane";
 import { VerdictLens } from "./lens/VerdictLens";
 import { CostLens } from "./lens/CostLens";
 import { ArchitectureLens } from "./lens/ArchitectureLens";
@@ -199,7 +199,7 @@ function CockpitInner({
         <ScenarioBar />
       </header>
 
-      {/* === Middle: lens rail + stage === */}
+      {/* === Middle: lens rail + stage + inline inspector === */}
       <div className="flex flex-1 min-h-0 flex-col md:flex-row">
         <aside className="md:w-[200px] md:shrink-0">
           <LensRail />
@@ -222,6 +222,8 @@ function CockpitInner({
             </AnimatePresence>
           </div>
         </main>
+
+        <InspectorPane />
       </div>
 
       {/* === Bottom: decision tray === */}
@@ -231,8 +233,8 @@ function CockpitInner({
         busy={synthBusy}
       />
 
-      {/* === Floating: explain drawer === */}
-      <ExplainDrawer />
+      {/* === Mobile/tablet fallback for the inspector === */}
+      <InspectorSheet />
     </div>
   );
 }
@@ -240,8 +242,15 @@ function CockpitInner({
 function LensHeader({ lensId, label }: { lensId: LensId; label: string }) {
   return (
     <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-3">
-      <span className="section-num">{label}</span>
-      <span className="hidden md:inline text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))]">
+      <div className="flex flex-col gap-0.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+          Lens
+        </span>
+        <h2 className="display-tight text-[22px] leading-none tracking-[-0.02em]">
+          {label}
+        </h2>
+      </div>
+      <span className="hidden md:inline text-[12px] text-[hsl(var(--ink-2))] max-w-[44ch] text-right">
         {lensCaption(lensId)}
       </span>
     </div>
@@ -250,15 +259,15 @@ function LensHeader({ lensId, label }: { lensId: LensId; label: string }) {
 
 function lensCaption(id: LensId): string {
   switch (id) {
-    case "verdict":      return "Which variant wins each axis";
-    case "architecture": return "Three diagrams · linked highlight";
-    case "performance":  return "Response time vs load";
-    case "scale":        return "Per-tier ceiling + bottleneck";
-    case "cost":         return "Stacked cost · projected to your load";
-    case "reliability":  return "Failure modes · region simulation";
-    case "security":     return "Controls · compliance regimes";
-    case "ops":          return "Headcount · day-2 burden";
-    case "lockin":       return "Sticky services · exit cost";
+    case "verdict":      return "Who wins which axis — cost, ops, lock-in, attack surface.";
+    case "architecture": return "Three diagrams side-by-side. Hover any component to see equivalents in the others; click to zoom.";
+    case "performance":  return "Response time vs load — read it as: at your scenario, how does each variant hold up?";
+    case "scale":        return "Per-tier ceiling and the bottleneck that hits first.";
+    case "cost":         return "Stacked monthly cost projected to your load. Drag the load slider above to project.";
+    case "reliability":  return "Failure modes and a region-down simulation. Toggle 'Region down' above.";
+    case "security":     return "Controls vs compliance regimes — green = covered, amber = partial, red = missing.";
+    case "ops":          return "Headcount required day-2 and where the burden lands (deploy, on-call, observability).";
+    case "lockin":       return "Sticky managed services and the rough cost to switch off them.";
   }
 }
 

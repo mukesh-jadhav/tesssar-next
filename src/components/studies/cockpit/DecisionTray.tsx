@@ -73,8 +73,21 @@ export function DecisionTray({
   }
 
   return (
-    <div className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/50 backdrop-blur-sm">
-      <div className="grid gap-3 px-4 md:px-6 py-4 lg:grid-cols-[1fr_auto] items-center">
+    <div className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 backdrop-blur-sm">
+      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 pt-3.5 pb-1.5 flex items-baseline justify-between gap-3">
+        <div className="flex items-baseline gap-2 min-w-0">
+          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+            Synthesis tray
+          </span>
+          <span className="hidden sm:inline text-[12px] text-[hsl(var(--ink-2))] truncate">
+            — pick the best variant per slice, then synthesize one cohesive architecture.
+          </span>
+        </div>
+        <span className="hidden md:inline font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+          {filledCount}/{SLICES.length} chosen
+        </span>
+      </div>
+      <div className="mx-auto w-full max-w-[1400px] grid gap-3 px-4 md:px-6 pb-4 lg:grid-cols-[1fr_auto] items-center">
         {/* === Slice picker rows === */}
         <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
           {SLICES.map((slice) => (
@@ -164,7 +177,7 @@ function SliceRow({
   onPick: (variantId: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-xl border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
+    <div className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
       <div className="flex flex-col items-start">
         <div className="flex items-center gap-1.5">
           <span

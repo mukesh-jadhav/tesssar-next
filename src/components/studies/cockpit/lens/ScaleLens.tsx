@@ -148,7 +148,7 @@ function ScaleDrawer({
         <section
           key={p.tier}
           className={
-            "rounded-xl border p-3 " +
+            "rounded-md border p-3 " +
             (p.tier === currentTier
               ? "border-[hsl(var(--accent))]/40 bg-[hsl(var(--accent-paper))]/40"
               : "border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/30")
