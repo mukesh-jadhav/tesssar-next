@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import type { Architecture } from "@/types/architecture";
 import type { StudyDoc } from "@/types/study";
 import { CockpitProvider, useCockpit, type LensId, type CockpitPicks } from "./state";
-import { LensRail, LENS_CATALOG } from "./LensRail";
-import { ScenarioBar } from "./ScenarioBar";
+import { LensTabs, LENS_CATALOG } from "./LensTabs";
+import { CockpitTopPlane } from "./CockpitTopPlane";
 import { DecisionTray } from "./DecisionTray";
 import { InspectorPane, InspectorSheet } from "./InspectorPane";
 import { VerdictLens } from "./lens/VerdictLens";
@@ -165,9 +165,9 @@ function CockpitInner({
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[hsl(var(--paper-2))]/30">
-      {/* === Top: brand + back + scenario === */}
+      {/* === Top: header strip === */}
       <header className="border-b border-[hsl(var(--line))] bg-[hsl(var(--card))]">
-        <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-3">
+        <div className="mx-auto w-full max-w-[1400px] flex items-center justify-between gap-3 px-4 md:px-6 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/studies/new"
@@ -196,15 +196,16 @@ function CockpitInner({
             )}
           </div>
         </div>
-        <ScenarioBar />
       </header>
 
-      {/* === Middle: lens rail + stage + inline inspector === */}
-      <div className="flex flex-1 min-h-0 flex-col md:flex-row">
-        <aside className="md:w-[200px] md:shrink-0">
-          <LensRail />
-        </aside>
+      {/* === Top plane: scenario + living verdict + variant scorecards === */}
+      <CockpitTopPlane variants={variants} />
 
+      {/* === Horizontal lens tabs === */}
+      <LensTabs />
+
+      {/* === Lens stage + inline inspector === */}
+      <div className="flex flex-1 min-h-0 flex-col md:flex-row">
         <main className="flex-1 min-h-0 overflow-auto scrollbar-thin">
           <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-5 md:py-6">
             <LensHeader lensId={currentLens} label={currentLensMeta.label} />
@@ -226,7 +227,7 @@ function CockpitInner({
         <InspectorPane />
       </div>
 
-      {/* === Bottom: decision tray === */}
+      {/* === Bottom: collapsible decision tray === */}
       <DecisionTray
         variants={trayVariants}
         onSynthesize={onSynthesize}

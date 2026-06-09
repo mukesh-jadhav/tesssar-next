@@ -2,56 +2,12 @@
  * Best-effort Mermaid sanitizer applied right before render. The
  * agent's system prompt asks the model to produce valid Mermaid, but
  * LLM output drifts — backtick fences leak in, node IDs grow hyphens,
- * labels contain unescaped parens. These fixes are conservative: we
- * only repair patterns that ALWAYS break the parser and otherwise
- * leave the source untouched.
- *
- * Order matters — we unwrap fences first (so subsequent regexes see
- * the actual chart), then operate line-by-line for the safer rules.
+ * labels contain unescaped parens / brackets / literal `\n` escapes.
+ * These fixes are conservative: we only repair patterns that ALWAYS
+ * break the parser and otherwise leave the source untouched.
  */
 
 const FENCE_RE = /^\s*```(?:mermaid)?\s*([\s\S]*?)```?\s*$/;
-
-/**
- * 1. Strip a single outer ```mermaid ... ``` fence if present (and any
- *    stray trailing/leading backticks the model sometimes adds).
- */
-function unwrapFences(src: string): string {
-  const m = src.trim().match(FENCE_RE);
-  if (m) return m[1].trim();
-  return src.replace(/```/g, "").trim();
-}
-
-/**
- * 2. Convert hyphens inside Mermaid node IDs to underscores. The
- *    parser allows hyphens inside *quoted labels* but not in raw IDs
- *    like `api-gateway-->db`. Hardest part: don't rewrite hyphens
- *    that are inside `[label]`, `("label")`, `{label}`, `(("label"))`,
- *    or quoted strings.
- *
- *    Approach: walk the line character by character, tracking which
- *    bracketing context we're in. Only mutate hyphens that sit in the
- *    bare-identifier context (between whitespace/arrows/parens and
- *    the start of a label or another arrow).
- */
-function fixIdentifierHyphens(line: string): string {
-  // Quick reject: edges (`-->`) contain hyphens by design. We can't
-  // touch any `-` adjacent to `>`. The simplest safe transform is to
-  // only rewrite identifiers that match `[A-Za-z0-9][A-Za-z0-9-]*` and
-  // are followed by whitespace, `(`, `[`, `{`, `:::`, or end-of-line.
-  return line.replace(/(^|[\s\(\)\[\]\{\}|;>])([A-Za-z_][A-Za-z0-9_-]*[A-Za-z0-9])(?=[\s\(\[\{:|;<>=]|$)/g,
-    (whole, prefix: string, ident: string) => {
-      if (!ident.includes("-")) return whole;
-      // Don't touch reserved Mermaid keywords (rare but possible).
-      const lower = ident.toLowerCase();
-      if (RESERVED.has(lower)) return whole;
-      // Don't touch identifiers that are obviously arrow remnants
-      // (e.g. `--`, `---`, `-->`); those should never match the
-      // outer regex but guard anyway.
-      if (/^-+>?$/.test(ident)) return whole;
-      return prefix + ident.replace(/-/g, "_");
-    });
-}
 
 const RESERVED = new Set([
   "graph", "flowchart", "subgraph", "end", "sequencediagram", "participant",
@@ -62,43 +18,182 @@ const RESERVED = new Set([
   "block-beta", "td", "tb", "bt", "lr", "rl",
 ]);
 
-/**
- * 3. Escape parentheses inside the FIRST level of square-bracket
- *    labels: `A[Cloud Run (asia-south1)]` → `A["Cloud Run (asia-south1)"]`.
- *    Mermaid's flowchart parser explodes when it sees a `(` inside an
- *    unquoted `[…]` label. The fix is to quote the whole label.
- */
-function quoteParenLabels(line: string): string {
-  return line.replace(/\[([^\[\]"\n]*\([^\[\]"\n]*\)[^\[\]"\n]*)\]/g,
-    (_, inner: string) => `["${inner.replace(/"/g, "'")}"]`);
+/** Strip a single outer ```mermaid ... ``` fence + any stray backticks. */
+function unwrapFences(src: string): string {
+  const m = src.trim().match(FENCE_RE);
+  if (m) return m[1].trim();
+  return src.replace(/```/g, "").trim();
 }
 
-/**
- * 4. Same for `()` labels — `A(My (parens) here)` → `A["My (parens) here"]`.
- *    Mermaid actually allows `(label)` but doesn't allow nested parens
- *    inside. Promote to the bracket form when it contains nested parens.
- */
-function quoteNestedParenLabels(line: string): string {
-  return line.replace(/(?<![\(])\(([^()"\n]*\([^()"\n]*\)[^()"\n]*)\)/g,
-    (_, inner: string) => `["${inner.replace(/"/g, "'")}"]`);
-}
-
-/**
- * 5. Strip a leading BOM and any zero-width characters the model
- *    sometimes emits when copying from markdown sources.
- */
+/** Drop a leading BOM and zero-width chars sometimes copied from markdown. */
 function stripInvisibles(src: string): string {
   return src.replace(/^\uFEFF/, "").replace(/[\u200B-\u200F\u202A-\u202E]/g, "");
 }
 
-/**
- * 6. Some models prefix `C4Container` / `C4Context` even though we ask
- *    for `flowchart TD`. Demote to `flowchart TD` so it renders — the
- *    visual difference is minor at the architecture-lens scale.
- */
+/** Demote unstable C4 directives to flowchart TD so they at least render. */
 function demoteUnstableC4(src: string): string {
   return src.replace(/^\s*(C4(?:Context|Container|Component|Dynamic))\b.*$/im,
     "flowchart TD");
+}
+
+type ChartKind = "flowchart" | "sequence" | "state" | "er" | "class" | "other";
+
+function chartKind(src: string): ChartKind {
+  for (const raw of src.split("\n")) {
+    const l = raw.trim();
+    if (!l || l.startsWith("%%")) continue;
+    if (/^(?:flowchart|graph)\b/i.test(l)) return "flowchart";
+    if (/^sequenceDiagram\b/i.test(l)) return "sequence";
+    if (/^stateDiagram(?:-v2)?\b/i.test(l)) return "state";
+    if (/^erDiagram\b/i.test(l)) return "er";
+    if (/^classDiagram\b/i.test(l)) return "class";
+    return "other";
+  }
+  return "other";
+}
+
+/** Strip sequence-only `actor`/`participant` lines slipped into flowcharts. */
+function stripWrongDialectActors(src: string, kind: ChartKind): string {
+  if (kind !== "flowchart") return src;
+  return src
+    .split("\n")
+    .filter((l) => !/^\s*actor\b/i.test(l) && !/^\s*participant\b/i.test(l))
+    .join("\n");
+}
+
+/**
+ * Clean up a label body so it survives `["..."]` wrapping.
+ * - literal `\n` and real newlines → `<br/>`
+ * - strip inner `[` and `]` (they're parser-confusing noise)
+ * - escape `"` to `'`
+ * - collapse whitespace runs
+ */
+function normalizeLabelBody(s: string): string {
+  return s
+    .replace(/\\n/g, "<br/>")
+    .replace(/\r?\n/g, "<br/>")
+    .replace(/[\[\]]/g, "")
+    .replace(/"/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function labelNeedsQuoting(body: string): boolean {
+  return (
+    body.includes("[") ||
+    body.includes("]") ||
+    body.includes("\\n") ||
+    body.includes("\n") ||
+    /[<>]/.test(body)
+  );
+}
+
+/**
+ * Walk a flowchart line and rewrite every node-shape label that fails
+ * `labelNeedsQuoting`. Hand-rolled because nested brackets defeat regex.
+ */
+function rewriteLabels(line: string): string {
+  const trimmed = line.trim();
+  if (!trimmed) return line;
+  if (/^(?:subgraph|end|direction|click|classDef|class\s|linkStyle|style\s|%%)/i.test(trimmed)) {
+    return line;
+  }
+
+  let i = 0;
+  let out = "";
+  while (i < line.length) {
+    const ch = line[i];
+    const next = line[i + 1];
+
+    // Skip pre-quoted strings.
+    if (ch === '"') {
+      const end = line.indexOf('"', i + 1);
+      if (end === -1) { out += line.slice(i); break; }
+      out += line.slice(i, end + 1);
+      i = end + 1;
+      continue;
+    }
+
+    let opener: string | null = null;
+    let closer: string | null = null;
+    if (ch === "[" && next === "[")      { opener = "[["; closer = "]]"; }
+    else if (ch === "[" && next === "(") { opener = "[("; closer = ")]"; }
+    else if (ch === "(" && next === "(") { opener = "(("; closer = "))"; }
+    else if (ch === "[")                 { opener = "[";  closer = "]";  }
+    else if (ch === "(")                 { opener = "(";  closer = ")";  }
+    else if (ch === "{" && next === "{") { opener = "{{"; closer = "}}"; }
+    else if (ch === "{")                 { opener = "{";  closer = "}";  }
+
+    if (!opener || !closer) {
+      out += ch;
+      i += 1;
+      continue;
+    }
+
+    const bodyStart = i + opener.length;
+    let j = bodyStart;
+    let depth = 1;
+    let hadNestedSameKind = false;
+    const openChar = opener[opener.length - 1];
+    const closeChar = closer[0];
+    while (j < line.length) {
+      if (closer.length === 2 && line.slice(j, j + 2) === closer) {
+        depth -= 1;
+        if (depth === 0) break;
+        j += 2;
+        continue;
+      }
+      if (line[j] === '"') {
+        const e = line.indexOf('"', j + 1);
+        if (e === -1) { j = line.length; break; }
+        j = e + 1;
+        continue;
+      }
+      if (line[j] === openChar && opener.length === 1) {
+        depth += 1;
+        hadNestedSameKind = true;
+        j += 1;
+        continue;
+      }
+      if (line[j] === closeChar && closer.length === 1) {
+        depth -= 1;
+        if (depth === 0) break;
+        j += 1;
+        continue;
+      }
+      j += 1;
+    }
+
+    if (depth !== 0) {
+      out += line.slice(i);
+      break;
+    }
+
+    const body = line.slice(bodyStart, j);
+    const consumeEnd = j + closer.length;
+
+    if (hadNestedSameKind || labelNeedsQuoting(body)) {
+      out += `["${normalizeLabelBody(body)}"]`;
+    } else {
+      out += line.slice(i, consumeEnd);
+    }
+    i = consumeEnd;
+  }
+  return out;
+}
+
+/** Convert hyphens in bare flowchart identifiers to underscores. */
+function fixIdentifierHyphens(line: string): string {
+  return line.replace(
+    /(^|[\s\(\)\[\]\{\}|;>])([A-Za-z_][A-Za-z0-9_-]*[A-Za-z0-9])(?=[\s\(\[\{:|;<>=]|$)/g,
+    (whole, prefix: string, ident: string) => {
+      if (!ident.includes("-")) return whole;
+      const lower = ident.toLowerCase();
+      if (RESERVED.has(lower)) return whole;
+      if (/^-+>?$/.test(ident)) return whole;
+      return prefix + ident.replace(/-/g, "_");
+    },
+  );
 }
 
 export function sanitizeMermaid(raw: string): string {
@@ -106,14 +201,18 @@ export function sanitizeMermaid(raw: string): string {
   let src = stripInvisibles(raw);
   src = unwrapFences(src);
   src = demoteUnstableC4(src);
-  const lines = src.split("\n").map((line) => {
-    // Comments pass through untouched.
-    if (/^\s*%%/.test(line)) return line;
-    let l = line;
-    l = quoteNestedParenLabels(l);
-    l = quoteParenLabels(l);
-    l = fixIdentifierHyphens(l);
-    return l;
-  });
-  return lines.join("\n");
+  const kind = chartKind(src);
+  src = stripWrongDialectActors(src, kind);
+
+  if (kind !== "flowchart") return src;
+
+  return src
+    .split("\n")
+    .map((line) => {
+      if (/^\s*%%/.test(line)) return line;
+      let l = rewriteLabels(line);
+      l = fixIdentifierHyphens(l);
+      return l;
+    })
+    .join("\n");
 }

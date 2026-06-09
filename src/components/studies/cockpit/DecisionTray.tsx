@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -45,6 +45,7 @@ export function DecisionTray({
   busy?: boolean;
 }) {
   const { picks, setPick } = useCockpit();
+  const [expanded, setExpanded] = useState(false);
 
   const completed = useMemo(
     () => SLICES.every((s) => picks[s.id] != null),
@@ -55,6 +56,7 @@ export function DecisionTray({
 
   async function handleSynthesize() {
     if (!completed) {
+      setExpanded(true);
       toast.message("Pick a variant for every slice first.");
       return;
     }
@@ -74,46 +76,57 @@ export function DecisionTray({
 
   return (
     <div className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 backdrop-blur-sm">
-      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 pt-3.5 pb-1.5 flex items-baseline justify-between gap-3">
-        <div className="flex items-baseline gap-2 min-w-0">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
-            Synthesis tray
+      {/* === Compact header bar (always visible) === */}
+      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-2.5 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          aria-controls="synthesis-tray-body"
+          className="group flex items-center gap-3 min-w-0 text-left"
+        >
+          <span
+            className={cn(
+              "ms text-[18px] text-[hsl(var(--ink-3))] transition-transform group-hover:text-[hsl(var(--ink))]",
+              expanded && "rotate-180",
+            )}
+            aria-hidden
+          >
+            expand_less
           </span>
-          <span className="hidden sm:inline text-[12px] text-[hsl(var(--ink-2))] truncate">
-            — pick the best variant per slice, then synthesize one cohesive architecture.
-          </span>
-        </div>
-        <span className="hidden md:inline font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
-          {filledCount}/{SLICES.length} chosen
-        </span>
-      </div>
-      <div className="mx-auto w-full max-w-[1400px] grid gap-3 px-4 md:px-6 pb-4 lg:grid-cols-[1fr_auto] items-center">
-        {/* === Slice picker rows === */}
-        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-          {SLICES.map((slice) => (
-            <SliceRow
-              key={slice.id}
-              slice={slice}
-              variants={variants}
-              picked={picks[slice.id]}
-              onPick={(vid) =>
-                setPick(slice.id, picks[slice.id] === vid ? undefined : vid)
-              }
-            />
-          ))}
-        </div>
-
-        {/* === Synthesize CTA === */}
-        <div className="flex items-center justify-end gap-3 lg:pl-4 lg:border-l lg:border-[hsl(var(--line))]">
-          <div className="text-right">
-            <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
-              Picks
-            </div>
-            <div className="display-tight text-[18px] tabular-nums">
-              {filledCount}
-              <span className="text-[hsl(var(--ink-3))]">/{SLICES.length}</span>
-            </div>
+          <div className="flex items-baseline gap-2 min-w-0">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))] group-hover:text-[hsl(var(--ink))] transition-colors">
+              Synthesis tray
+            </span>
+            <span className="hidden sm:inline text-[12px] text-[hsl(var(--ink-2))] truncate">
+              {expanded
+                ? "Pick the best variant per slice, then synthesize."
+                : completed
+                  ? "Ready to synthesize — all 6 slices picked."
+                  : `${filledCount}/${SLICES.length} picks — click to choose slices.`}
+            </span>
           </div>
+        </button>
+
+        <div className="flex items-center gap-3">
+          {/* Compact progress dots */}
+          <div className="hidden sm:flex items-center gap-1" aria-hidden>
+            {SLICES.map((s) => (
+              <span
+                key={s.id}
+                className={cn(
+                  "size-1.5 rounded-full transition-colors",
+                  picks[s.id] != null
+                    ? "bg-[hsl(var(--accent))]"
+                    : "bg-[hsl(var(--line-2))]",
+                )}
+                title={`${s.label}: ${picks[s.id] ?? "—"}`}
+              />
+            ))}
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))] tabular-nums">
+            {filledCount}/{SLICES.length}
+          </span>
           <motion.button
             type="button"
             onClick={handleSynthesize}
@@ -121,7 +134,7 @@ export function DecisionTray({
             layout
             transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
             className={cn(
-              "btn-pill press relative overflow-hidden",
+              "btn-pill press relative overflow-hidden text-[12px] py-1.5 px-3",
               busy
                 ? "btn-pill-accent !cursor-wait"
                 : completed
@@ -136,9 +149,9 @@ export function DecisionTray({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5"
                 >
-                  <span className="ms text-[18px] animate-spin" aria-hidden>
+                  <span className="ms text-[14px] animate-spin" aria-hidden>
                     progress_activity
                   </span>
                   Synthesizing…
@@ -149,10 +162,10 @@ export function DecisionTray({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1.5"
                 >
                   Synthesize · {SYNTHESIS_COST_CREDITS} cr
-                  <span className="ms text-[18px]" aria-hidden>
+                  <span className="ms text-[14px]" aria-hidden>
                     auto_awesome
                   </span>
                 </motion.span>
@@ -161,6 +174,35 @@ export function DecisionTray({
           </motion.button>
         </div>
       </div>
+
+      {/* === Expandable body === */}
+      <AnimatePresence initial={false}>
+        {expanded && (
+          <motion.div
+            id="synthesis-tray-body"
+            key="tray-body"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+            className="overflow-hidden border-t border-[hsl(var(--line))]"
+          >
+            <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+              {SLICES.map((slice) => (
+                <SliceRow
+                  key={slice.id}
+                  slice={slice}
+                  variants={variants}
+                  picked={picks[slice.id]}
+                  onPick={(vid) =>
+                    setPick(slice.id, picks[slice.id] === vid ? undefined : vid)
+                  }
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
