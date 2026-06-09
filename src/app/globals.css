@@ -212,10 +212,7 @@
   }
 
   .rule-dots {
-    background-image: radial-gradient(circle, hsl(var(--ink-3)) 1px, transparent 1px);
-    background-size: 16px 16px;
-    background-repeat: repeat-x;
-    background-position: left center;
+    border-bottom: 1px solid hsl(var(--line));
   }
 
   /* Material Symbols Rounded */
