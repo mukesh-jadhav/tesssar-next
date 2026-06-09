@@ -10,7 +10,15 @@ import { LensRail, LENS_CATALOG } from "./LensRail";
 import { ScenarioBar } from "./ScenarioBar";
 import { DecisionTray } from "./DecisionTray";
 import { ExplainDrawer } from "./ExplainDrawer";
-import { LensColumns } from "./LensColumns";
+import { VerdictLens } from "./lens/VerdictLens";
+import { CostLens } from "./lens/CostLens";
+import { ArchitectureLens } from "./lens/ArchitectureLens";
+import { LockInLens } from "./lens/LockInLens";
+import { OpsLens } from "./lens/OpsLens";
+import { SecurityLens } from "./lens/SecurityLens";
+import { ReliabilityLens } from "./lens/ReliabilityLens";
+import { ScaleLens } from "./lens/ScaleLens";
+import { PerformanceLens } from "./lens/PerformanceLens";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
@@ -118,15 +126,7 @@ function CockpitInner({ study, variants }: StudyCockpitProps) {
                 transition={{ duration: 0.24, ease: EASE_OUT_EXPO }}
                 className="mt-4"
               >
-                <LensColumns
-                  variants={variants.map((v) => ({
-                    runId: v.runId,
-                    variantId: v.variantId,
-                    label: v.label,
-                    failed: v.failed,
-                  }))}
-                  emptyMessage={lensPlaceholderCopy(currentLens)}
-                />
+                <LensRouter lens={currentLens} variants={variants} />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -167,17 +167,23 @@ function lensCaption(id: LensId): string {
   }
 }
 
-function lensPlaceholderCopy(id: LensId): string {
-  switch (id) {
-    case "verdict":      return "The verdict lens summarises which variant wins each axis. Lands with Phase 5.";
-    case "architecture": return "Three diagrams render side-by-side here, with linked node highlights. Lands with Phase 5.";
-    case "performance":  return "A live response-time curve per variant — drag the scenario slider to watch the lines bend. Lands with Phase 5.";
-    case "scale":        return "Per-tier bar charts with a ceiling marker and the first-to-saturate component callout. Lands with Phase 5.";
-    case "cost":         return "Stacked monthly cost — compute, data, network, observability, ML. Re-projects on every slider tick. Lands with Phase 5.";
-    case "reliability":  return "Failure-mode matrix. Toggle Region Down to see who survives and at what cost. Lands with Phase 5.";
-    case "security":     return "Compliance × variant grid with control density per regime. Lands with Phase 5.";
-    case "ops":          return "Headcount estimate + day-2 burden score per variant. Lands with Phase 5.";
-    case "lockin":       return "Sticky-service inventory and migration cost estimate. Lands with Phase 5.";
+function LensRouter({
+  lens,
+  variants,
+}: {
+  lens: LensId;
+  variants: CockpitVariant[];
+}) {
+  switch (lens) {
+    case "verdict":      return <VerdictLens variants={variants} />;
+    case "architecture": return <ArchitectureLens variants={variants} />;
+    case "performance":  return <PerformanceLens variants={variants} />;
+    case "scale":        return <ScaleLens variants={variants} />;
+    case "cost":         return <CostLens variants={variants} />;
+    case "reliability":  return <ReliabilityLens variants={variants} />;
+    case "security":     return <SecurityLens variants={variants} />;
+    case "ops":          return <OpsLens variants={variants} />;
+    case "lockin":       return <LockInLens variants={variants} />;
   }
 }
 

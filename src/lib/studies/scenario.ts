@@ -461,3 +461,27 @@ export function projectScenario(
     ceiling: projectCeiling(arch),
   };
 }
+
+// ---------- Derived: requests-per-month + per-1M cost ----------
+
+/**
+ * Translate MAU → monthly requests using an interactive-app heuristic
+ * (~50 requests / MAU / month). Coarse but consistent across variants.
+ */
+export function estimatedMonthlyRequests(mau: number): number {
+  if (!Number.isFinite(mau) || mau <= 0) return 0;
+  return mau * 50;
+}
+
+/**
+ * ₹ per 1M requests at the current scenario load. Returns 0 when the
+ * arch has no usable cost data.
+ */
+export function costPer1MRequests(
+  totalInr: number,
+  mau: number,
+): number {
+  const monthlyReq = estimatedMonthlyRequests(mau);
+  if (monthlyReq <= 0) return 0;
+  return (totalInr * 1_000_000) / monthlyReq;
+}

@@ -7,6 +7,11 @@ import { VariantHeader } from "./VariantHeader";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
+/**
+ * Minimum shape every lens's variant must satisfy. Lenses are free to
+ * pass richer types (e.g. `CockpitVariant` with `architecture`) — the
+ * generic `T` flows through to the `renderCell` callback.
+ */
 interface ColumnVariant {
   runId: string;
   variantId: string;
@@ -15,17 +20,17 @@ interface ColumnVariant {
 }
 
 /**
- * Generic three-column stage layout reused by every lens. Each lens
- * passes a `renderCell(variant)` to fill the body. Until Phase 5 lands
- * the lens-specific cells, we render an animated placeholder.
+ * Generic N-column stage layout reused by every lens. Each lens passes
+ * a `renderCell(variant)` to fill the body. Without `renderCell` we
+ * render an animated placeholder.
  */
-export function LensColumns({
+export function LensColumns<T extends ColumnVariant>({
   variants,
   renderCell,
   emptyMessage,
 }: {
-  variants: ColumnVariant[];
-  renderCell?: (v: ColumnVariant) => ReactNode;
+  variants: T[];
+  renderCell?: (v: T) => ReactNode;
   emptyMessage?: string;
 }) {
   return (

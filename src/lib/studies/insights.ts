@@ -431,3 +431,150 @@ export function formatInr(amount: number): string {
   if (amount >= 1_000)       return `${(amount / 1_000).toFixed(1)}K`;
   return Math.round(amount).toLocaleString("en-IN");
 }
+
+// ---------- Ops headcount + managed coverage ----------
+
+/**
+ * Fraction of an arch's components that are fully managed (serverless,
+ * autopilot, fully-managed SaaS). Returns 0 when there are no components.
+ */
+export function managedFraction(arch: Architecture | null): number {
+  if (!arch) return 0;
+  const cs = arch.components ?? [];
+  if (cs.length === 0) return 0;
+  const managed = cs.filter((c) =>
+    /managed|serverless|autopilot|fully ?managed|saas|fargate|lambda|cloud run|cloud function|app runner|container apps|azure functions/i.test(
+      `${c.technology ?? ""} ${c.scaling ?? ""}`,
+    ),
+  ).length;
+  return managed / cs.length;
+}
+
+/**
+ * Components that the team will have to run themselves (Kubernetes, VMs,
+ * self-hosted DBs, etc.). Limited to first 5 for the cockpit summary.
+ */
+export function selfRunComponents(arch: Architecture | null): string[] {
+  if (!arch) return [];
+  return (arch.components ?? [])
+    .filter((c) => {
+      const tech = c.technology ?? "";
+      const isSelf =
+        /\bkubernetes\b|\bgke\b(?! autopilot)|\beks\b(?! fargate)|\baks\b|\bopenshift\b|\bec2\b|\bvm\b|\bcompute engine\b|self-?hosted|operator/i.test(
+          tech,
+        );
+      const autoflag = /autopilot|fargate/i.test(tech);
+      return isSelf && !autoflag;
+    })
+    .slice(0, 5)
+    .map((c) => c.name);
+}
+
+/**
+ * Engineer headcount estimate per tier. Heuristic — meant as a directional
+ * comparison between variants, not a hiring plan. Rooted in:
+ *   - component count (more surface area → more people)
+ *   - self-run-component count (each requires day-2 expertise)
+ *   - managed fraction (offsets some headcount)
+ *   - tier multiplier (scale is harder than growth)
+ */
+export function headcountAtTier(
+  arch: Architecture | null,
+  tier: "growth" | "scale" | "hyperscale",
+): number {
+  if (!arch) return 0;
+  const componentCount = (arch.components ?? []).length;
+  const selfRun = selfRunComponents(arch).length;
+  const managed = managedFraction(arch);
+
+  const multiplier =
+    tier === "growth" ? 1
+    : tier === "scale" ? 1.6
+    : 2.4;
+
+  const baseFromComponents = componentCount / 5;
+  const baseFromSelfRun = selfRun * 1.2;
+  const managedDiscount = managed * 1.5;
+
+  const headcount = Math.round(
+    Math.max(
+      tier === "growth" ? 1 : tier === "scale" ? 2 : 3,
+      (baseFromComponents + baseFromSelfRun - managedDiscount) * multiplier,
+    ),
+  );
+  return headcount;
+}
+
+// ---------- Sticky service inventory ----------
+
+const STICKY_VENDOR_RULES: Array<{ rx: RegExp; weight: number }> = [
+  { rx: /\bspanner\b/i,                                 weight: 9 },
+  { rx: /\bbigtable\b/i,                                weight: 8 },
+  { rx: /\bdynamodb\b/i,                                weight: 9 },
+  { rx: /\bcosmos ?db\b/i,                              weight: 9 },
+  { rx: /\bbigquery\b/i,                                weight: 8 },
+  { rx: /\bredshift\b/i,                                weight: 7 },
+  { rx: /\bsynapse\b/i,                                 weight: 7 },
+  { rx: /\bsnowflake\b/i,                               weight: 6 },
+  { rx: /\bfirestore\b|\bdatastore\b/i,                 weight: 7 },
+  { rx: /\baurora dsql\b/i,                             weight: 8 },
+  { rx: /\baurora\b/i,                                  weight: 5 },
+  { rx: /\blambda\b/i,                                  weight: 5 },
+  { rx: /\bcloud function/i,                            weight: 5 },
+  { rx: /\bazure functions\b/i,                         weight: 5 },
+  { rx: /\bcloud run\b/i,                               weight: 4 },
+  { rx: /\bservice ?bus\b|\bevent ?grid\b/i,            weight: 6 },
+  { rx: /\bpub\/?sub\b/i,                               weight: 5 },
+  { rx: /\bkinesis\b|\bevent ?hub\b/i,                  weight: 5 },
+  { rx: /\bsqs\b|\bsns\b/i,                             weight: 4 },
+  { rx: /\bidentity platform\b|\bfirebase auth\b|\bcognito\b|\bentra\b/i, weight: 5 },
+  { rx: /\bvertex\b|\bsagemaker\b|\bbedrock\b/i,        weight: 6 },
+];
+
+export interface StickyService {
+  componentId: string;
+  name: string;
+  technology: string;
+  weight: number;
+}
+
+/**
+ * Top N stickiest managed services in this arch — what makes leaving
+ * expensive. Ranked by hardcoded vendor weight.
+ */
+export function topStickyServices(
+  arch: Architecture | null,
+  limit = 3,
+): StickyService[] {
+  if (!arch) return [];
+  const out: StickyService[] = [];
+  for (const c of arch.components ?? []) {
+    const tech = `${c.technology ?? ""} ${c.name ?? ""}`;
+    let best = 0;
+    for (const r of STICKY_VENDOR_RULES) {
+      if (r.rx.test(tech) && r.weight > best) best = r.weight;
+    }
+    if (best > 0) {
+      out.push({
+        componentId: c.id,
+        name: c.name,
+        technology: c.technology,
+        weight: best,
+      });
+    }
+  }
+  out.sort((a, b) => b.weight - a.weight);
+  return out.slice(0, limit);
+}
+
+/**
+ * Estimated migration time in months if you had to leave this stack —
+ * sum of the sticky services' weights mapped to a month value. Coarse.
+ */
+export function replacementMonths(arch: Architecture | null): number {
+  const sticky = topStickyServices(arch, 999);
+  if (!sticky.length) return 1;
+  const weightSum = sticky.reduce((s, x) => s + x.weight, 0);
+  // 6 weight ≈ 1 month, capped at 18.
+  return Math.max(1, Math.min(18, Math.round(weightSum / 6)));
+}
