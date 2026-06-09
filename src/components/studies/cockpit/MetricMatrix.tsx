@@ -205,7 +205,7 @@ const ROWS: MetricRow[] = [
   {
     id: "components",
     label: "Components",
-    lens: "architecture",
+    lens: "scale",
     caption: "Total moving parts",
     direction: "lower",
     read: (m) => m.componentCount,
@@ -345,7 +345,7 @@ export function MetricMatrix({ variants }: { variants: CockpitVariant[] }) {
                       </span>
                       {isWinner && (
                         <span
-                          className="font-mono text-[9px] uppercase tracking-wider text-[hsl(var(--accent-ink))] shrink-0"
+                          className="font-mono text-[9px] uppercase tracking-wider text-[hsl(var(--ink-2))] shrink-0"
                           title="Best on this row"
                         >
                           best
@@ -360,8 +360,8 @@ export function MetricMatrix({ variants }: { variants: CockpitVariant[] }) {
                           isWarn
                             ? "bg-[hsl(var(--bad))]"
                             : isWinner
-                            ? "bg-[hsl(var(--accent))]"
-                            : "bg-[hsl(var(--ink-3))]/50",
+                            ? "bg-[hsl(var(--ink))]"
+                            : "bg-[hsl(var(--ink-3))]/40",
                         )}
                         initial={false}
                         animate={{ width: `${barPct}%` }}

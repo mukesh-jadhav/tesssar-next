@@ -33,14 +33,13 @@ interface LensEntry {
  */
 export const LENS_CATALOG: readonly LensEntry[] = [
   { id: "verdict",      label: "Verdict",      icon: "stars",          shortcut: "1" },
-  { id: "architecture", label: "Architecture", icon: "schema",         shortcut: "2" },
-  { id: "performance",  label: "Performance",  icon: "speed",          shortcut: "3" },
-  { id: "scale",        label: "Scale",        icon: "stacked_line_chart", shortcut: "4" },
-  { id: "cost",         label: "Cost",         icon: "payments",       shortcut: "5" },
-  { id: "reliability",  label: "Reliability",  icon: "verified",       shortcut: "6" },
-  { id: "security",     label: "Security",     icon: "encrypted",      shortcut: "7" },
-  { id: "ops",          label: "Ops burden",   icon: "build",          shortcut: "8" },
-  { id: "lockin",       label: "Lock-in",      icon: "lock",           shortcut: "9" },
+  { id: "performance",  label: "Performance",  icon: "speed",          shortcut: "2" },
+  { id: "scale",        label: "Scale",        icon: "stacked_line_chart", shortcut: "3" },
+  { id: "cost",         label: "Cost",         icon: "payments",       shortcut: "4" },
+  { id: "reliability",  label: "Reliability",  icon: "verified",       shortcut: "5" },
+  { id: "security",     label: "Security",     icon: "encrypted",      shortcut: "6" },
+  { id: "ops",          label: "Ops burden",   icon: "build",          shortcut: "7" },
+  { id: "lockin",       label: "Lock-in",      icon: "lock",           shortcut: "8" },
 ] as const;
 
 export function LensTabs() {
@@ -85,7 +84,7 @@ export function LensTabs() {
       role="tablist"
       className="border-b border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/40 backdrop-blur-sm"
     >
-      <div className="mx-auto w-full max-w-[1400px] px-2 md:px-4 flex items-stretch gap-0.5 overflow-x-auto scrollbar-thin">
+      <div className="mx-auto w-full max-w-[1800px] px-2 md:px-4 flex items-stretch gap-0.5 overflow-x-auto scrollbar-thin">
         {LENS_CATALOG.map((l) => {
           const active = l.id === currentLens;
           return (

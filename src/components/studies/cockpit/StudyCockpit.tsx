@@ -146,6 +146,7 @@ function CockpitInner({
   onSynthesize: (picks: Required<CockpitPicks>) => Promise<void>;
 }) {
   const { currentLens } = useCockpit();
+  const [view, setView] = useState<"cockpit" | "architectures">("cockpit");
 
   const trayVariants = useMemo(
     () =>
@@ -159,6 +160,7 @@ function CockpitInner({
 
   const failedCount = variants.filter((v) => v.failed).length;
   const completedCount = variants.length - failedCount;
+  const liveArchCount = variants.filter((v) => !v.failed && v.architecture).length;
 
   const currentLensMeta =
     LENS_CATALOG.find((l) => l.id === currentLens) ?? LENS_CATALOG[0];
@@ -167,7 +169,7 @@ function CockpitInner({
     <div className="flex h-full min-h-0 flex-col bg-[hsl(var(--paper-2))]/30">
       {/* === Top: header strip === */}
       <header className="border-b border-[hsl(var(--line))] bg-[hsl(var(--card))]">
-        <div className="mx-auto w-full max-w-[1400px] flex items-center justify-between gap-3 px-4 md:px-6 py-3">
+        <div className="mx-auto w-full max-w-[1800px] flex items-center justify-between gap-3 px-4 md:px-6 py-3">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/studies/new"
@@ -187,52 +189,117 @@ function CockpitInner({
               </h1>
             </div>
           </div>
-          <div className="hidden sm:flex items-center gap-2 text-[11px] text-[hsl(var(--ink-3))] font-mono uppercase tracking-wider">
-            <span>{completedCount} ready</span>
-            {failedCount > 0 && (
-              <span className="text-[hsl(var(--bad))]">
-                · {failedCount} failed
-              </span>
+          <div className="flex items-center gap-3">
+            {liveArchCount > 0 && (
+              <button
+                type="button"
+                onClick={() => setView((v) => (v === "cockpit" ? "architectures" : "cockpit"))}
+                aria-pressed={view === "architectures"}
+                className={
+                  view === "architectures"
+                    ? "inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-3 py-1.5 text-[12px] text-[hsl(var(--paper))] transition-colors"
+                    : "inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] transition-colors hover:text-[hsl(var(--ink))] hover:border-[hsl(var(--ink-3))]"
+                }
+                title={view === "architectures" ? "Back to dashboard" : "Show all diagrams side-by-side"}
+              >
+                <span className="ms text-[15px]" aria-hidden>
+                  {view === "architectures" ? "dashboard" : "schema"}
+                </span>
+                <span className="font-medium whitespace-nowrap">
+                  {view === "architectures" ? "Back to dashboard" : "Compare diagrams"}
+                </span>
+              </button>
             )}
+            <div className="hidden sm:flex items-center gap-2 text-[11px] text-[hsl(var(--ink-3))] font-mono uppercase tracking-wider">
+              <span>{completedCount} ready</span>
+              {failedCount > 0 && (
+                <span className="text-[hsl(var(--bad))]">
+                  · {failedCount} failed
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* === Top plane: scenario + living verdict + variant scorecards === */}
-      <CockpitTopPlane variants={variants} />
+      {/* === Body: fade-swap between dashboard cockpit and architectures-only view === */}
+      <AnimatePresence mode="wait" initial={false}>
+        {view === "cockpit" ? (
+          <motion.div
+            key="cockpit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+            className="flex flex-1 min-h-0 flex-col"
+          >
+            {/* Top plane: scenario + living verdict + KPI hero + matrix */}
+            <CockpitTopPlane variants={variants} />
 
-      {/* === Horizontal lens tabs === */}
-      <LensTabs />
+            {/* Horizontal lens tabs */}
+            <LensTabs />
 
-      {/* === Lens stage + inline inspector === */}
-      <div className="flex flex-1 min-h-0 flex-col md:flex-row">
-        <main className="flex-1 min-h-0 overflow-auto scrollbar-thin">
-          <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-5 md:py-6">
-            <LensHeader lensId={currentLens} label={currentLensMeta.label} />
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentLens}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.24, ease: EASE_OUT_EXPO }}
-                className="mt-4"
-              >
-                <LensRouter lens={currentLens} variants={variants} />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </main>
+            {/* Lens stage + inline inspector */}
+            <div className="flex flex-1 min-h-0 flex-col md:flex-row">
+              <main className="flex-1 min-h-0 overflow-auto scrollbar-thin">
+                <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-5 md:py-6">
+                  <LensHeader lensId={currentLens} label={currentLensMeta.label} />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentLens}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.24, ease: EASE_OUT_EXPO }}
+                      className="mt-4"
+                    >
+                      <LensRouter lens={currentLens} variants={variants} />
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </main>
 
-        <InspectorPane />
-      </div>
+              <InspectorPane />
+            </div>
 
-      {/* === Bottom: collapsible decision tray === */}
-      <DecisionTray
-        variants={trayVariants}
-        onSynthesize={onSynthesize}
-        busy={synthBusy}
-      />
+            {/* Bottom: collapsible decision tray */}
+            <DecisionTray
+              variants={trayVariants}
+              onSynthesize={onSynthesize}
+              busy={synthBusy}
+            />
+          </motion.div>
+        ) : (
+          <motion.main
+            key="architectures"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+            className="flex-1 min-h-0 overflow-auto scrollbar-thin"
+          >
+            <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-5 md:py-6">
+              <div className="flex items-baseline justify-between border-b border-[hsl(var(--line))] pb-3">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+                    Compare
+                  </span>
+                  <h2 className="display-tight text-[22px] leading-none tracking-[-0.02em]">
+                    Architecture diagrams
+                  </h2>
+                </div>
+                <span className="hidden md:inline text-[12px] text-[hsl(var(--ink-2))] max-w-[44ch] text-right">
+                  All variants side-by-side. Hover a component to glow its
+                  equivalents in the others; click to zoom.
+                </span>
+              </div>
+              <div className="mt-4">
+                <ArchitectureLens variants={variants} />
+              </div>
+            </div>
+          </motion.main>
+        )}
+      </AnimatePresence>
 
       {/* === Mobile/tablet fallback for the inspector === */}
       <InspectorSheet />

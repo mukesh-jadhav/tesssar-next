@@ -95,7 +95,7 @@ export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
       aria-label="Scenario controls and live verdict"
       className="border-b border-[hsl(var(--line))] bg-[hsl(var(--card))]"
     >
-      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-4 md:py-5 flex flex-col gap-4">
+      <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-4 md:py-5 flex flex-col gap-4">
         {/* ────────── Row 1: scenario controls ────────── */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
           {/* Load slider */}

@@ -77,7 +77,7 @@ export function DecisionTray({
   return (
     <div className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 backdrop-blur-sm">
       {/* === Compact header bar (always visible) === */}
-      <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-2.5 flex items-center justify-between gap-3">
+      <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-2.5 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
@@ -187,7 +187,7 @@ export function DecisionTray({
             transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
             className="overflow-hidden border-t border-[hsl(var(--line))]"
           >
-            <div className="mx-auto w-full max-w-[1400px] px-4 md:px-6 py-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
               {SLICES.map((slice) => (
                 <SliceRow
                   key={slice.id}
