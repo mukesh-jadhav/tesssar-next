@@ -1,29 +1,11 @@
 "use client";
 
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { DEFAULT_SCENARIO, type Scenario } from "@/lib/studies/scenario";
 
-/**
- * Shared shape for the scenario the cockpit is testing. Pure client-side
- * state — never persisted. Phase 4 wires the projection engine; Phase 3
- * just plumbs the values through.
- */
-export interface Scenario {
-  /** Continuous, 1K → 100M monthly active users. */
-  loadMau: number;
-  /** Latency budget for p95 reads. */
-  latencyBudgetMs: 50 | 200 | 500 | 1000;
-  /** When true, the primary region is assumed offline. */
-  regionFailureSim: boolean;
-  /** Optional ₹ / month ceiling — `undefined` = no ceiling. */
-  costCeilingInr?: number;
-}
-
-export const DEFAULT_SCENARIO: Scenario = {
-  loadMau: 100_000,
-  latencyBudgetMs: 200,
-  regionFailureSim: false,
-  costCeilingInr: undefined,
-};
+// Re-export so existing component imports keep working unchanged.
+export { DEFAULT_SCENARIO };
+export type { Scenario };
 
 /**
  * The six pick slices the user commits in the decision tray. Maps
