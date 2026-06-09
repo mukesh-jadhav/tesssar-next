@@ -3,6 +3,7 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import type { ArchitectureDoc } from "@/types/architecture";
 import { rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
+import { reapIfStuck } from "@/lib/agent/watchdog";
 
 export const runtime = "nodejs";
 
@@ -28,7 +29,9 @@ export async function GET(
   const d = snap.data() as ArchitectureDoc;
   if (d.uid !== user.uid) return new Response("Forbidden", { status: 403 });
 
-  return NextResponse.json(d, {
+  const reaped = await reapIfStuck(d);
+
+  return NextResponse.json(reaped, {
     headers: { "Cache-Control": "no-store" },
   });
 }
