@@ -419,3 +419,211 @@ export async function reapStudyIfStuck(study: StudyDoc): Promise<StudyDoc> {
   const fresh = await adminDb.collection("studies").doc(study.id).get();
   return fresh.exists ? (fresh.data() as StudyDoc) : study;
 }
+
+// ===========================================================================
+// Synthesis fan-out
+// ===========================================================================
+
+/**
+ * Create the destination architecture doc for a synthesis run and spawn
+ * the detached worker. Caller is responsible for charging credits BEFORE
+ * calling this; the worker refunds on agent failure.
+ *
+ * Behavior mirrors the per-variant worker but writes back to a single
+ * `synthesizedFrom`-tagged arch doc and updates `studies/{id}.finalRunId`
+ * on completion (transactional, idempotent against retry).
+ *
+ * Per docs/STUDY_PLAN.md §10.
+ */
+export async function startSynthesisWorker(args: {
+  finalRunId: string;            // pre-allocated by caller
+  studyId: string;
+  uid: string;
+  brief: string;                 // composed synthesis brief from composeSynthesisBrief
+  picks: Record<string, string>; // user-visible audit copy
+  refundCredits: number;         // SYNTHESIS_COST_CREDITS
+  log: RequestLogger;
+}): Promise<void> {
+  const now = Date.now();
+  const archRef = adminDb.collection("architectures").doc(args.finalRunId);
+
+  const initial: ArchitectureDoc = {
+    id: archRef.id,
+    uid: args.uid,
+    prompt: args.brief,
+    status: "running",
+    createdAt: now,
+    modelVersion: process.env.VERTEX_MODEL || "gemini-2.5-pro",
+    progress: {
+      phase: "analyzing",
+      message: "Synthesizing the picks into one architecture",
+      tokens: 0,
+      updatedAt: now,
+    },
+    // Note: deliberately NOT setting `studyId/variantId/variantLabel`.
+    // Those signal "this run is a variant of a study"; a synthesis run
+    // is a standalone architecture. `synthesizedFrom` is the audit
+    // trail back to the study + picks.
+    synthesizedFrom: {
+      studyId: args.studyId,
+      picks: args.picks,
+    },
+  };
+  await archRef.set(initial);
+
+  const work: LiveWorker = runSynthesisWorker({
+    studyId: args.studyId,
+    uid: args.uid,
+    archRef,
+    brief: args.brief,
+    refundCredits: args.refundCredits,
+    log: args.log,
+  })
+    .catch((err) => {
+      args.log.error("synthesis worker crashed", {
+        studyId: args.studyId,
+        runId: archRef.id,
+        err: (err as Error).message,
+      });
+    })
+    .finally(() => {
+      inflightWorkers.delete(work);
+      untrackRun(archRef.id);
+    });
+  inflightWorkers.add(work);
+
+  trackRun(archRef.id, {
+    docRef: archRef,
+    uid: args.uid,
+    refundCredits: args.refundCredits,
+    // Note: deliberately NOT passing studyId/variantId here. Synthesis is
+    // not a variant; the shutdown drain's flipStudyVariant doesn't apply.
+    // The synthesis worker handles its own study-level bookkeeping by
+    // writing finalRunId on completion.
+  });
+}
+
+async function runSynthesisWorker(args: {
+  studyId: string;
+  uid: string;
+  archRef: FirebaseFirestore.DocumentReference;
+  brief: string;
+  refundCredits: number;
+  log: RequestLogger;
+}): Promise<void> {
+  const startedAt = Date.now();
+  let lastWriteAt = 0;
+  const writeProgress = async (
+    phase: string,
+    message: string,
+    tokens: number,
+    force = false,
+  ) => {
+    const now = Date.now();
+    if (!force && now - lastWriteAt < PROGRESS_THROTTLE_MS) return;
+    lastWriteAt = now;
+    try {
+      await args.archRef.update({
+        progress: { phase, message, tokens, updatedAt: now },
+      });
+    } catch (err) {
+      args.log.warn("synthesis progress write failed", {
+        studyId: args.studyId,
+        err: (err as Error).message,
+      });
+    }
+  };
+
+  let phase = "analyzing";
+  let message = "Synthesizing the picks into one architecture";
+  let tokens = 0;
+  let finished = false;
+
+  try {
+    for await (const ev of runArchitect(args.brief)) {
+      if (ev.type === "phase") {
+        phase = ev.phase;
+        message = ev.message;
+        await writeProgress(phase, message, tokens, true);
+      } else if (ev.type === "tokens") {
+        tokens = ev.tokens;
+        await writeProgress(phase, message, tokens);
+      } else if (ev.type === "complete") {
+        finished = true;
+        const completedAt = Date.now();
+        await args.archRef.update({
+          status: "complete",
+          architecture: ev.architecture as Architecture,
+          completedAt,
+          durationMs: completedAt - startedAt,
+          progress: {
+            phase: "finalizing",
+            message: "Done",
+            tokens,
+            updatedAt: completedAt,
+          },
+        });
+        // Publish finalRunId on the study transactionally so the cockpit
+        // (and history) reflect it on next read.
+        await adminDb.runTransaction(async (tx) => {
+          const sref = adminDb.collection("studies").doc(args.studyId);
+          const snap = await tx.get(sref);
+          if (!snap.exists) return;
+          const study = snap.data() as StudyDoc;
+          if (study.finalRunId && study.finalRunId !== args.archRef.id) {
+            // Another synthesis already won; we lost the race — leave the
+            // existing finalRunId in place. The duplicate result doc
+            // remains queryable via `synthesizedFrom.studyId`.
+            return;
+          }
+          tx.update(sref, { finalRunId: args.archRef.id });
+        });
+      } else if (ev.type === "error") {
+        finished = true;
+        args.log.error("synthesis agent reported error", {
+          studyId: args.studyId,
+          message: ev.message,
+        });
+        await args.archRef.update({
+          status: "failed",
+          errorMessage: ev.message,
+        });
+        await refundCredit(
+          args.uid,
+          `Refund on study synthesis failure`,
+          args.archRef.id,
+          args.refundCredits,
+        );
+      }
+    }
+  } catch (err) {
+    const msg = (err as Error).message || "Synthesis failed";
+    args.log.error("synthesis worker exception", {
+      studyId: args.studyId,
+      err: msg,
+    });
+    if (!finished) {
+      try {
+        await args.archRef.update({ status: "failed", errorMessage: msg });
+      } catch (err2) {
+        args.log.error("synthesis failure write failed", {
+          studyId: args.studyId,
+          err: (err2 as Error).message,
+        });
+      }
+      try {
+        await refundCredit(
+          args.uid,
+          `Refund on study synthesis failure`,
+          args.archRef.id,
+          args.refundCredits,
+        );
+      } catch (err2) {
+        args.log.error("synthesis refund failed", {
+          studyId: args.studyId,
+          err: (err2 as Error).message,
+        });
+      }
+    }
+  }
+}

@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import type { Architecture } from "@/types/architecture";
 import type { StudyDoc } from "@/types/study";
-import { CockpitProvider, useCockpit, type LensId } from "./state";
+import { CockpitProvider, useCockpit, type LensId, type CockpitPicks } from "./state";
 import { LensRail, LENS_CATALOG } from "./LensRail";
 import { ScenarioBar } from "./ScenarioBar";
 import { DecisionTray } from "./DecisionTray";
@@ -55,6 +57,8 @@ export function StudyCockpit(props: StudyCockpitProps) {
 
 function CockpitInner({ study, variants }: StudyCockpitProps) {
   const { currentLens } = useCockpit();
+  const router = useRouter();
+  const [synthBusy, setSynthBusy] = useState(false);
 
   const trayVariants = useMemo(
     () =>
@@ -71,6 +75,31 @@ function CockpitInner({ study, variants }: StudyCockpitProps) {
 
   const currentLensMeta =
     LENS_CATALOG.find((l) => l.id === currentLens) ?? LENS_CATALOG[0];
+
+  async function handleSynthesize(picks: Required<CockpitPicks>) {
+    if (synthBusy) return;
+    setSynthBusy(true);
+    const t = toast.loading("Synthesizing your final architecture…");
+    try {
+      const res = await fetch(`/api/studies/${study.id}/synthesize`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ picks }),
+      });
+      if (!res.ok) {
+        const msg = (await res.text()) || "Synthesis failed";
+        toast.error(msg, { id: t });
+        setSynthBusy(false);
+        return;
+      }
+      const data = (await res.json()) as { finalRunId: string };
+      toast.success("Synthesis started — opening the architecture", { id: t });
+      router.push(`/architecture/${data.finalRunId}`);
+    } catch (err) {
+      toast.error((err as Error).message || "Network error", { id: t });
+      setSynthBusy(false);
+    }
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[hsl(var(--paper-2))]/30">
@@ -134,7 +163,11 @@ function CockpitInner({ study, variants }: StudyCockpitProps) {
       </div>
 
       {/* === Bottom: decision tray === */}
-      <DecisionTray variants={trayVariants} />
+      <DecisionTray
+        variants={trayVariants}
+        onSynthesize={handleSynthesize}
+        busy={synthBusy}
+      />
 
       {/* === Floating: explain drawer === */}
       <ExplainDrawer />
