@@ -135,6 +135,7 @@ export function ProfileChip({
             <MenuLink href="/studies/new" icon="compare_arrows" label="Compare designs" onClick={() => setOpen(false)} />
             <MenuLink href="/studio"     icon="workspaces"      label="Studio"         onClick={() => setOpen(false)} />
             <MenuLink href="/history"    icon="history"         label="Past runs"      onClick={() => setOpen(false)} />
+            <MenuLink href="/studies"    icon="dataset"         label="Past studies"   onClick={() => setOpen(false)} />
             <MenuLink href="/dashboard"  icon="dashboard"       label="Dashboard"      onClick={() => setOpen(false)} />
           </ul>
 
