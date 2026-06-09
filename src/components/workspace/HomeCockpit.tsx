@@ -8,7 +8,13 @@ import { cn } from "@/lib/utils";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
 import { signInWithGoogle } from "@/lib/firebase/client";
 import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
+import { RefineDisclosure } from "@/components/architecture/RefineDisclosure";
 import { canAffordRun, formatDesigns } from "@/lib/credits/display";
+import {
+  composeBriefWithPreferences,
+  type BriefPreferences,
+} from "@/lib/architectures/preferences";
+import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
 
 /**
  * HomeCockpit — single-screen home for the workspace.
@@ -43,9 +49,12 @@ export function HomeCockpit({
   runCount?: number;
 }) {
   const router = useRouter();
+  const reduced = useReducedMotionSafe();
   const [brief, setBrief] = useState("");
   const [busy, setBusy] = useState(false);
   const [guidedOpen, setGuidedOpen] = useState(false);
+  const [prefs, setPrefs] = useState<BriefPreferences>({});
+  const [refineOpen, setRefineOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const tooShort = brief.trim().length < 30;
   const showSample = !signedIn || runCount === 0;
@@ -89,10 +98,11 @@ export function HomeCockpit({
   }
 
   async function startRun(briefText: string) {
+    const composed = composeBriefWithPreferences(briefText, prefs);
     const res = await fetch("/api/architect/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ brief: briefText }),
+      body: JSON.stringify({ brief: composed }),
     });
     if (!res.ok) {
       const text = await res.text();
@@ -148,6 +158,14 @@ export function HomeCockpit({
                 }
               }}
               className="block w-full resize-none bg-transparent pt-4 pb-3 text-[16px] leading-[1.55] text-[hsl(var(--ink))] placeholder:text-[hsl(var(--ink-3))] focus:outline-none scrollbar-thin max-h-[28vh]"
+            />
+            <RefineDisclosure
+              compact
+              open={refineOpen}
+              onToggle={() => setRefineOpen((v) => !v)}
+              prefs={prefs}
+              setPrefs={setPrefs}
+              reduced={reduced}
             />
             <div className="flex items-center justify-between gap-3 pt-3 border-t border-[hsl(var(--line))]">
               <span className="text-[11.5px] text-[hsl(var(--ink-3))]">

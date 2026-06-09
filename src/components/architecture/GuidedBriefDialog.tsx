@@ -27,6 +27,7 @@ export function GuidedBriefDialog({
   const [region, setRegion] = useState<string>("India");
   const [scale, setScale] = useState<string>("Up to 100K users");
   const [tier, setTier] = useState<string>("Growth-stage startup");
+  const [cloud, setCloud] = useState<string>("No preference");
   const [needs, setNeeds] = useState<string[]>([]);
   const reduced = useReducedMotionSafe();
 
@@ -56,12 +57,16 @@ export function GuidedBriefDialog({
     const need = needs.length
       ? ` It must handle ${needs.map((n) => n.toLowerCase()).join(", ")}.`
       : "";
+    const cloudSentence =
+      cloud === "No preference"
+        ? `Recommend a production-ready cloud architecture with components, scale tiers, INR cost estimates, risks, and security model.`
+        : `Recommend a production-ready architecture on ${cloud} with components, scale tiers, INR cost estimates, risks, and security model.`;
     const composed = [
       `${oneLiner.trim().replace(/\.$/, "")}.`,
       `It serves ${audience.toLowerCase()} primarily in ${region}.`,
       `Target scale: ${scale.toLowerCase()}.`,
       `Maturity: ${tier.toLowerCase()}.${need}`,
-      `Recommend a production-ready cloud architecture on Google Cloud with components, scale tiers, INR cost estimates, risks, and security model.`,
+      cloudSentence,
     ].join(" ");
     onCompose(composed);
   }
@@ -157,7 +162,15 @@ export function GuidedBriefDialog({
             />
           </Field>
 
-          <Field label="06" question="Anything special?" hint="Pick as many as apply.">
+          <Field label="06" question="Any cloud preference?">
+            <Chips
+              value={cloud}
+              options={["No preference", "GCP", "AWS", "Azure", "Multi-cloud"]}
+              onChange={setCloud}
+            />
+          </Field>
+
+          <Field label="07" question="Anything special?" hint="Pick as many as apply.">
             <Chips
               multi
               value={needs}

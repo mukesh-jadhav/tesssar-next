@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     template: "%s · Tessar",
   },
   description:
-    "Brief in. A 14-section, schema-validated cloud architecture out — components, diagrams, monthly cost in INR, scored risks, applied patterns, roadmap. Sized to your scale. Built on Google Cloud.",
+    "Brief in. A 14-section, schema-validated cloud architecture out — components, diagrams, monthly cost in INR, scored risks, applied patterns, roadmap. Sized to your scale. Cloud-agnostic: GCP, AWS, or Azure.",
   openGraph: {
     title: "Tessar — AI Cloud Architect",
     description:

@@ -189,7 +189,7 @@ export default async function HomePage() {
             <Feature
               icon="inventory_2"
               title="Bill of materials"
-              body="Every component named: which GCP service, which tier, which region. Stop hand-rolling lists."
+              body="Every component named: which cloud service, which tier, which region. Stop hand-rolling lists."
             />
             <Feature
               icon="payments"
@@ -223,8 +223,8 @@ export default async function HomePage() {
             />
             <Feature
               icon="cloud_done"
-              title="GCP-native"
-              body="Designed for Google Cloud out of the box — Cloud Run, Firestore, BigQuery, Spanner, Pub/Sub."
+              title="Cloud-agnostic"
+              body="Pick GCP, AWS, Azure or multi-cloud — the architect maps native services for whichever you choose."
             />
           </div>
         </div>

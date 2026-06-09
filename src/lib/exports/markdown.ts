@@ -26,6 +26,10 @@ export function renderArchitectureMarkdown(arch: Architecture): string {
   h(`**Generated:** ${generated} IST  `);
   h(`**By:** Tessar — AI Cloud Architect (Gemini on Vertex AI)`);
   blank();
+  h(
+    `> ⚠ **Draft for review.** This is an AI-generated architecture intended as a defensible first cut. Costs are ballpark estimates against public list pricing at generation time. Security & compliance controls are design-level mappings, not certifications. Verify cloud services, quotas and prices against the provider's current documentation before implementing. You retain full responsibility for the decisions you ship.`,
+  );
+  blank();
   h(`---`);
   blank();
 

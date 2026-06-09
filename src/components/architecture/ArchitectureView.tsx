@@ -54,6 +54,20 @@ export function ArchitectureView({
             </div>
           </div>
 
+          {/* Draft notice — the architect is opinionated, but the call is yours. */}
+          <div
+            role="note"
+            aria-label="Draft notice"
+            className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-full border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-3.5 py-1.5 text-[11.5px] text-[hsl(var(--ink-3))]"
+          >
+            <span className="font-mono uppercase tracking-[0.16em] text-[hsl(var(--accent))]">Draft</span>
+            <span aria-hidden className="opacity-50">·</span>
+            <span>
+              AI-generated architecture, intended as a defensible first cut. Costs are estimates; security
+              and compliance controls need review by a qualified engineer before implementation.
+            </span>
+          </div>
+
           {/* The kicker = project title (small label) */}
           <div className="mt-12 md:mt-16 flex items-baseline gap-4">
             <span className="section-num">Brief</span>

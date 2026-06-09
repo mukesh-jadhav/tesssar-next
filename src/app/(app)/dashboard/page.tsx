@@ -12,27 +12,27 @@ import { EmptyHero } from "@/components/empty/EmptyHero";
 const SUGGESTIONS = [
   {
     n: "01",
-    label: "Launch a B2B SaaS on Google Cloud",
+    label: "Launch a B2B SaaS",
     seed:
-      "I'm building a B2B SaaS for Indian SMBs. Target 10k tenants, multi-region in India. Suggest a production-grade architecture on Google Cloud with cost estimates in INR.",
+      "I'm building a B2B SaaS for Indian SMBs. Target 10k tenants, multi-region in India. Suggest a production-grade cloud architecture with cost estimates in INR.",
   },
   {
     n: "02",
     label: "Add an AI chat copilot to my app",
     seed:
-      "I want to add an AI chat copilot to my existing app. 50k DAU, low latency, conversation memory, retrieval over the user's documents. What's the right architecture on Google Cloud?",
+      "I want to add an AI chat copilot to my existing app. 50k DAU, low latency, conversation memory, retrieval over the user's documents. What's the right cloud architecture?",
   },
   {
     n: "03",
     label: "E-commerce backend for India",
     seed:
-      "Design a low-latency e-commerce backend for India: 1M MAU, 100k peak concurrent at sale times, INR pricing. Recommend a Google Cloud architecture and risks.",
+      "Design a low-latency e-commerce backend for India: 1M MAU, 100k peak concurrent at sale times, INR pricing. Recommend a production cloud architecture and risks.",
   },
   {
     n: "04",
     label: "EdTech with live classes",
     seed:
-      "EdTech platform with live classes, recorded content, quizzes. 500k students across India, peak 50k concurrent on live sessions. Architect it on Google Cloud.",
+      "EdTech platform with live classes, recorded content, quizzes. 500k students across India, peak 50k concurrent on live sessions. Architect a production cloud system for it.",
   },
 ];
 

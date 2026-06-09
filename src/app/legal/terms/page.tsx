@@ -40,11 +40,38 @@ export default function TermsPage() {
             templates. You grant us a limited licence to process your brief
             in order to deliver the report you requested.
           </Clause>
-          <Clause num="04" heading="Limitation of liability">
-            Tessar is provided &ldquo;as is&rdquo;. Our maximum liability is
-            limited to the amount you paid us in the trailing 90 days.
+          <Clause num="04" heading="AI-generated drafts, not implementation specs">
+            Every report Tessar produces is a draft architecture generated
+            by a large language model from your brief. It is intended as a
+            defensible first cut for engineering discussion — not as a
+            finished implementation specification, audit deliverable, or
+            compliance attestation. Treat costs as ballpark estimates against
+            public list prices at generation time; treat security and
+            compliance mappings (HIPAA, PCI-DSS, GDPR, SOC 2, DPDP, RBI and
+            similar) as design-level guidance, not certifications. Cross-check
+            cloud services, regions, quotas and prices against the provider&apos;s
+            current documentation. The reports may contain inaccuracies,
+            outdated service names, or unsuitable choices for your specific
+            context; review them with a qualified engineer before you build.
           </Clause>
-          <Clause num="05" heading="Contact">
+          <Clause num="05" heading="No professional advice">
+            Nothing produced by Tessar constitutes legal, financial,
+            regulatory, security, or other professional advice. You remain
+            solely responsible for the engineering, business, regulatory and
+            commercial decisions you ship on top of any Tessar output.
+          </Clause>
+          <Clause num="06" heading="Limitation of liability">
+            Tessar is provided &ldquo;as is&rdquo; and &ldquo;as available&rdquo;
+            with no warranty of merchantability, fitness for a particular
+            purpose, or non-infringement. To the maximum extent permitted by
+            applicable law, Tessar and its operators are not liable for any
+            indirect, incidental, special, consequential or punitive damages
+            — including lost revenue, downtime, data loss, or third-party
+            claims — arising from your use of, or reliance on, the service or
+            any generated output. Our maximum aggregate liability is limited
+            to the amount you paid us in the trailing 90 days.
+          </Clause>
+          <Clause num="07" heading="Contact">
             Questions, disputes, or just feedback —
             <a href="mailto:hello@tessar.dev" className="ulgrow accent ml-1">hello@tessar.dev</a>.
           </Clause>

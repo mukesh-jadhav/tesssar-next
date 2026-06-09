@@ -54,8 +54,10 @@ export async function POST(req: NextRequest) {
   if (!brief || brief.trim().length < 30) {
     return new Response("Brief must be at least 30 characters", { status: 400 });
   }
-  if (brief.length > 8000) {
-    return new Response("Brief too long (8000 char max)", { status: 400 });
+  // 10000 leaves ~2KB headroom above the 8000-char user textarea for the
+  // optional Constraints block composed from BriefPreferences.
+  if (brief.length > 10000) {
+    return new Response("Brief too long (10000 char max)", { status: 400 });
   }
 
   const docRef = adminDb.collection("architectures").doc();

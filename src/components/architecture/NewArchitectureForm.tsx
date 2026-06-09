@@ -7,8 +7,13 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
 import { RecentBriefsRail, type RecentBrief } from "@/components/architecture/RecentBriefsRail";
+import { RefineDisclosure } from "@/components/architecture/RefineDisclosure";
 import { canAffordRun } from "@/lib/credits/display";
 import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
+import {
+  composeBriefWithPreferences,
+  type BriefPreferences,
+} from "@/lib/architectures/preferences";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
@@ -83,6 +88,8 @@ export function NewArchitectureForm({
   const [guidedOpen, setGuidedOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [showCoach, setShowCoach] = useState(false);
+  const [prefs, setPrefs] = useState<BriefPreferences>({});
+  const [refineOpen, setRefineOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const idleTimerRef = useRef<number | null>(null);
 
@@ -128,10 +135,11 @@ export function NewArchitectureForm({
 
     setSubmitting(true);
     try {
+      const composed = composeBriefWithPreferences(brief, prefs);
       const res = await fetch("/api/architect/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ brief }),
+        body: JSON.stringify({ brief: composed }),
       });
       if (!res.ok) {
         const text = await res.text();
@@ -208,6 +216,14 @@ export function NewArchitectureForm({
               </motion.button>
             )}
           </AnimatePresence>
+
+          <RefineDisclosure
+            open={refineOpen}
+            onToggle={() => setRefineOpen((v) => !v)}
+            prefs={prefs}
+            setPrefs={setPrefs}
+            reduced={reduced}
+          />
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[hsl(var(--line))]">
             <span className="text-[12px] text-[hsl(var(--ink-3))]">

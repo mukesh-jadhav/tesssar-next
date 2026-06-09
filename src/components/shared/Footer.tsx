@@ -82,6 +82,17 @@ export function Footer() {
             <ThemeToggle />
           </div>
         </div>
+
+        {/* AI-output disclaimer — appears once at the bottom of every page. */}
+        <p className="mt-6 max-w-[80ch] text-[11px] leading-[1.55] text-[hsl(var(--ink-3))]">
+          Architecture reports produced by Tessar are AI-generated drafts intended for engineering
+          discussion. Costs, security controls, and compliance mappings are design-level estimates and
+          should be reviewed by a qualified engineer before implementation. See the{" "}
+          <a href="/legal/terms" className="underline decoration-[hsl(var(--line-2))] underline-offset-2 hover:text-[hsl(var(--ink-2))]">
+            terms
+          </a>{" "}
+          for the full notice.
+        </p>
       </div>
     </footer>
   );

@@ -196,7 +196,7 @@ function RunningHeader({ title }: { title: string }) {
 function Footer() {
   return (
     <View style={s.footer} fixed>
-      <Text>tessar.dev</Text>
+      <Text>tessar.dev · AI-generated draft · review before implementing</Text>
       <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
     </View>
   );
@@ -323,6 +323,42 @@ export function ArchitectureReport({ arch }: { arch: Architecture }) {
           </Text>
           <Text style={s.small}>Powered by Gemini on Vertex AI</Text>
         </View>
+      </Page>
+
+      {/* DISCLAIMER */}
+      <Page size="A4" style={s.page}>
+        <RunningHeader title={title} />
+        <SectionHeader eyebrow="§ Notice" title="Draft for review" />
+        <Text style={{ ...s.lead, marginTop: 4 }}>
+          This document is an AI-generated draft architecture, produced by Tessar from a natural-language
+          brief. It is intended as a defensible first cut for engineering discussion — not as a finished
+          implementation specification, audit deliverable, or compliance attestation.
+        </Text>
+        <Text style={s.subTitle}>What to verify before implementing</Text>
+        <Text style={s.bullet}>
+          • Costs are ballpark estimates against public list prices at generation time. Real cloud
+          spend depends on contracts, commitments, region, egress and usage patterns — model your
+          own quote before committing.
+        </Text>
+        <Text style={s.bullet}>
+          • Security and compliance controls are mapped to the named regimes (HIPAA, PCI-DSS, GDPR,
+          SOC 2, DPDP, RBI etc.) at a design level. Achieving certification requires evidence,
+          audits and sign-off from qualified specialists.
+        </Text>
+        <Text style={s.bullet}>
+          • Diagrams, component counts and scale-tier sizings are derived from the brief and the
+          architect&apos;s prior. They are reasoned ballparks, not measured load tests.
+        </Text>
+        <Text style={s.bullet}>
+          • Cloud services, SDKs, pricing and quotas change. Cross-check service availability,
+          regional support and limits against the provider&apos;s current documentation.
+        </Text>
+        <Text style={{ ...s.para, marginTop: 14 }}>
+          You retain full responsibility for the engineering decisions you ship. Tessar is provided
+          &ldquo;as is&rdquo; with no warranty of fitness for a particular purpose; see
+          tessar.dev/legal/terms for the full terms.
+        </Text>
+        <Footer />
       </Page>
 
       {/* REQUIREMENTS */}
