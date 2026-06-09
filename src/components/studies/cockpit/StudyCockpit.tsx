@@ -44,37 +44,14 @@ export interface StudyCockpitProps {
 }
 
 /**
- * StudyCockpit — the four-plane cockpit shell. Phase 3 wires the chrome
- * and state; Phase 4-5 fills the lenses with projections and content.
+ * StudyCockpit — outer wrapper. Holds the router + per-action callbacks
+ * (synthesize / promote / retry) so the provider can hand promote/retry
+ * to every VariantHeader through context, while synthesize stays a
+ * direct prop down to the decision tray.
  */
-export function StudyCockpit(props: StudyCockpitProps) {
-  return (
-    <CockpitProvider>
-      <CockpitInner {...props} />
-    </CockpitProvider>
-  );
-}
-
-function CockpitInner({ study, variants }: StudyCockpitProps) {
-  const { currentLens } = useCockpit();
+export function StudyCockpit({ study, variants }: StudyCockpitProps) {
   const router = useRouter();
   const [synthBusy, setSynthBusy] = useState(false);
-
-  const trayVariants = useMemo(
-    () =>
-      variants.map((v) => ({
-        variantId: v.variantId,
-        label: v.label,
-        available: !v.failed,
-      })),
-    [variants],
-  );
-
-  const failedCount = variants.filter((v) => v.failed).length;
-  const completedCount = variants.length - failedCount;
-
-  const currentLensMeta =
-    LENS_CATALOG.find((l) => l.id === currentLens) ?? LENS_CATALOG[0];
 
   async function handleSynthesize(picks: Required<CockpitPicks>) {
     if (synthBusy) return;
@@ -100,6 +77,91 @@ function CockpitInner({ study, variants }: StudyCockpitProps) {
       setSynthBusy(false);
     }
   }
+
+  async function handlePromote(runId: string) {
+    const t = toast.loading("Promoting variant…");
+    try {
+      const res = await fetch(`/api/studies/${study.id}/promote`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ runId }),
+      });
+      if (!res.ok) {
+        const msg = (await res.text()) || "Promote failed";
+        toast.error(msg, { id: t });
+        return;
+      }
+      toast.success("Promoted — opening as a standalone architecture", { id: t });
+      router.push(`/architecture/${runId}`);
+    } catch (err) {
+      toast.error((err as Error).message || "Network error", { id: t });
+    }
+  }
+
+  async function handleRetry(variantId: string) {
+    const t = toast.loading("Charging 40 credits and re-running variant…");
+    try {
+      const res = await fetch(`/api/studies/${study.id}/retry-variant`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ variantId }),
+      });
+      if (!res.ok) {
+        const msg = (await res.text()) || "Retry failed";
+        toast.error(msg, { id: t });
+        return;
+      }
+      toast.success("Retry started — reloading the cockpit", { id: t });
+      // The server shell re-renders with the new runId in study.variants[]
+      // and the StudyLive fallback streams progress until it lands.
+      router.refresh();
+    } catch (err) {
+      toast.error((err as Error).message || "Network error", { id: t });
+    }
+  }
+
+  return (
+    <CockpitProvider
+      studyId={study.id}
+      promoteVariant={handlePromote}
+      retryVariant={handleRetry}
+    >
+      <CockpitInner
+        study={study}
+        variants={variants}
+        synthBusy={synthBusy}
+        onSynthesize={handleSynthesize}
+      />
+    </CockpitProvider>
+  );
+}
+
+function CockpitInner({
+  study,
+  variants,
+  synthBusy,
+  onSynthesize,
+}: StudyCockpitProps & {
+  synthBusy: boolean;
+  onSynthesize: (picks: Required<CockpitPicks>) => Promise<void>;
+}) {
+  const { currentLens } = useCockpit();
+
+  const trayVariants = useMemo(
+    () =>
+      variants.map((v) => ({
+        variantId: v.variantId,
+        label: v.label,
+        available: !v.failed,
+      })),
+    [variants],
+  );
+
+  const failedCount = variants.filter((v) => v.failed).length;
+  const completedCount = variants.length - failedCount;
+
+  const currentLensMeta =
+    LENS_CATALOG.find((l) => l.id === currentLens) ?? LENS_CATALOG[0];
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-[hsl(var(--paper-2))]/30">
@@ -165,7 +227,7 @@ function CockpitInner({ study, variants }: StudyCockpitProps) {
       {/* === Bottom: decision tray === */}
       <DecisionTray
         variants={trayVariants}
-        onSynthesize={handleSynthesize}
+        onSynthesize={onSynthesize}
         busy={synthBusy}
       />
 

@@ -53,7 +53,7 @@ export function LensColumns<T extends ColumnVariant>({
           }}
           className="flex flex-col min-h-[320px]"
         >
-          <VariantHeader label={v.label} runId={v.runId} failed={v.failed} />
+          <VariantHeader label={v.label} runId={v.runId} variantId={v.variantId} failed={v.failed} />
           <div
             className={cn(
               "flex-1 rounded-b-2xl border-x border-b border-[hsl(var(--line))] bg-[hsl(var(--card))] p-5",

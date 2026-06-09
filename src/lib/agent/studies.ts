@@ -42,7 +42,7 @@ const inflightWorkers = new Set<LiveWorker>();
  * composed brief. We add it to the Constraints block so the agent treats
  * the variant choice with the same hardness as user-supplied preferences.
  */
-function composeVariantBrief(baseBrief: string, constraint: string): string {
+export function composeVariantBrief(baseBrief: string, constraint: string): string {
   // The base brief was already run through composeBriefWithPreferences in
   // the API route, so it may or may not already end with a Constraints
   // block. We append a fresh constraints line either way; the agent reads

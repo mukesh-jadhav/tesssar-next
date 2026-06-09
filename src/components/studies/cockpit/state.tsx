@@ -46,6 +46,7 @@ export interface DrawerPayload {
 }
 
 interface CockpitContextValue {
+  studyId: string;
   scenario: Scenario;
   setScenario: (next: Scenario) => void;
   currentLens: LensId;
@@ -55,26 +56,69 @@ interface CockpitContextValue {
   drawer: DrawerPayload | null;
   openDrawer: (payload: DrawerPayload) => void;
   closeDrawer: () => void;
+  /** runIds currently in flight for a per-variant action (promote/retry). */
+  variantBusy: Record<string, "promote" | "retry" | undefined>;
+  promoteVariant: (runId: string) => Promise<void>;
+  retryVariant: (variantId: string) => Promise<void>;
 }
 
 const CockpitContext = createContext<CockpitContextValue | null>(null);
 
 export function CockpitProvider({
   children,
+  studyId,
   initialLens = "verdict",
   initialScenario = DEFAULT_SCENARIO,
+  promoteVariant,
+  retryVariant,
 }: {
   children: ReactNode;
+  studyId: string;
   initialLens?: LensId;
   initialScenario?: Scenario;
+  promoteVariant: (runId: string) => Promise<void>;
+  retryVariant: (variantId: string) => Promise<void>;
 }) {
   const [scenario, setScenario] = useState<Scenario>(initialScenario);
   const [currentLens, setCurrentLens] = useState<LensId>(initialLens);
   const [picks, setPicks] = useState<CockpitPicks>({});
   const [drawer, setDrawer] = useState<DrawerPayload | null>(null);
+  const [variantBusy, setVariantBusy] = useState<
+    Record<string, "promote" | "retry" | undefined>
+  >({});
+
+  const wrappedPromote = async (runId: string) => {
+    if (variantBusy[runId]) return;
+    setVariantBusy((prev) => ({ ...prev, [runId]: "promote" }));
+    try {
+      await promoteVariant(runId);
+    } finally {
+      setVariantBusy((prev) => {
+        const next = { ...prev };
+        delete next[runId];
+        return next;
+      });
+    }
+  };
+  const wrappedRetry = async (variantId: string) => {
+    // Key the busy state on the variantId for retry — the runId changes
+    // on success, so the slot itself (variantId) is the stable identity.
+    if (variantBusy[variantId]) return;
+    setVariantBusy((prev) => ({ ...prev, [variantId]: "retry" }));
+    try {
+      await retryVariant(variantId);
+    } finally {
+      setVariantBusy((prev) => {
+        const next = { ...prev };
+        delete next[variantId];
+        return next;
+      });
+    }
+  };
 
   const value = useMemo<CockpitContextValue>(
     () => ({
+      studyId,
       scenario,
       setScenario,
       currentLens,
@@ -94,8 +138,15 @@ export function CockpitProvider({
       drawer,
       openDrawer: (payload) => setDrawer(payload),
       closeDrawer: () => setDrawer(null),
+      variantBusy,
+      promoteVariant: wrappedPromote,
+      retryVariant: wrappedRetry,
     }),
-    [scenario, currentLens, picks, drawer],
+    // wrappedPromote/wrappedRetry close over variantBusy + the prop
+    // callbacks; deps below cover the prop identities + state. The
+    // wrappers themselves are recreated on each render — cheap.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [studyId, scenario, currentLens, picks, drawer, variantBusy, promoteVariant, retryVariant],
   );
 
   return (

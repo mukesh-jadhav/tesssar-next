@@ -82,7 +82,7 @@ export function SecurityLens({ variants }: { variants: CockpitVariant[] }) {
                   key={v.variantId}
                   className="px-3 py-2 text-left border-b border-[hsl(var(--line))] min-w-[200px]"
                 >
-                  <VariantHeader label={v.label} runId={v.runId} />
+                  <VariantHeader label={v.label} runId={v.runId} variantId={v.variantId} />
                 </th>
               ))}
             </tr>
