@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
@@ -61,10 +62,12 @@ interface StudyStatusResponse {
  */
 export function StudyLive({ initial }: { initial: StudyDoc }) {
   const reduced = useReducedMotionSafe();
+  const router = useRouter();
   const [state, setState] = useState<StudyStatusResponse>(() =>
     studyDocToResponse(initial),
   );
   const lastUpdatedRef = useRef<number>(initial.completedAt ?? 0);
+  const swappedRef = useRef(false);
 
   const fetchOnce = useCallback(async () => {
     try {
@@ -98,6 +101,17 @@ export function StudyLive({ initial }: { initial: StudyDoc }) {
     state.status === "complete" ||
     state.status === "partial" ||
     state.status === "failed";
+  const hasAnyComplete = state.variants.some((v) => v.status === "complete");
+
+  // Once the run reaches a terminal state with at least one usable
+  // variant, swap to the cockpit. The server route already gates on
+  // this; we just need to ask it to re-render now that polling has
+  // confirmed completion (the user's tab was loaded mid-run).
+  useEffect(() => {
+    if (!terminal || !hasAnyComplete || swappedRef.current) return;
+    swappedRef.current = true;
+    router.refresh();
+  }, [terminal, hasAnyComplete, router]);
 
   return (
     <div className="flex-1 min-h-0 overflow-auto scrollbar-thin">
@@ -184,16 +198,16 @@ export function StudyLive({ initial }: { initial: StudyDoc }) {
                       </span>
                     </Link>
                   ) : (
-                    <span className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line-2))] px-4 py-2 text-[13px] text-[hsl(var(--ink-2))]">
-                      <span
-                        className="ms text-[16px] text-[hsl(var(--accent))]"
-                        aria-hidden
-                      >
-                        bolt
+                    <button
+                      type="button"
+                      onClick={() => router.refresh()}
+                      className="btn-pill btn-pill-accent press"
+                    >
+                      Open the cockpit
+                      <span className="ms text-[18px]" aria-hidden>
+                        arrow_forward
                       </span>
-                      Cockpit lands in the next release — your variants are
-                      saved and viewable individually.
-                    </span>
+                    </button>
                   )}
                 </div>
               </motion.div>
