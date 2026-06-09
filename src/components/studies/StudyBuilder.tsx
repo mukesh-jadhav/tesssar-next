@@ -17,9 +17,25 @@ import {
   composeBriefWithPreferences,
   type BriefPreferences,
 } from "@/lib/architectures/preferences";
+import { formatCredits, isUnlimited } from "@/lib/credits/display";
 import { RefineDisclosure } from "@/components/architecture/RefineDisclosure";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+
+/**
+ * Refine rows that would collide with the dimension the user is varying.
+ * Hiding them avoids the "I asked for AWS + GCP variants but also set
+ * Cloud to Azure in Refine" trap.
+ */
+function refineHideFields(
+  dim: DimensionId,
+): Array<"cloud" | "budget" | "audience" | "residency" | "compliance" | "existingStack"> {
+  switch (dim) {
+    case "cloud":        return ["cloud"];
+    case "cost-posture": return ["budget"];
+    default:             return [];
+  }
+}
 
 /**
  * StudyBuilder — pick a brief, a comparison dimension, and 2-3 variants.
@@ -75,7 +91,11 @@ export function StudyBuilder({ credits }: { credits: number }) {
     () => (canSubmit ? studyCost(variantCount) : 0),
     [canSubmit, variantCount],
   );
-  const insufficient = cost > 0 && cost > credits;
+  // Admins carry a sentinel `-1` balance (unlimited). The naive
+  // `cost > credits` check would always be true for them and block the
+  // CTA, so we short-circuit on `isUnlimited`.
+  const unlimited = isUnlimited(credits);
+  const insufficient = cost > 0 && !unlimited && cost > credits;
 
   function toggleVariant(id: string) {
     setVariantIds((prev) => {
@@ -178,6 +198,8 @@ export function StudyBuilder({ credits }: { credits: number }) {
           prefs={prefs}
           setPrefs={setPrefs}
           reduced={reduced}
+          hideFields={refineHideFields(dimensionId)}
+          intro={`Refine sets cross-cutting preferences (compliance, residency, budget) that apply to every variant. The dimension below — ${dimension.label.toLowerCase()} — already varies per column.`}
         />
       </motion.div>
 
@@ -305,7 +327,7 @@ export function StudyBuilder({ credits }: { credits: number }) {
             </span>
             {insufficient && (
               <span className="text-[12px] text-[hsl(var(--bad))] mt-1">
-                You have {credits} credits — top up to run this study.
+                You have {formatCredits(credits)} credits — top up to run this study.
               </span>
             )}
           </div>

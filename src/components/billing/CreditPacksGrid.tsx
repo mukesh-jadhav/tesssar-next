@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CREDIT_PACKS, type CreditPack } from "@/lib/razorpay/packs";
 import { cn, formatINR } from "@/lib/utils";
-import { Tilt } from "@/components/motion/Tilt";
 import { DrawnUnderline } from "@/components/landing/DrawnUnderline";
 
 declare global {
@@ -42,34 +41,68 @@ interface RazorpayOptions {
   modal?: { ondismiss?: () => void };
 }
 
-function useRazorpayScript() {
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (window.Razorpay) { setLoaded(true); return; }
-    const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/checkout.js";
-    s.async = true;
-    s.onload = () => setLoaded(true);
-    s.onerror = () => toast.error("Could not load Razorpay");
-    document.body.appendChild(s);
+const RAZORPAY_SRC = "https://checkout.razorpay.com/v1/checkout.js";
+
+/**
+ * Self-healing Razorpay loader. Background-loads on mount, and re-tries
+ * on demand at click time if the first load was blocked (ad blocker,
+ * flaky network, CSP edge cases). Errors are surfaced to the console
+ * and as a toast — the previous version swallowed them, which made
+ * "buy button does nothing" indistinguishable from a hung script.
+ */
+function useRazorpayLoader() {
+  const promiseRef = useRef<Promise<boolean> | null>(null);
+
+  const load = useCallback((): Promise<boolean> => {
+    if (typeof window === "undefined") return Promise.resolve(false);
+    if (window.Razorpay) return Promise.resolve(true);
+    if (promiseRef.current) return promiseRef.current;
+
+    promiseRef.current = new Promise<boolean>((resolve) => {
+      const existing = document.querySelector<HTMLScriptElement>(
+        `script[src="${RAZORPAY_SRC}"]`,
+      );
+      const s = existing ?? document.createElement("script");
+      const finish = (ok: boolean) => {
+        if (!ok) promiseRef.current = null; // allow retry
+        resolve(ok);
+      };
+      s.addEventListener("load", () => finish(Boolean(window.Razorpay)), { once: true });
+      s.addEventListener("error", (e) => {
+        console.error("[razorpay] checkout.js failed to load", e);
+        finish(false);
+      }, { once: true });
+      if (!existing) {
+        s.src = RAZORPAY_SRC;
+        s.async = true;
+        document.head.appendChild(s);
+      }
+    });
+
+    return promiseRef.current;
   }, []);
-  return loaded;
+
+  useEffect(() => { void load(); }, [load]);
+
+  return load;
 }
 
 export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   const router = useRouter();
-  const razorpayLoaded = useRazorpayScript();
+  const loadRazorpay = useRazorpayLoader();
   const [loadingPackId, setLoadingPackId] = useState<string | null>(null);
 
   async function buyPack(pack: CreditPack) {
     if (!signedIn) { router.push("/login?next=/pricing"); return; }
-    if (!razorpayLoaded || !window.Razorpay) {
-      toast.error("Razorpay still loading. Try again in a moment.");
-      return;
-    }
     setLoadingPackId(pack.id);
     try {
+      const ready = await loadRazorpay();
+      if (!ready || !window.Razorpay) {
+        toast.error(
+          "Couldn't load Razorpay checkout. Disable any ad-blocker for tessar.dev and try again.",
+        );
+        return;
+      }
       const res = await fetch("/api/payments/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,6 +152,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
       });
       rzp.open();
     } catch (err) {
+      console.error("[razorpay] buyPack error", err);
       toast.error((err as Error).message || "Could not start checkout");
       setLoadingPackId(null);
     }
@@ -130,10 +164,8 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
         const popular = pack.badge === "Most popular";
         const isFree = pack.id === "single";
         return (
-          <Tilt
+          <div
             key={pack.id}
-            max={2}
-            perspective={1100}
             className={cn(
               "group relative",
               popular && "lg:z-10 lg:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.45)]",
@@ -252,7 +284,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
                 )}
               </button>
             </article>
-          </Tilt>
+          </div>
         );
       })}
     </div>

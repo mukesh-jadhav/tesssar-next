@@ -34,6 +34,8 @@ export function RefineDisclosure({
   setPrefs,
   reduced,
   compact = false,
+  hideFields,
+  intro,
 }: {
   open: boolean;
   onToggle: () => void;
@@ -42,8 +44,17 @@ export function RefineDisclosure({
   reduced: boolean;
   /** Tighter spacing for the inline cockpit layout. */
   compact?: boolean;
+  /**
+   * Suppress refine rows that would conflict with another picker on the
+   * same page (e.g. hide "Cloud" inside the study builder when the
+   * dimension *is* cloud).
+   */
+  hideFields?: Array<"cloud" | "budget" | "audience" | "residency" | "compliance" | "existingStack">;
+  /** Optional one-liner shown above the rows when the panel is open. */
+  intro?: string;
 }) {
   const count = preferenceCount(prefs);
+  const hidden = new Set(hideFields ?? []);
 
   return (
     <div className={compact ? "mt-1" : "mt-2"}>
@@ -92,62 +103,79 @@ export function RefineDisclosure({
                 compact ? "p-3.5" : "p-4 md:p-5",
               )}
             >
-              <RefineRow label="Cloud" compact={compact}>
-                <SingleChips
-                  options={CLOUD_OPTIONS}
-                  value={prefs.cloud}
-                  onChange={(v) => setPrefs({ ...prefs, cloud: v as CloudChoice })}
-                />
-              </RefineRow>
+              {intro && (
+                <p className="text-[12px] leading-snug text-[hsl(var(--ink-3))]">
+                  {intro}
+                </p>
+              )}
+              {!hidden.has("cloud") && (
+                <RefineRow label="Cloud" compact={compact}>
+                  <SingleChips
+                    options={CLOUD_OPTIONS}
+                    value={prefs.cloud}
+                    onChange={(v) => setPrefs({ ...prefs, cloud: v as CloudChoice })}
+                  />
+                </RefineRow>
+              )}
 
-              <RefineRow label="Budget" compact={compact}>
-                <SingleChips
-                  options={BUDGET_OPTIONS}
-                  value={prefs.budget}
-                  onChange={(v) => setPrefs({ ...prefs, budget: v as BudgetChoice })}
-                />
-              </RefineRow>
+              {!hidden.has("budget") && (
+                <RefineRow label="Budget" compact={compact}>
+                  <SingleChips
+                    options={BUDGET_OPTIONS}
+                    value={prefs.budget}
+                    onChange={(v) => setPrefs({ ...prefs, budget: v as BudgetChoice })}
+                  />
+                </RefineRow>
+              )}
 
-              <RefineRow label="Audience" compact={compact}>
-                <SingleChips
-                  options={AUDIENCE_OPTIONS}
-                  value={prefs.audience}
-                  onChange={(v) => setPrefs({ ...prefs, audience: v as AudienceChoice })}
-                />
-              </RefineRow>
+              {!hidden.has("audience") && (
+                <RefineRow label="Audience" compact={compact}>
+                  <SingleChips
+                    options={AUDIENCE_OPTIONS}
+                    value={prefs.audience}
+                    onChange={(v) => setPrefs({ ...prefs, audience: v as AudienceChoice })}
+                  />
+                </RefineRow>
+              )}
 
-              <RefineRow label="Residency" compact={compact}>
-                <SingleChips
-                  options={RESIDENCY_OPTIONS}
-                  value={prefs.residency}
-                  onChange={(v) => setPrefs({ ...prefs, residency: v as ResidencyChoice })}
-                />
-              </RefineRow>
+              {!hidden.has("residency") && (
+                <RefineRow label="Residency" compact={compact}>
+                  <SingleChips
+                    options={RESIDENCY_OPTIONS}
+                    value={prefs.residency}
+                    onChange={(v) => setPrefs({ ...prefs, residency: v as ResidencyChoice })}
+                  />
+                </RefineRow>
+              )}
 
-              <RefineRow label="Compliance" hint="Pick all that apply" compact={compact}>
-                <MultiChips
-                  options={COMPLIANCE_OPTIONS}
-                  value={prefs.compliance ?? []}
-                  onToggle={(v) => {
-                    const current = prefs.compliance ?? [];
-                    const next = current.includes(v as ComplianceChoice)
-                      ? current.filter((x) => x !== v)
-                      : [...current, v as ComplianceChoice];
-                    setPrefs({ ...prefs, compliance: next });
-                  }}
-                />
-              </RefineRow>
+              {!hidden.has("compliance") && (
+                <RefineRow label="Compliance" hint="Pick all that apply" compact={compact}>
+                  <MultiChips
+                    options={COMPLIANCE_OPTIONS}
+                    value={prefs.compliance ?? []}
+                    onToggle={(v) => {
+                      const current = prefs.compliance ?? [];
+                      const next = current.includes(v as ComplianceChoice)
+                        ? current.filter((x) => x !== v)
+                        : [...current, v as ComplianceChoice];
+                      setPrefs({ ...prefs, compliance: next });
+                    }}
+                  />
+                </RefineRow>
+              )}
 
-              <RefineRow label="Existing stack" hint="Optional · one line" compact={compact}>
-                <input
-                  type="text"
-                  value={prefs.existingStack ?? ""}
-                  onChange={(e) => setPrefs({ ...prefs, existingStack: e.target.value })}
-                  placeholder="e.g. Postgres + Kafka + Node, already on AWS"
-                  maxLength={300}
-                  className="w-full rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--paper))] px-3 py-2 text-[13px] text-[hsl(var(--ink))] placeholder:text-[hsl(var(--ink-3))] focus:outline-none focus:border-[hsl(var(--ink))]"
-                />
-              </RefineRow>
+              {!hidden.has("existingStack") && (
+                <RefineRow label="Existing stack" hint="Optional · one line" compact={compact}>
+                  <input
+                    type="text"
+                    value={prefs.existingStack ?? ""}
+                    onChange={(e) => setPrefs({ ...prefs, existingStack: e.target.value })}
+                    placeholder="e.g. Postgres + Kafka + Node, already on AWS"
+                    maxLength={300}
+                    className="w-full rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--paper))] px-3 py-2 text-[13px] text-[hsl(var(--ink))] placeholder:text-[hsl(var(--ink-3))] focus:outline-none focus:border-[hsl(var(--ink))]"
+                  />
+                </RefineRow>
+              )}
             </div>
           </motion.div>
         )}

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getBalance } from "@/lib/credits/ledger";
+import { formatCredits } from "@/lib/credits/display";
 import { ScrollFrame } from "@/components/workspace/ScrollFrame";
 import { StudyBuilder } from "@/components/studies/StudyBuilder";
 
@@ -21,7 +22,7 @@ export default async function NewStudyPage() {
           <span className="eyebrow hidden md:inline">
             Credits available ·{" "}
             <span className="text-[hsl(var(--ink))] font-medium">
-              {credits}
+              {formatCredits(credits)}
             </span>
           </span>
         </div>
