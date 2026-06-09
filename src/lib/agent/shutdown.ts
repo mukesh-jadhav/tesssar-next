@@ -15,9 +15,21 @@ import { refundCredit } from "@/lib/credits/ledger";
  * handlers that flip every still-running doc to `failed` + refund the
  * credit before the container exits, so the user sees the failure
  * immediately on next poll and can retry.
+ *
+ * Study-aware: when a tracked run belongs to a comparison study the drain
+ * also surfaces the variant failure on the study doc so the cockpit's
+ * fan-in aggregation reflects it without waiting for the watchdog.
  */
 
-type InflightRun = { docRef: FirebaseFirestore.DocumentReference; uid: string };
+type InflightRun = {
+  docRef: FirebaseFirestore.DocumentReference;
+  uid: string;
+  /** Refund amount in credits. Defaults to RUN_COST_CREDITS via caller. */
+  refundCredits?: number;
+  /** Set when the run is a variant of a comparison study. */
+  studyId?: string;
+  variantId?: string;
+};
 
 const inflight = new Map<string, InflightRun>();
 let installed = false;
@@ -30,6 +42,37 @@ export function untrackRun(id: string) {
   inflight.delete(id);
 }
 
+async function flipStudyVariant(
+  studyId: string,
+  variantId: string,
+  errorMessage: string,
+) {
+  const ref = adminDb.collection("studies").doc(studyId);
+  await adminDb.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    const study = snap.data() as { variants: Array<{ variantId: string; status: string; errorMessage?: string }>; status: string };
+    let mutated = false;
+    const variants = study.variants.map((v) => {
+      if (v.variantId !== variantId) return v;
+      if (v.status !== "running") return v;
+      mutated = true;
+      return { ...v, status: "failed" as const, errorMessage };
+    });
+    if (!mutated) return;
+    const anyRunning = variants.some((v) => v.status === "running");
+    const anyComplete = variants.some((v) => v.status === "complete");
+    const anyFailed = variants.some((v) => v.status === "failed");
+    let nextStatus = study.status;
+    if (!anyRunning) {
+      if (anyComplete && anyFailed) nextStatus = "partial";
+      else if (anyFailed) nextStatus = "failed";
+      else nextStatus = "complete";
+    }
+    tx.update(ref, { variants, status: nextStatus });
+  });
+}
+
 async function drain(reason: string) {
   if (inflight.size === 0) return;
   const snapshot = Array.from(inflight.entries());
@@ -38,7 +81,7 @@ async function drain(reason: string) {
     `[shutdown] draining ${snapshot.length} in-flight run(s): ${reason}`,
   );
   await Promise.allSettled(
-    snapshot.map(async ([id, { docRef, uid }]) => {
+    snapshot.map(async ([id, { docRef, uid, refundCredits, studyId, variantId }]) => {
       const errorMessage =
         "The server was rotating during your run — please retry. Your credit has been refunded.";
       try {
@@ -48,12 +91,22 @@ async function drain(reason: string) {
         return;
       }
       try {
-        await refundCredit(uid, "Refund on server shutdown", id);
+        await refundCredit(uid, "Refund on server shutdown", id, refundCredits);
       } catch (err) {
         console.error(
           `[shutdown] failed to refund ${id}:`,
           (err as Error).message,
         );
+      }
+      if (studyId && variantId) {
+        try {
+          await flipStudyVariant(studyId, variantId, errorMessage);
+        } catch (err) {
+          console.error(
+            `[shutdown] failed to flip study variant ${studyId}/${variantId}:`,
+            (err as Error).message,
+          );
+        }
       }
     }),
   );

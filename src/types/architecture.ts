@@ -300,6 +300,15 @@ export interface ArchitectureDoc {
     slug: string;
     createdAt: number;
   };
+  /** When this run is one variant of a comparison study. Cleared on promotion. */
+  studyId?: string;
+  variantLabel?: string;
+  variantId?: string;
+  /** Set on the final synthesis run produced from a study's pick-and-mix. */
+  synthesizedFrom?: {
+    studyId: string;
+    picks: Record<string, string>;
+  };
 }
 
 export interface TransactionDoc {
