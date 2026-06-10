@@ -205,7 +205,7 @@ export default async function PricingPage() {
           <Magnetic strength={0.22} maxDistance={10} className="mt-10">
             <a
               href="mailto:hello@tessar.dev?subject=Bulk credits"
-              className="btn-pill-accent btn-pill-lg group inline-flex"
+              className="btn-pill btn-pill-accent btn-pill-lg group inline-flex"
             >
               Get a quote
               <span className="ms text-[20px] transition-transform duration-300 group-hover:translate-x-1" aria-hidden>arrow_forward</span>

@@ -55,7 +55,7 @@ export default async function StudiesHistoryPage() {
               committed.
             </p>
             <div>
-              <Link href="/studies/new" className="btn-pill-accent">
+              <Link href="/studies/new" className="btn-pill btn-pill-accent">
                 New study
                 <span className="ms text-[18px]" aria-hidden>arrow_forward</span>
               </Link>

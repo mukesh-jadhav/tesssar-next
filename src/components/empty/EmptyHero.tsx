@@ -45,13 +45,13 @@ export function EmptyHero({
           {(primary || secondary) && (
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3 md:justify-start">
               {primary && (
-                <Link href={primary.href} className="btn-pill-accent btn-pill-lg">
+                <Link href={primary.href} className="btn-pill btn-pill-accent btn-pill-lg">
                   {primary.label}
                   <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
                 </Link>
               )}
               {secondary && (
-                <Link href={secondary.href} className="btn-pill-ghost btn-pill-lg">
+                <Link href={secondary.href} className="btn-pill btn-pill-ghost btn-pill-lg">
                   {secondary.label}
                 </Link>
               )}

@@ -492,7 +492,7 @@ export function ArchitectureView({
                 </h3>
               </div>
               <div className="flex flex-col gap-3">
-                <Link href="/new" className="btn-pill-accent btn-pill-lg w-fit">
+                <Link href="/new" className="btn-pill btn-pill-accent btn-pill-lg w-fit">
                   New design
                   <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
                 </Link>

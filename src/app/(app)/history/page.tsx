@@ -91,13 +91,13 @@ export default async function HistoryPage() {
               you&rsquo;ve run — searchable, permanent, exportable.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/new" className="btn-pill-accent">
+              <Link href="/new" className="btn-pill btn-pill-accent">
                 New design
                 <span className="ms text-[18px]" aria-hidden>
                   arrow_forward
                 </span>
               </Link>
-              <Link href="/studies/new" className="btn-pill-ghost">
+              <Link href="/studies/new" className="btn-pill btn-pill-ghost">
                 New study
                 <span className="ms text-[18px]" aria-hidden>
                   compare_arrows

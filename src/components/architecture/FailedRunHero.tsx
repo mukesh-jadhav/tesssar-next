@@ -54,11 +54,11 @@ export function FailedRunHero({
               </p>
 
               <div className="mt-9 flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                <Link href={retryHref} className="btn-pill-accent btn-pill-lg">
+                <Link href={retryHref} className="btn-pill btn-pill-accent btn-pill-lg">
                   Try again
                   <span className="ms text-[20px]" aria-hidden>autorenew</span>
                 </Link>
-                <Link href="/dashboard" className="btn-pill-ghost btn-pill-lg">
+                <Link href="/dashboard" className="btn-pill btn-pill-ghost btn-pill-lg">
                   Back to dashboard
                 </Link>
               </div>

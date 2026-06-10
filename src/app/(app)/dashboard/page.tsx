@@ -83,12 +83,12 @@ export default async function DashboardPage() {
             below, or open a blank brief.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/new" className="btn-pill-accent btn-pill-lg">
+            <Link href="/new" className="btn-pill btn-pill-accent btn-pill-lg">
               New design
               <span className="ms text-[20px]" aria-hidden>arrow_forward</span>
             </Link>
             {totalRuns === 0 && (
-              <Link href="/sample" className="btn-pill-ghost btn-pill-lg">
+              <Link href="/sample" className="btn-pill btn-pill-ghost btn-pill-lg">
                 See a sample
               </Link>
             )}
