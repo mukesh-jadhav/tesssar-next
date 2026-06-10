@@ -29,8 +29,8 @@ export default async function NewStudyPage() {
 
         <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
           <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-            Run them<br />
-            <span className="serif font-normal italic accent">side-by-side</span>
+            One brief,<br />
+            <span className="serif font-normal italic accent">every option</span>
             {firstName !== "friend" ? <>, {firstName}.</> : "."}
           </h1>
 

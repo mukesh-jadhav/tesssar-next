@@ -64,7 +64,7 @@ export default async function NewArchitecturePage({
         <>
           <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:gap-20">
             <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-              What can I<br />
+              What should we<br />
               <span className="serif font-normal italic accent">architect</span>
               {firstName !== "friend" ? <>, {firstName}?</> : "?"}
             </h1>
