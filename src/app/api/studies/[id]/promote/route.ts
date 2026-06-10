@@ -27,8 +27,9 @@ const PromoteBody = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const log = requestLogger(req, "studies.promote");
 
   const ipGuard = rateLimit({
@@ -60,7 +61,7 @@ export async function POST(
   }
 
   // Ownership + study membership.
-  const studyRef = adminDb.collection("studies").doc(params.id);
+  const studyRef = adminDb.collection("studies").doc(id);
   const studySnap = await studyRef.get();
   if (!studySnap.exists) return new Response("Not found", { status: 404 });
   const study = studySnap.data() as StudyDoc;

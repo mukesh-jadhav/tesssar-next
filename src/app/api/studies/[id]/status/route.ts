@@ -18,8 +18,9 @@ export const runtime = "nodejs";
  */
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const user = await getSessionUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
@@ -32,7 +33,7 @@ export async function GET(
   });
   if (!guard.ok) return rateLimitResponse(guard);
 
-  const snap = await adminDb.collection("studies").doc(params.id).get();
+  const snap = await adminDb.collection("studies").doc(id).get();
   if (!snap.exists) return new Response("Not found", { status: 404 });
 
   const study = snap.data() as StudyDoc;

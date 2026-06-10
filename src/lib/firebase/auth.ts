@@ -13,7 +13,7 @@ export async function getSessionUser(): Promise<{
   displayName: string | null;
   photoURL: string | null;
 } | null> {
-  const cookie = cookies().get(SESSION_COOKIE_NAME)?.value;
+  const cookie = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   if (!cookie) return null;
   try {
     const decoded = await adminAuth.verifySessionCookie(cookie, true);

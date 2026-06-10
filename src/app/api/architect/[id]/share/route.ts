@@ -21,8 +21,9 @@ export const runtime = "nodejs";
  */
 export async function POST(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const user = await getSessionUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
@@ -33,7 +34,7 @@ export async function POST(
   });
   if (!guard.ok) return rateLimitResponse(guard);
 
-  const ref = adminDb.collection("architectures").doc(params.id);
+  const ref = adminDb.collection("architectures").doc(id);
   const snap = await ref.get();
   if (!snap.exists) return new Response("Not found", { status: 404 });
   const d = snap.data() as ArchitectureDoc;
@@ -54,8 +55,8 @@ export async function POST(
   try {
     await consumeCredit(
       user.uid,
-      `Public share ${params.id}`,
-      params.id,
+      `Public share ${id}`,
+      id,
       SHARE_COST_CREDITS,
     );
   } catch (err) {
@@ -82,8 +83,9 @@ export async function POST(
  */
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const user = await getSessionUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
@@ -94,7 +96,7 @@ export async function DELETE(
   });
   if (!guard.ok) return rateLimitResponse(guard);
 
-  const ref = adminDb.collection("architectures").doc(params.id);
+  const ref = adminDb.collection("architectures").doc(id);
   const snap = await ref.get();
   if (!snap.exists) return new Response("Not found", { status: 404 });
   const d = snap.data() as ArchitectureDoc;

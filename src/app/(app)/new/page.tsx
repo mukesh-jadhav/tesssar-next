@@ -14,14 +14,15 @@ export const metadata = { title: "New design" };
 export default async function NewArchitecturePage({
   searchParams,
 }: {
-  searchParams: { seed?: string; prompt?: string };
+  searchParams: Promise<{ seed?: string; prompt?: string }>;
 }) {
   const user = await getSessionUser();
   if (!user) redirect("/login?next=/new");
   const credits = await getBalance(user.uid);
   const firstName =
     (user.displayName ?? user.email).split(" ")[0]?.split("@")[0] ?? "friend";
-  const seed = searchParams.seed ?? searchParams.prompt;
+  const sp = await searchParams;
+  const seed = sp.seed ?? sp.prompt;
 
   let recentBriefs: RecentBrief[] = [];
   try {

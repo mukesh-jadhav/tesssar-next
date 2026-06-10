@@ -14,9 +14,10 @@ export const runtime = "nodejs";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const d = await loadBySlug(params.slug);
+  const { slug } = await params;
+  const d = await loadBySlug(slug);
   if (!d?.architecture) return { title: "Shared design · Tessar" };
   const arch = Architecture.safeParse(d.architecture);
   const title = arch.success ? arch.data.meta.title : "Shared design";
@@ -29,11 +30,12 @@ export async function generateMetadata({
 export default async function PublicReportPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  // Public route \u2014 enforce a per-IP rate limit before touching Firestore
+  const { slug } = await params;
+  // Public route — enforce a per-IP rate limit before touching Firestore
   // so a single legitimate slug can't be hammered for unlimited reads.
-  const ip = clientIp({ headers: headers() });
+  const ip = clientIp({ headers: await headers() });
   const guard = rateLimit({
     key: `share-view:ip:${ip}`,
     limit: 60,
@@ -41,7 +43,7 @@ export default async function PublicReportPage({
   });
   if (!guard.ok) notFound();
 
-  const d = await loadBySlug(params.slug);
+  const d = await loadBySlug(slug);
   if (!d || !d.architecture) notFound();
   const arch = Architecture.parse(d.architecture);
 

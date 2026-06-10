@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * from the browser without UI.
  */
 export async function GET() {
-  const cookie = cookies().get(SESSION_COOKIE_NAME)?.value;
+  const cookie = (await cookies()).get(SESSION_COOKIE_NAME)?.value;
   if (!cookie) {
     return NextResponse.json({ signedIn: false, reason: "no-cookie" });
   }

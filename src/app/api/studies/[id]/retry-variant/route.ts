@@ -46,8 +46,9 @@ const RetryBody = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const log = requestLogger(req, "studies.retry-variant");
 
   const ipGuard = rateLimit({
@@ -79,7 +80,7 @@ export async function POST(
   }
 
   // Ownership + variant existence (pre-charge read).
-  const studyRef = adminDb.collection("studies").doc(params.id);
+  const studyRef = adminDb.collection("studies").doc(id);
   const studySnap = await studyRef.get();
   if (!studySnap.exists) return new Response("Not found", { status: 404 });
   const study = studySnap.data() as StudyDoc;

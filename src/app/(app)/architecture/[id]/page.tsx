@@ -8,11 +8,12 @@ import type { ArchitectureDoc } from "@/types/architecture";
 export default async function ArchitectureResultPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const user = await getSessionUser();
-  if (!user) redirect("/login?next=/architecture/" + params.id);
-  const snap = await adminDb.collection("architectures").doc(params.id).get();
+  if (!user) redirect("/login?next=/architecture/" + id);
+  const snap = await adminDb.collection("architectures").doc(id).get();
   if (!snap.exists) notFound();
   const raw = snap.data() as ArchitectureDoc;
   if (raw.uid !== user.uid) redirect("/dashboard");

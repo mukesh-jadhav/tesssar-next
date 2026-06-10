@@ -13,12 +13,13 @@ import {
 export default async function StudyResultPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const user = await getSessionUser();
-  if (!user) redirect(`/login?next=/studies/${params.id}`);
+  if (!user) redirect(`/login?next=/studies/${id}`);
 
-  const snap = await adminDb.collection("studies").doc(params.id).get();
+  const snap = await adminDb.collection("studies").doc(id).get();
   if (!snap.exists) notFound();
   const raw = snap.data() as StudyDoc;
   if (raw.uid !== user.uid) redirect("/dashboard");

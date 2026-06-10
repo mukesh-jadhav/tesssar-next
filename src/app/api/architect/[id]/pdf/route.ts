@@ -8,7 +8,8 @@ import { rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 
-export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await getSessionUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
 
@@ -20,7 +21,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   });
   if (!guard.ok) return rateLimitResponse(guard);
 
-  const snap = await adminDb.collection("architectures").doc(params.id).get();
+  const snap = await adminDb.collection("architectures").doc(id).get();
   if (!snap.exists) return new NextResponse("Not found", { status: 404 });
   const doc = snap.data() as ArchitectureDoc;
   if (doc.uid !== user.uid) return new NextResponse("Forbidden", { status: 403 });

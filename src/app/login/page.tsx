@@ -14,12 +14,12 @@ export const metadata = { title: "Sign in" };
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { next?: string };
+  searchParams: Promise<{ next?: string }>;
 }) {
   // Validate the post-auth destination — unvalidated `next` is an
   // open-redirect (CWE-601) primitive that turns the sign-in page into
   // a phishing relay.
-  const next = safeNext(searchParams.next, "/studio");
+  const next = safeNext((await searchParams).next, "/studio");
   const user = await getSessionUser();
   if (user) redirect(next);
 

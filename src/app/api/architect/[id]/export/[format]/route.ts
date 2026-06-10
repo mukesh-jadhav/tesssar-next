@@ -16,11 +16,12 @@ type Format = (typeof FORMATS)[number];
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string; format: string } },
+  { params }: { params: Promise<{ id: string; format: string }> },
 ) {
-  const format = params.format.toLowerCase();
+  const { id, format: rawFormat } = await params;
+  const format = rawFormat.toLowerCase();
   if (!FORMATS.includes(format as Format)) {
-    return new NextResponse(`Unsupported format: ${params.format}`, { status: 400 });
+    return new NextResponse(`Unsupported format: ${rawFormat}`, { status: 400 });
   }
 
   const user = await getSessionUser();
@@ -35,7 +36,7 @@ export async function GET(
   });
   if (!guard.ok) return rateLimitResponse(guard);
 
-  const snap = await adminDb.collection("architectures").doc(params.id).get();
+  const snap = await adminDb.collection("architectures").doc(id).get();
   if (!snap.exists) return new NextResponse("Not found", { status: 404 });
   const doc = snap.data() as ArchitectureDoc;
   if (doc.uid !== user.uid) return new NextResponse("Forbidden", { status: 403 });

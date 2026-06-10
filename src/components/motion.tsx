@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 /* ------------------------------------------------------------------ */
 export function useInView<T extends HTMLElement>(
   options: { threshold?: number; rootMargin?: string; once?: boolean } = {},
-): [React.RefObject<T>, boolean] {
+): [React.RefObject<T | null>, boolean] {
   const { threshold = 0.12, rootMargin = "0px 0px -6% 0px", once = true } = options;
   const ref = React.useRef<T>(null);
   // Start TRUE so SSR + no-JS users see content. Client decides if it should animate.
