@@ -1,19 +1,10 @@
-import { getSessionUser } from "@/lib/firebase/auth";
-import { getBalance } from "@/lib/credits/ledger";
-import { getUserRunCount } from "@/lib/architectures/stats";
-import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { HomeCockpit } from "@/components/workspace/HomeCockpit";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "Studio" };
 
-export default async function StudioPage() {
-  const user = await getSessionUser();
-  const [credits, runCount] = user
-    ? await Promise.all([getBalance(user.uid), getUserRunCount(user.uid)])
-    : [undefined, 0];
-  return (
-    <WorkspaceShell user={user} credits={credits}>
-      <HomeCockpit signedIn={!!user} credits={credits} user={user} runCount={runCount} />
-    </WorkspaceShell>
-  );
+// `/studio` was a duplicate of `/new` (the same single-brief composer). It now
+// permanently redirects to `/new`, the canonical composer, so any old
+// bookmarks or external links keep working.
+export default function StudioPage() {
+  redirect("/new");
 }

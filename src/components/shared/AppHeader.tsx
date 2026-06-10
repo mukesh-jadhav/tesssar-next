@@ -45,7 +45,7 @@ export async function AppHeader() {
         </div>
 
         <nav className="hidden md:flex items-center gap-1">
-          <HeaderLink href="/studio" label="Studio" />
+          <HeaderLink href="/new" label="New design" />
           {showSample && <HeaderLink href="/sample" label="Sample" />}
           <HeaderLink href="/pricing" label="Pricing" />
         </nav>

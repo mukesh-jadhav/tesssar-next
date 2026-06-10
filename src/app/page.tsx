@@ -321,7 +321,7 @@ export default async function HomePage() {
                   Start a study
                   <span className="ms text-[18px]" aria-hidden>compare_arrows</span>
                 </Link>
-                <Link href="/studio" className="link-ink text-[14px]">
+                <Link href="/new" className="link-ink text-[14px]">
                   Or design a single system
                 </Link>
               </div>

@@ -4,8 +4,8 @@
  * Reusable Refine ▾ disclosure — six optional preference chips that
  * compose into the user's brief before send.
  *
- * Used by both NewArchitectureForm (/new) and HomeCockpit (/studio) so
- * that whichever entrypoint the user picks, they get the same controls.
+ * Used by `NewArchitectureForm` (`/new`) so the composer gets a consistent
+ * set of optional preference controls.
  */
 
 import { AnimatePresence, motion } from "framer-motion";

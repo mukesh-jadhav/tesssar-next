@@ -17,7 +17,6 @@ const PRIMARY: Dest[] = [
 
 const SECONDARY: Dest[] = [
   { href: "/sample", label: "View sample", icon: "visibility" },
-  { href: "/studio", label: "Studio", icon: "palette" },
 ];
 
 export function MobileNavMenu({ signedIn }: { signedIn: boolean }) {
