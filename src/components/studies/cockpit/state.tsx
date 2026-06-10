@@ -27,6 +27,7 @@ export type CockpitPicks = Partial<Record<
 
 /** The full nine-lens catalog. Stable order; ids match the rail shortcuts. */
 export type LensId =
+  | "dashboard"
   | "verdict"
   | "architecture"
   | "performance"
@@ -67,7 +68,7 @@ const CockpitContext = createContext<CockpitContextValue | null>(null);
 export function CockpitProvider({
   children,
   studyId,
-  initialLens = "verdict",
+  initialLens = "dashboard",
   initialScenario = DEFAULT_SCENARIO,
   promoteVariant,
   retryVariant,

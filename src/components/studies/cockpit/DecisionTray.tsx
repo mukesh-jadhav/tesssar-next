@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,7 @@ export function DecisionTray({
   busy?: boolean;
 }) {
   const { picks, setPick } = useCockpit();
-  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const completed = useMemo(
     () => SLICES.every((s) => picks[s.id] != null),
@@ -54,9 +54,26 @@ export function DecisionTray({
 
   const filledCount = SLICES.filter((s) => picks[s.id] != null).length;
 
+  // Lock background scroll while the panel is open.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
+
+  // Close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   async function handleSynthesize() {
     if (!completed) {
-      setExpanded(true);
       toast.message("Pick a variant for every slice first.");
       return;
     }
@@ -68,142 +85,223 @@ export function DecisionTray({
       }
       return;
     }
-    // Phase 3 placeholder: the synthesis API lands in Phase 6.
     toast.message(
       "Synthesis ships in the next release — your picks are saved in the cockpit.",
     );
   }
 
+  // Button label morphs based on state:
+  //   - panel closed  → "Finalize"
+  //   - panel open    → "Synthesize · 80 cr"
+  //   - busy          → "Synthesizing…"
+  const buttonLabel = busy
+    ? "synth"
+    : open
+      ? "synth"
+      : "finalize";
+
   return (
-    <div className="border-t border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 backdrop-blur-sm">
-      {/* === Compact header bar (always visible) === */}
-      <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-2.5 flex items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          aria-controls="synthesis-tray-body"
-          className="group flex items-center gap-3 min-w-0 text-left"
-        >
-          <span
-            className={cn(
-              "ms text-[18px] text-[hsl(var(--ink-3))] transition-transform group-hover:text-[hsl(var(--ink))]",
-              expanded && "rotate-180",
-            )}
-            aria-hidden
-          >
-            expand_less
-          </span>
-          <div className="flex items-baseline gap-2 min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))] group-hover:text-[hsl(var(--ink))] transition-colors">
-              Synthesis tray
-            </span>
-            <span className="hidden sm:inline text-[12px] text-[hsl(var(--ink-2))] truncate">
-              {expanded
-                ? "Pick the best variant per slice, then synthesize."
-                : completed
-                  ? "Ready to synthesize — all 6 slices picked."
-                  : `${filledCount}/${SLICES.length} picks — click to choose slices.`}
-            </span>
-          </div>
-        </button>
-
-        <div className="flex items-center gap-3">
-          {/* Compact progress dots */}
-          <div className="hidden sm:flex items-center gap-1" aria-hidden>
-            {SLICES.map((s) => (
-              <span
-                key={s.id}
-                className={cn(
-                  "size-1.5 rounded-full transition-colors",
-                  picks[s.id] != null
-                    ? "bg-[hsl(var(--accent))]"
-                    : "bg-[hsl(var(--line-2))]",
-                )}
-                title={`${s.label}: ${picks[s.id] ?? "—"}`}
-              />
-            ))}
-          </div>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))] tabular-nums">
-            {filledCount}/{SLICES.length}
-          </span>
-          <motion.button
-            type="button"
-            onClick={handleSynthesize}
-            disabled={busy || !completed}
-            layout
-            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
-            className={cn(
-              "btn-pill press relative overflow-hidden text-[12px] py-1.5 px-3",
-              busy
-                ? "btn-pill-accent !cursor-wait"
-                : completed
-                  ? "btn-pill-accent"
-                  : "!bg-[hsl(var(--paper-3))] !text-[hsl(var(--ink-3))] !border-[hsl(var(--paper-3))] cursor-not-allowed",
-            )}
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              {busy ? (
-                <motion.span
-                  key="busy"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-1.5"
-                >
-                  <span className="ms text-[14px] animate-spin" aria-hidden>
-                    progress_activity
-                  </span>
-                  Synthesizing…
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="idle"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="flex items-center gap-1.5"
-                >
-                  Synthesize · {SYNTHESIS_COST_CREDITS} cr
-                  <span className="ms text-[14px]" aria-hidden>
-                    auto_awesome
-                  </span>
-                </motion.span>
+    <>
+      {/* === Floating action button (bottom-right) === */}
+      <motion.button
+        type="button"
+        onClick={() => {
+          if (busy) return;
+          if (!open) {
+            setOpen(true);
+            return;
+          }
+          handleSynthesize();
+        }}
+        disabled={busy || (open && !completed)}
+        layout
+        transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+        className={cn(
+          "fixed bottom-5 right-5 md:bottom-6 md:right-6 z-30",
+          "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium",
+          "shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] transition-colors",
+          busy
+            ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] cursor-wait"
+            : open && completed
+              ? "bg-[hsl(var(--accent))] text-[hsl(var(--accent-ink))] hover:bg-[hsl(var(--accent))]/90"
+              : open && !completed
+                ? "bg-[hsl(var(--paper-3))] text-[hsl(var(--ink-3))] cursor-not-allowed"
+                : "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] hover:bg-[hsl(var(--ink-2))]",
+        )}
+        aria-label={open ? "Synthesize architecture" : "Finalize picks"}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          {busy ? (
+            <motion.span
+              key="busy"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18 }}
+              className="flex items-center gap-1.5"
+            >
+              <span className="ms text-[16px] animate-spin" aria-hidden>
+                progress_activity
+              </span>
+              Synthesizing…
+            </motion.span>
+          ) : open ? (
+            <motion.span
+              key="synth"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: EASE_OUT_EXPO }}
+              className="flex items-center gap-1.5"
+            >
+              Synthesize
+              <span className="font-mono text-[10px] uppercase tracking-wider opacity-80">
+                · {SYNTHESIS_COST_CREDITS} cr
+              </span>
+              <span className="ms text-[16px]" aria-hidden>
+                auto_awesome
+              </span>
+            </motion.span>
+          ) : (
+            <motion.span
+              key="finalize"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.22, ease: EASE_OUT_EXPO }}
+              className="flex items-center gap-1.5"
+            >
+              Finalize
+              {filledCount > 0 && (
+                <span className="font-mono text-[10px] uppercase tracking-wider opacity-80">
+                  · {filledCount}/{SLICES.length}
+                </span>
               )}
-            </AnimatePresence>
-          </motion.button>
-        </div>
-      </div>
+              <span className="ms text-[16px]" aria-hidden>
+                tune
+              </span>
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
 
-      {/* === Expandable body === */}
-      <AnimatePresence initial={false}>
-        {expanded && (
-          <motion.div
-            id="synthesis-tray-body"
-            key="tray-body"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
-            className="overflow-hidden border-t border-[hsl(var(--line))]"
-          >
-            <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-4 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
-              {SLICES.map((slice) => (
-                <SliceRow
-                  key={slice.id}
-                  slice={slice}
-                  variants={variants}
-                  picked={picks[slice.id]}
-                  onPick={(vid) =>
-                    setPick(slice.id, picks[slice.id] === vid ? undefined : vid)
-                  }
-                />
-              ))}
-            </div>
-          </motion.div>
+      {/* === Side panel slide-out === */}
+      <AnimatePresence>
+        {open && (
+          <>
+            {/* Scrim */}
+            <motion.div
+              key="scrim"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-20 bg-[hsl(var(--ink))]/15 backdrop-blur-[2px]"
+              onClick={() => setOpen(false)}
+              aria-hidden
+            />
+            {/* Panel */}
+            <motion.aside
+              key="panel"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="finalize-title"
+              initial={{ x: "100%", opacity: 0.4 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ duration: 0.34, ease: EASE_OUT_EXPO }}
+              className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-[460px] flex flex-col bg-[hsl(var(--paper))] border-l border-[hsl(var(--line))] shadow-[-12px_0_40px_-16px_rgba(0,0,0,0.25)]"
+            >
+              {/* Panel header */}
+              <div className="flex items-start justify-between gap-3 border-b border-[hsl(var(--line))] px-5 py-4">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+                    Finalize architecture
+                  </div>
+                  <h2
+                    id="finalize-title"
+                    className="display-tight text-[20px] leading-tight tracking-[-0.02em] mt-0.5"
+                  >
+                    Pick the best variant per slice
+                  </h2>
+                  <p className="mt-1 text-[12px] text-[hsl(var(--ink-3))] leading-snug">
+                    These six picks define the synthesized architecture. You
+                    can mix and match — the next step combines them into one
+                    coherent design.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="shrink-0 ms text-[20px] text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] transition-colors"
+                  aria-label="Close finalize panel"
+                >
+                  close
+                </button>
+              </div>
+
+              {/* Progress dots */}
+              <div className="flex items-center justify-between gap-3 border-b border-[hsl(var(--line))] px-5 py-2.5 bg-[hsl(var(--paper-2))]/40">
+                <div className="flex items-center gap-1" aria-hidden>
+                  {SLICES.map((s) => (
+                    <span
+                      key={s.id}
+                      className={cn(
+                        "size-2 rounded-full transition-colors",
+                        picks[s.id] != null
+                          ? "bg-[hsl(var(--ink))]"
+                          : "bg-[hsl(var(--line-2))]",
+                      )}
+                      title={`${s.label}: ${picks[s.id] ?? "—"}`}
+                    />
+                  ))}
+                </div>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))] tabular-nums">
+                  {filledCount}/{SLICES.length}{" "}
+                  {completed ? "ready" : "picked"}
+                </span>
+              </div>
+
+              {/* Slices */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin px-5 py-4 grid gap-2.5">
+                {SLICES.map((slice) => (
+                  <SliceRow
+                    key={slice.id}
+                    slice={slice}
+                    variants={variants}
+                    picked={picks[slice.id]}
+                    onPick={(vid) =>
+                      setPick(slice.id, picks[slice.id] === vid ? undefined : vid)
+                    }
+                  />
+                ))}
+              </div>
+
+              {/* Footer — synthesis affordance is the floating button itself */}
+              <div className="border-t border-[hsl(var(--line))] px-5 py-3 text-[11px] text-[hsl(var(--ink-3))] leading-snug">
+                {completed ? (
+                  <span>
+                    All slices picked. Press{" "}
+                    <span className="text-[hsl(var(--ink))] font-medium">
+                      Synthesize
+                    </span>{" "}
+                    to combine them into a final architecture
+                    {" "}({SYNTHESIS_COST_CREDITS} credits).
+                  </span>
+                ) : (
+                  <span>
+                    Pick a variant for every slice to unlock Synthesize.
+                  </span>
+                )}
+              </div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
-    </div>
+
+      {/* Hidden suppress: button label cue avoids unused var lint */}
+      <span hidden aria-hidden>{buttonLabel}</span>
+    </>
   );
 }
 

@@ -17,7 +17,7 @@
  * the user can retry.
  */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCockpit, type Scenario } from "./state";
@@ -69,7 +69,16 @@ function headcountTierForMau(mau: number): "growth" | "scale" | "hyperscale" {
   return "hyperscale";
 }
 
-export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
+export function CockpitTopPlane({
+  variants,
+  showDashboard = true,
+}: {
+  variants: CockpitVariant[];
+  /** When false, the KpiHero + MetricMatrix band is hidden; only the
+   * scenario controls and living verdict render. Used when a non-
+   * dashboard lens is selected — the lens body owns the main area. */
+  showDashboard?: boolean;
+}) {
   const { scenario, setScenario } = useCockpit();
 
   const sliderValue = useMemo(
@@ -173,6 +182,7 @@ export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
 
           {/* Region failure */}
           <label
+            title="Simulate a single-region outage. Variants that depend on one region degrade; multi-region designs survive."
             className={cn(
               "flex items-center gap-2 select-none cursor-pointer text-[12px]",
               scenario.regionFailureSim && "text-[hsl(var(--bad))]",
@@ -209,12 +219,28 @@ export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
             <span className="font-mono text-[10px] uppercase tracking-[0.14em]">
               Region down
             </span>
+            <span
+              className="ms text-[14px] text-[hsl(var(--ink-3))]/70 -ml-1"
+              aria-hidden
+              title="Simulate a single-region outage. Variants that depend on one region degrade; multi-region designs survive."
+            >
+              info
+            </span>
           </label>
 
           {/* Cost ceiling */}
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
+          <div
+            className="flex items-center gap-2"
+            title="Monthly cost ceiling in INR. Variants that exceed this at the current load show a warning in the matrix."
+          >
+            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))] inline-flex items-center gap-1">
               Ceiling
+              <span
+                className="ms text-[12px] text-[hsl(var(--ink-3))]/70"
+                aria-hidden
+              >
+                info
+              </span>
             </span>
             <div className="flex items-center rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-2 py-0.5">
               <span className="text-[11px] text-[hsl(var(--ink-3))] mr-1">₹</span>
@@ -252,10 +278,10 @@ export function CockpitTopPlane({ variants }: { variants: CockpitVariant[] }) {
         />
 
         {/* ────────── Row 3: KPI hero band ────────── */}
-        <KpiHero variants={variants} />
+        {showDashboard && <KpiHero variants={variants} />}
 
         {/* ────────── Row 4: comparison matrix ────────── */}
-        <MetricMatrix variants={variants} />
+        {showDashboard && <MetricMatrix variants={variants} />}
       </div>
     </section>
   );
@@ -278,6 +304,7 @@ function LivingVerdict({
   latencyMs: number;
   regionDown: boolean;
 }) {
+  const [open, setOpen] = useState(false);
   const monthlyReq = estimatedMonthlyRequests(mau);
   const monthlyReqStr =
     monthlyReq >= 1_000_000_000
@@ -288,38 +315,130 @@ function LivingVerdict({
 
   return (
     <div className="rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/40 px-3.5 py-3 leading-relaxed">
-      <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
-        At your scenario
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full text-left"
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))]">
+            At your scenario
+          </div>
+          <span
+            className={cn(
+              "ms text-[16px] text-[hsl(var(--ink-3))] transition-transform",
+              open && "rotate-180",
+            )}
+            aria-hidden
+          >
+            expand_more
+          </span>
+        </div>
+        <p className="mt-1 text-[14px] md:text-[15px] text-[hsl(var(--ink))]">
+          <span className="font-mono text-[hsl(var(--ink-2))]">
+            {formatMauShort(mau)} MAU
+          </span>
+          <span className="text-[hsl(var(--ink-3))]">
+            {" "}({monthlyReqStr}/mo)
+          </span>
+          <span className="text-[hsl(var(--ink-3))]"> · p95 ≤ </span>
+          <span className="font-mono text-[hsl(var(--ink-2))]">
+            {latencyMs < 1000 ? `${latencyMs}ms` : `${latencyMs / 1000}s`}
+          </span>
+          {regionDown && (
+            <span className="text-[hsl(var(--bad))]"> · region down</span>
+          )}
+          <span className="text-[hsl(var(--ink-3))]"> — </span>
+          <WinnerWord prefix="cheapest is" label={cheapestLabel} tone="accent" />
+          {lowestOpsLabel && (
+            <>
+              <span className="text-[hsl(var(--ink-3))]">, </span>
+              <WinnerWord prefix="lowest ops is" label={lowestOpsLabel} tone="ink" />
+            </>
+          )}
+          {fastestLabel && fastestLabel !== cheapestLabel && (
+            <>
+              <span className="text-[hsl(var(--ink-3))]">, </span>
+              <WinnerWord prefix="fastest to ship is" label={fastestLabel} tone="ink" />
+            </>
+          )}
+          <span className="text-[hsl(var(--ink-3))]">.</span>
+        </p>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="verdict-detail"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3 text-[12px]">
+              <DetailRow
+                label="Load"
+                value={`${formatMauShort(mau)} MAU · ~${monthlyReqStr}/mo`}
+                hint="Drag the slider above to project to any load between 1K and 100M MAU. Cost, latency and saturation all re-compute live."
+              />
+              <DetailRow
+                label="Latency budget"
+                value={latencyMs < 1000 ? `${latencyMs}ms p95` : `${latencyMs / 1000}s p95`}
+                hint="The 95th-percentile response time you commit to. Variants whose projected p95 exceeds this get flagged in the Performance lens."
+              />
+              <DetailRow
+                label="Region down"
+                value={regionDown ? "Simulating" : "Off"}
+                hint="When on, single-region designs degrade and the Reliability lens highlights which architectures survive."
+              />
+              {cheapestLabel && (
+                <DetailRow
+                  label="Cheapest at this load"
+                  value={cheapestLabel}
+                  hint="Lowest projected monthly INR for the current load, after the cost ceiling rule."
+                />
+              )}
+              {lowestOpsLabel && (
+                <DetailRow
+                  label="Lowest ops burden"
+                  value={lowestOpsLabel}
+                  hint="Fewest day-2 engineering headcount required — deploys, on-call, observability combined."
+                />
+              )}
+              {fastestLabel && (
+                <DetailRow
+                  label="Fastest to ship"
+                  value={fastestLabel}
+                  hint="Smallest projected p95 at the current load. Sometimes the same as cheapest, often not."
+                />
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  hint,
+}: {
+  label: string;
+  value: string;
+  hint: string;
+}) {
+  return (
+    <div className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
+      <div className="font-mono text-[9px] uppercase tracking-wider text-[hsl(var(--ink-3))]">
+        {label}
       </div>
-      <p className="mt-1 text-[14px] md:text-[15px] text-[hsl(var(--ink))]">
-        <span className="font-mono text-[hsl(var(--ink-2))]">
-          {formatMauShort(mau)} MAU
-        </span>
-        <span className="text-[hsl(var(--ink-3))]">
-          {" "}({monthlyReqStr}/mo)
-        </span>
-        <span className="text-[hsl(var(--ink-3))]"> · p95 ≤ </span>
-        <span className="font-mono text-[hsl(var(--ink-2))]">
-          {latencyMs < 1000 ? `${latencyMs}ms` : `${latencyMs / 1000}s`}
-        </span>
-        {regionDown && (
-          <span className="text-[hsl(var(--bad))]"> · region down</span>
-        )}
-        <span className="text-[hsl(var(--ink-3))]"> — </span>
-        <WinnerWord prefix="cheapest is" label={cheapestLabel} tone="accent" />
-        {lowestOpsLabel && (
-          <>
-            <span className="text-[hsl(var(--ink-3))]">, </span>
-            <WinnerWord prefix="lowest ops is" label={lowestOpsLabel} tone="ink" />
-          </>
-        )}
-        {fastestLabel && fastestLabel !== cheapestLabel && (
-          <>
-            <span className="text-[hsl(var(--ink-3))]">, </span>
-            <WinnerWord prefix="fastest to ship is" label={fastestLabel} tone="ink" />
-          </>
-        )}
-        <span className="text-[hsl(var(--ink-3))]">.</span>
+      <div className="mt-0.5 text-[12.5px] text-[hsl(var(--ink))]">{value}</div>
+      <p className="mt-1 text-[11px] text-[hsl(var(--ink-3))] leading-snug">
+        {hint}
       </p>
     </div>
   );

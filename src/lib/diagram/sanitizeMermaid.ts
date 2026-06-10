@@ -94,7 +94,7 @@ function labelNeedsQuoting(body: string): boolean {
 function rewriteLabels(line: string): string {
   const trimmed = line.trim();
   if (!trimmed) return line;
-  if (/^(?:subgraph|end|direction|click|classDef|class\s|linkStyle|style\s|%%)/i.test(trimmed)) {
+  if (/^(?:end|direction|click|classDef|class\s|linkStyle|style\s|%%)/i.test(trimmed)) {
     return line;
   }
 
@@ -195,6 +195,21 @@ function fixIdentifierHyphens(line: string): string {
   );
 }
 
+/**
+ * Quote pipe-delimited edge labels that contain parser-tripping chars.
+ * Matches `|...|` segments that sit between two non-`|` chars (typical
+ * edge label form). Already-quoted bodies are left alone.
+ */
+function rewriteEdgeLabels(line: string): string {
+  return line.replace(/\|([^|\n]+)\|/g, (whole, body: string) => {
+    const trimmed = body.trim();
+    if (!trimmed) return whole;
+    if (trimmed.startsWith('"') && trimmed.endsWith('"')) return whole;
+    if (!labelNeedsQuoting(trimmed)) return whole;
+    return `|"${normalizeLabelBody(trimmed)}"|`;
+  });
+}
+
 export function sanitizeMermaid(raw: string): string {
   if (!raw) return raw;
   let src = stripInvisibles(raw);
@@ -210,6 +225,7 @@ export function sanitizeMermaid(raw: string): string {
     .map((line) => {
       if (/^\s*%%/.test(line)) return line;
       let l = rewriteLabels(line);
+      l = rewriteEdgeLabels(l);
       l = fixIdentifierHyphens(l);
       return l;
     })

@@ -149,6 +149,24 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
           const histogram = countByCategory(components);
           return (
             <div className="flex flex-col gap-3">
+              {/* Architecture header — title + one-liner + executive summary */}
+              <div className="rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/40 p-3">
+                <div className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
+                  Architecture
+                </div>
+                <h4 className="mt-0.5 display-tight text-[15px] leading-snug tracking-[-0.01em] text-[hsl(var(--ink))]">
+                  {arch.meta?.title || v.label}
+                </h4>
+                {arch.meta?.one_liner && (
+                  <p className="mt-0.5 text-[12px] text-[hsl(var(--ink-2))] leading-snug">
+                    {arch.meta.one_liner}
+                  </p>
+                )}
+                {arch.executive_summary && (
+                  <ArchSummary text={arch.executive_summary} />
+                )}
+              </div>
+
               {diagram ? (
                 <DiagramLightbox
                   caption={`${v.label} · ${KIND_LABEL[diagram.kind]}`}
@@ -364,5 +382,45 @@ function ComponentChip({
       />
       <span className="max-w-[12ch] truncate">{component.name}</span>
     </button>
+  );
+}
+
+/**
+ * Click-to-expand summary text. Short by default, expanded on demand
+ * so the side-by-side columns stay scannable.
+ */
+function ArchSummary({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const collapsedLines = 2;
+  return (
+    <div className="mt-2">
+      <p
+        className={cn(
+          "text-[12px] text-[hsl(var(--ink-2))] leading-snug",
+          !open && "overflow-hidden",
+        )}
+        style={
+          !open
+            ? {
+                display: "-webkit-box",
+                WebkitLineClamp: collapsedLines,
+                WebkitBoxOrient: "vertical",
+              }
+            : undefined
+        }
+      >
+        {text}
+      </p>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="mt-1 inline-flex items-center gap-0.5 font-mono text-[10px] uppercase tracking-wider text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] transition-colors"
+      >
+        {open ? "show less" : "read more"}
+        <span className="ms text-[12px]" aria-hidden>
+          {open ? "expand_less" : "expand_more"}
+        </span>
+      </button>
+    </div>
   );
 }

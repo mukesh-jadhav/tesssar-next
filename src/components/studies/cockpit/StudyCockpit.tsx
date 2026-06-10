@@ -200,13 +200,13 @@ function CockpitInner({
                     ? "inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-3 py-1.5 text-[12px] text-[hsl(var(--paper))] transition-colors"
                     : "inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] transition-colors hover:text-[hsl(var(--ink))] hover:border-[hsl(var(--ink-3))]"
                 }
-                title={view === "architectures" ? "Back to dashboard" : "Show all diagrams side-by-side"}
+                title={view === "architectures" ? "Back to dashboard" : "Show all architectures side-by-side"}
               >
                 <span className="ms text-[15px]" aria-hidden>
                   {view === "architectures" ? "dashboard" : "schema"}
                 </span>
                 <span className="font-medium whitespace-nowrap">
-                  {view === "architectures" ? "Back to dashboard" : "Compare diagrams"}
+                  {view === "architectures" ? "Back to dashboard" : "Compare architectures"}
                 </span>
               </button>
             )}
@@ -231,43 +231,49 @@ function CockpitInner({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
-            className="flex flex-1 min-h-0 flex-col"
+            className="flex flex-1 min-h-0 flex-col md:flex-row"
           >
-            {/* Top plane: scenario + living verdict + KPI hero + matrix */}
-            <CockpitTopPlane variants={variants} />
-
-            {/* Horizontal lens tabs */}
+            {/* Left: vertical lens rail */}
             <LensTabs />
 
-            {/* Lens stage + inline inspector */}
-            <div className="flex flex-1 min-h-0 flex-col md:flex-row">
-              <main className="flex-1 min-h-0 overflow-auto scrollbar-thin">
-                <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-5 md:py-6">
-                  <LensHeader lensId={currentLens} label={currentLensMeta.label} />
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={currentLens}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -6 }}
-                      transition={{ duration: 0.24, ease: EASE_OUT_EXPO }}
-                      className="mt-4"
-                    >
-                      <LensRouter lens={currentLens} variants={variants} />
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </main>
+            {/* Right: scenario + selected view (dashboard OR lens) + inspector */}
+            <div className="flex flex-1 min-h-0 flex-col">
+              <CockpitTopPlane
+                variants={variants}
+                showDashboard={currentLens === "dashboard"}
+              />
 
-              <InspectorPane />
+              <div className="flex flex-1 min-h-0 flex-col md:flex-row">
+                <main className="flex-1 min-h-0 overflow-auto scrollbar-thin">
+                  <div className="mx-auto w-full max-w-[1800px] px-4 md:px-6 py-5 md:py-6">
+                    {currentLens !== "dashboard" && (
+                      <LensHeader lensId={currentLens} label={currentLensMeta.label} />
+                    )}
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={currentLens}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.24, ease: EASE_OUT_EXPO }}
+                        className={currentLens === "dashboard" ? "" : "mt-4"}
+                      >
+                        <LensRouter lens={currentLens} variants={variants} />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </main>
+
+                <InspectorPane />
+              </div>
+
+              {/* Decision tray docked at bottom of right column */}
+              <DecisionTray
+                variants={trayVariants}
+                onSynthesize={onSynthesize}
+                busy={synthBusy}
+              />
             </div>
-
-            {/* Bottom: collapsible decision tray */}
-            <DecisionTray
-              variants={trayVariants}
-              onSynthesize={onSynthesize}
-              busy={synthBusy}
-            />
           </motion.div>
         ) : (
           <motion.main
@@ -285,12 +291,13 @@ function CockpitInner({
                     Compare
                   </span>
                   <h2 className="display-tight text-[22px] leading-none tracking-[-0.02em]">
-                    Architecture diagrams
+                    Architectures side-by-side
                   </h2>
                 </div>
                 <span className="hidden md:inline text-[12px] text-[hsl(var(--ink-2))] max-w-[44ch] text-right">
-                  All variants side-by-side. Hover a component to glow its
-                  equivalents in the others; click to zoom.
+                  Each column is one full architecture &mdash; title, summary,
+                  diagram, and component map. Hover a component to glow its
+                  equivalents in the others.
                 </span>
               </div>
               <div className="mt-4">
@@ -327,6 +334,7 @@ function LensHeader({ lensId, label }: { lensId: LensId; label: string }) {
 
 function lensCaption(id: LensId): string {
   switch (id) {
+    case "dashboard":    return "Live verdict and the 9-metric comparison matrix — your starting overview.";
     case "verdict":      return "Who wins which axis — cost, ops, lock-in, attack surface.";
     case "architecture": return "Three diagrams side-by-side. Hover any component to see equivalents in the others; click to zoom.";
     case "performance":  return "Response time vs load — read it as: at your scenario, how does each variant hold up?";
@@ -347,6 +355,7 @@ function LensRouter({
   variants: CockpitVariant[];
 }) {
   switch (lens) {
+    case "dashboard":    return null;
     case "verdict":      return <VerdictLens variants={variants} />;
     case "architecture": return <ArchitectureLens variants={variants} />;
     case "performance":  return <PerformanceLens variants={variants} />;
