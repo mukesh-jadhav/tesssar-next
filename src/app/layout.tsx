@@ -10,6 +10,7 @@ import { HelpOverlay } from "@/components/shared/HelpOverlay";
 import { CursorAccent } from "@/components/shared/CursorAccent";
 import { ThemeScript } from "@/components/shared/ThemeScript";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { Analytics } from "@/components/analytics/Analytics";
 import { SITE, SITE_URL, SITE_KEYWORDS } from "@/lib/seo/site";
 import { organizationLd, websiteLd } from "@/lib/seo/jsonLd";
 
@@ -112,6 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col antialiased">
+        <Analytics />
         <JsonLd data={organizationLd()} />
         <JsonLd data={websiteLd()} />
         <RouteProgress />

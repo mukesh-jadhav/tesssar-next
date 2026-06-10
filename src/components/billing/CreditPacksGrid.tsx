@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { CREDIT_PACKS, type CreditPack } from "@/lib/razorpay/packs";
 import { cn, formatINR } from "@/lib/utils";
+import { trackPurchase } from "@/lib/analytics/track";
 import { DrawnUnderline } from "@/components/landing/DrawnUnderline";
 
 declare global {
@@ -132,6 +133,14 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
               body: JSON.stringify({ ...resp, txId: data.txId }),
             });
             if (!verifyRes.ok) throw new Error(await verifyRes.text());
+            // Fire the purchase conversion (GA4 + Google Ads) with the
+            // INR value and Razorpay order id for ROAS bidding + dedupe.
+            trackPurchase({
+              valueInr: data.amount / 100,
+              transactionId: data.orderId,
+              packId: pack.id,
+              designs: pack.designs,
+            });
             toast.success(`Added ${pack.designs} ${pack.designs === 1 ? "design" : "designs"} to your account.`);
             router.push("/dashboard");
             router.refresh();

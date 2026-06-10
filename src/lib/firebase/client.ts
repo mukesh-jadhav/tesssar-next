@@ -5,6 +5,7 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  getAdditionalUserInfo,
   signOut as fbSignOut,
   onAuthStateChanged,
   type Auth,
@@ -53,11 +54,12 @@ export function getFirebaseDb(): Firestore {
   return _db;
 }
 
-export async function signInWithGoogle(): Promise<User> {
+export async function signInWithGoogle(): Promise<{ user: User; isNewUser: boolean }> {
   const auth = getFirebaseAuth();
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: "select_account" });
   const result = await signInWithPopup(auth, provider);
+  const isNewUser = getAdditionalUserInfo(result)?.isNewUser ?? false;
   const idToken = await result.user.getIdToken();
   const res = await fetch("/api/auth/session", {
     method: "POST",
@@ -77,7 +79,7 @@ export async function signInWithGoogle(): Promise<User> {
     try { await fbSignOut(auth); } catch { /* ignore */ }
     throw new Error(detail);
   }
-  return result.user;
+  return { user: result.user, isNewUser };
 }
 
 export async function signOut(): Promise<void> {

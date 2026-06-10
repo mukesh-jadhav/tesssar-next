@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signInWithGoogle } from "@/lib/firebase/client";
+import { trackSignUp } from "@/lib/analytics/track";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { safeNext } from "@/lib/security/redirect";
@@ -15,7 +16,8 @@ export function GoogleSignInButton({ next = "/studio" }: { next?: string }) {
   async function handleClick() {
     setLoading(true);
     try {
-      await signInWithGoogle();
+      const { isNewUser } = await signInWithGoogle();
+      if (isNewUser) trackSignUp();
       // Trigger the sweep, then hard-nav once it's mostly visible.
       // Hard nav guarantees the next page renders with the fresh
       // __tessar_session cookie. safeNext() blocks open-redirect

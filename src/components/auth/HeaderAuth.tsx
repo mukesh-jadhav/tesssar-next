@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { signInWithGoogle } from "@/lib/firebase/client";
+import { trackSignUp } from "@/lib/analytics/track";
 import { ProfileChip, type ProfileChipUser } from "@/components/auth/ProfileChip";
 
 /**
@@ -28,7 +29,8 @@ export function HeaderAuth({
     if (loading) return;
     setLoading(true);
     try {
-      await signInWithGoogle();
+      const { isNewUser } = await signInWithGoogle();
+      if (isNewUser) trackSignUp();
       // Full reload — guarantees the server layout re-renders with the
       // new __tessar_session cookie. router.refresh() races with the
       // RSC cache in production and sometimes returns the cached (null)
