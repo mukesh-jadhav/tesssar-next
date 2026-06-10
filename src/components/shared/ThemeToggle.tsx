@@ -57,7 +57,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       role="radiogroup"
       aria-label="Theme"
       className={cn(
-        "inline-flex items-center gap-0.5 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] p-0.5",
+        "inline-flex items-center gap-0.5 border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] p-0.5",
         className,
       )}
     >
@@ -73,7 +73,7 @@ export function ThemeToggle({ className }: { className?: string }) {
             title={opt.label}
             onClick={() => pick(opt.value)}
             className={cn(
-              "grid size-7 place-items-center rounded-full transition-colors duration-fast ease-out-quart",
+              "grid size-7 place-items-center transition-colors duration-fast ease-out-quart",
               selected
                 ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
                 : "text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]",

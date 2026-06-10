@@ -118,8 +118,8 @@ export function DecisionTray({
         transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
         className={cn(
           "fixed bottom-5 right-5 md:bottom-6 md:right-6 z-30",
-          "inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium",
-          "shadow-[0_10px_30px_-12px_rgba(0,0,0,0.35)] transition-colors",
+          "inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium",
+          "transition-colors",
           busy
             ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] cursor-wait"
             : open && completed
@@ -185,32 +185,32 @@ export function DecisionTray({
         </AnimatePresence>
       </motion.button>
 
-      {/* === Side panel slide-out === */}
+      {/* === Bottom slide-up panel === */}
       <AnimatePresence>
         {open && (
           <>
-            {/* Scrim */}
+            {/* Scrim — flat tint, no blur (consistent with InspectorSheet). */}
             <motion.div
               key="scrim"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-20 bg-[hsl(var(--ink))]/15 backdrop-blur-[2px]"
+              className="fixed inset-0 z-20 bg-[hsl(var(--ink))]/15"
               onClick={() => setOpen(false)}
               aria-hidden
             />
-            {/* Panel */}
+            {/* Panel — slides up from the bottom. */}
             <motion.aside
               key="panel"
               role="dialog"
               aria-modal="true"
               aria-labelledby="finalize-title"
-              initial={{ x: "100%", opacity: 0.4 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: "100%", opacity: 0 }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
               transition={{ duration: 0.34, ease: EASE_OUT_EXPO }}
-              className="fixed top-0 right-0 bottom-0 z-30 w-full max-w-[460px] flex flex-col bg-[hsl(var(--paper))] border-l border-[hsl(var(--line))] shadow-[-12px_0_40px_-16px_rgba(0,0,0,0.25)]"
+              className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[760px] max-h-[80vh] flex flex-col bg-[hsl(var(--paper))] border-t border-[hsl(var(--line))]"
             >
               {/* Panel header */}
               <div className="flex items-start justify-between gap-3 border-b border-[hsl(var(--line))] px-5 py-4">
@@ -263,7 +263,7 @@ export function DecisionTray({
               </div>
 
               {/* Slices */}
-              <div className="flex-1 overflow-y-auto scrollbar-thin px-5 py-4 grid gap-2.5">
+              <div className="flex-1 overflow-y-auto scrollbar-thin px-5 py-4 grid gap-2.5 sm:grid-cols-2">
                 {SLICES.map((slice) => (
                   <SliceRow
                     key={slice.id}
@@ -317,7 +317,7 @@ function SliceRow({
   onPick: (variantId: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
+    <div className="grid grid-cols-[auto_1fr] items-center gap-3 border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
       <div className="flex flex-col items-start">
         <div className="flex items-center gap-1.5">
           <span
@@ -351,7 +351,7 @@ function SliceRow({
               disabled={disabled}
               onClick={() => onPick(v.variantId)}
               className={cn(
-                "relative rounded-full border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider transition-colors",
+                "relative border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider transition-colors",
                 selected
                   ? "text-[hsl(var(--paper))] border-transparent"
                   : "bg-transparent text-[hsl(var(--ink-2))] border-[hsl(var(--line-2))] hover:border-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]",
@@ -362,7 +362,7 @@ function SliceRow({
               {selected && (
                 <motion.span
                   layoutId={`pick-${slice.id}`}
-                  className="absolute inset-0 rounded-full bg-[hsl(var(--ink))]"
+                  className="absolute inset-0 bg-[hsl(var(--ink))]"
                   transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
                 />
               )}

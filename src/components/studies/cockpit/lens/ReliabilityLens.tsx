@@ -269,7 +269,7 @@ function ReliabilityDrawer({
             {relatedPatterns.map((p) => (
               <li
                 key={`${p.name}-${p.where}`}
-                className="rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-2 py-0.5 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-2))]"
+                className="border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-2 py-0.5 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-2))]"
               >
                 {p.name}
               </li>

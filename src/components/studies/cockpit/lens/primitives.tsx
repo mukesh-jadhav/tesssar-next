@@ -174,7 +174,7 @@ export function MiniChip({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em]",
+        "inline-flex items-center gap-1 border px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.08em]",
         toneClass,
       )}
     >

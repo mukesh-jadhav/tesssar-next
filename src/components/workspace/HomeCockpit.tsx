@@ -177,7 +177,7 @@ export function HomeCockpit({
                 <button
                   type="button"
                   onClick={() => setGuidedOpen(true)}
-                  className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))] transition-colors"
+                  className="hidden md:inline-flex items-center gap-1.5 border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))] hover:bg-[hsl(var(--paper-2))] transition-colors"
                   title="Build the brief with guided questions"
                 >
                   <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
@@ -217,7 +217,7 @@ export function HomeCockpit({
           <button
             type="button"
             onClick={() => setGuidedOpen(true)}
-            className="mt-4 md:hidden inline-flex items-center gap-1.5 self-start rounded-full border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))]"
+            className="mt-4 md:hidden inline-flex items-center gap-1.5 self-start border border-[hsl(var(--line-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))]"
           >
             <span className="ms text-[16px]" aria-hidden>auto_awesome</span>
             Build my brief with guided questions

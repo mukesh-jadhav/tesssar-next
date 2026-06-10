@@ -31,7 +31,7 @@ export function SegmentedButtons({
     <div
       role="tablist"
       className={cn(
-        "inline-flex rounded-full border border-m3-outline-variant bg-m3-surface-container-low p-1",
+        "inline-flex border border-m3-outline-variant bg-m3-surface-container-low p-1",
         h,
         className,
       )}
@@ -46,7 +46,7 @@ export function SegmentedButtons({
             aria-selected={active}
             onClick={() => onChange(s.value)}
             className={cn(
-              "state-layer press relative inline-flex items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium",
+              "state-layer press relative inline-flex items-center gap-1.5 px-3.5 text-[13px] font-medium",
               "transition-colors duration-m3-default-effects ease-m3-default-effects",
               active
                 ? "bg-m3-secondary-container text-m3-on-secondary-container"

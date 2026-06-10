@@ -262,7 +262,7 @@ function DiagramsPanel({
 
       {diagrams.length > 1 && (
         <LayoutGroup id="cockpit-diagram-segmented">
-          <div className="flex flex-wrap gap-1 p-1 bg-[hsl(var(--paper-2))] border border-[hsl(var(--line))] rounded-full w-fit">
+          <div className="flex flex-wrap gap-1 p-1 bg-[hsl(var(--paper-2))] border border-[hsl(var(--line))] w-fit">
             {diagrams.map((d) => {
               const isActive = active === d.id;
               return (
@@ -270,7 +270,7 @@ function DiagramsPanel({
                   key={d.id}
                   onClick={() => onActive(d.id)}
                   className={cn(
-                    "press relative px-3 py-1.5 rounded-full text-[11.5px] font-medium tracking-tight transition-colors",
+                    "press relative px-3 py-1.5 text-[11.5px] font-medium tracking-tight transition-colors",
                     isActive
                       ? "text-[hsl(var(--paper))]"
                       : "text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]",
@@ -280,7 +280,7 @@ function DiagramsPanel({
                     <motion.span
                       layoutId="cockpit-diagram-segmented-pill"
                       aria-hidden
-                      className="absolute inset-0 -z-0 rounded-full bg-[hsl(var(--ink))]"
+                      className="absolute inset-0 -z-0 bg-[hsl(var(--ink))]"
                       transition={{ type: "spring", stiffness: 420, damping: 34 }}
                     />
                   )}
@@ -582,7 +582,7 @@ function RisksPanel({ arch, onSelect, selection }: { arch: Architecture; onSelec
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <h4 className="display text-[16px] tracking-[-0.02em]">{r.title}</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
+                    <span className={cn("inline-flex items-center border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
                       {r.impact} impact
                     </span>
                     <span className="tag !h-5 !text-[10px]">{r.likelihood} likely</span>
@@ -655,7 +655,7 @@ function WatchPanel({ arch }: { arch: Architecture }) {
           <li key={i} className="py-3 flex items-start gap-4">
             <span
               className={cn(
-                "shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
+                "shrink-0 inline-flex items-center border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
                 a.severity === "critical"
                   ? "bg-[hsl(var(--bad))]/10 text-[hsl(var(--bad))] border-[hsl(var(--bad))]/20"
                   : a.severity === "warning"

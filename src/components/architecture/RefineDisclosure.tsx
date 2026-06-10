@@ -69,7 +69,7 @@ export function RefineDisclosure({
         </span>
         Refine
         {count > 0 && (
-          <span className="rounded-full bg-[hsl(var(--accent))]/15 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-[hsl(var(--accent))]">
+          <span className="bg-[hsl(var(--accent))]/15 px-1.5 py-0.5 font-mono text-[10px] tabular-nums text-[hsl(var(--accent))]">
             {count}
           </span>
         )}
@@ -232,7 +232,7 @@ function SingleChips({
             type="button"
             onClick={() => onChange(opt)}
             className={cn(
-              "rounded-full border px-3 py-1 text-[12px] transition-colors press",
+              "border px-3 py-1 text-[12px] transition-colors press",
               active
                 ? "border-[hsl(var(--ink))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
                 : "border-[hsl(var(--line))] bg-[hsl(var(--paper))] text-[hsl(var(--ink-2))] hover:border-[hsl(var(--line-2))] hover:text-[hsl(var(--ink))]",
@@ -265,7 +265,7 @@ function MultiChips({
             type="button"
             onClick={() => onToggle(opt)}
             className={cn(
-              "rounded-full border px-3 py-1 text-[12px] transition-colors press",
+              "border px-3 py-1 text-[12px] transition-colors press",
               active
                 ? "border-[hsl(var(--ink))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
                 : "border-[hsl(var(--line))] bg-[hsl(var(--paper))] text-[hsl(var(--ink-2))] hover:border-[hsl(var(--line-2))] hover:text-[hsl(var(--ink))]",

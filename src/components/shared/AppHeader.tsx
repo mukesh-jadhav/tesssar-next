@@ -63,7 +63,7 @@ function HeaderLink({ href, label }: { href: string; label: string }) {
   return (
     <Link
       href={href}
-      className="state-layer rounded-full px-3.5 py-1.5 text-[13.5px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
+      className="state-layer px-3.5 py-1.5 text-[13.5px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
     >
       {label}
     </Link>

@@ -133,7 +133,7 @@ export function ShareButton({
         type="button"
         onClick={handleClick}
         className={cn(
-          "inline-flex items-center gap-1.5 h-7 px-2.5 text-[11.5px] rounded-full border bg-[hsl(var(--paper-2))] transition-colors",
+          "inline-flex items-center gap-1.5 h-7 px-2.5 text-[11.5px] border bg-[hsl(var(--paper-2))] transition-colors",
           share.slug
             ? "border-[hsl(var(--accent))]/40 text-[hsl(var(--ink))] hover:border-[hsl(var(--accent))]"
             : "border-[hsl(var(--line-2))] hover:border-[hsl(var(--ink))]",

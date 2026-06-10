@@ -182,7 +182,7 @@ function StudyStatusBadge({ status }: { status: StudyStatus }) {
   return (
     <span
       className={
-        "shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-mono tracking-wider " +
+        "shrink-0 inline-flex items-center border px-2 py-0.5 text-[10px] font-mono tracking-wider " +
         s.cls
       }
     >
@@ -193,7 +193,7 @@ function StudyStatusBadge({ status }: { status: StudyStatus }) {
 
 function SynthesisBadge() {
   return (
-    <span className="shrink-0 inline-flex items-center gap-1 rounded-full border border-[hsl(var(--accent))]/20 bg-[hsl(var(--accent))]/10 px-2 py-0.5 text-[10px] font-mono tracking-wider text-[hsl(var(--accent))]">
+    <span className="shrink-0 inline-flex items-center gap-1 border border-[hsl(var(--accent))]/20 bg-[hsl(var(--accent))]/10 px-2 py-0.5 text-[10px] font-mono tracking-wider text-[hsl(var(--accent))]">
       <span className="ms text-[10px]" aria-hidden>auto_awesome</span>
       SYNTH
     </span>

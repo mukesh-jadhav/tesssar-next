@@ -64,7 +64,7 @@ export function ProfileChip({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group inline-flex items-center gap-2 rounded-full border border-[hsl(var(--line))] bg-[hsl(var(--card))]/80 backdrop-blur px-1.5 py-1 pr-3 hover:border-[hsl(var(--line-2))] transition-colors"
+        className="group inline-flex items-center gap-2 border border-[hsl(var(--line))] bg-[hsl(var(--card))]/80 backdrop-blur px-1.5 py-1 pr-3 hover:border-[hsl(var(--line-2))] transition-colors"
         aria-haspopup="menu"
         aria-expanded={open}
       >

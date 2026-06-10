@@ -25,7 +25,7 @@ export function Chip(props: ChipProps) {
   const { type = "assist", icon, trailingIcon, selected, children, className, href, ...rest } = props;
 
   const base = cn(
-    "state-layer press inline-flex h-9 items-center gap-1.5 rounded-full",
+    "state-layer press inline-flex h-9 items-center gap-1.5",
     "border px-3.5 text-[13px] font-medium",
     "transition-all duration-m3-default-effects ease-m3-default-effects",
   );
