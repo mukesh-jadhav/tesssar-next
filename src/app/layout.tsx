@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Manrope, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -9,6 +9,9 @@ import { GlobalShortcuts } from "@/components/shared/GlobalShortcuts";
 import { HelpOverlay } from "@/components/shared/HelpOverlay";
 import { CursorAccent } from "@/components/shared/CursorAccent";
 import { ThemeScript } from "@/components/shared/ThemeScript";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { SITE, SITE_URL, SITE_KEYWORDS } from "@/lib/seo/site";
+import { organizationLd, websiteLd } from "@/lib/seo/jsonLd";
 
 // Display — modern editorial sans with SOFT axis (rounded corners) and
 // variable width. The personality typeface of the whole product.
@@ -45,20 +48,53 @@ const instrument = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://tessar.dev"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Tessar — AI Cloud Architect",
+    default: SITE.title,
     template: "%s · Tessar",
   },
-  description:
-    "Brief in. A 14-section, schema-validated cloud architecture out — components, diagrams, monthly cost in INR, scored risks, applied patterns, roadmap. Sized to your scale. Cloud-agnostic: GCP, AWS, or Azure.",
+  description: SITE.description,
+  keywords: [...SITE_KEYWORDS],
+  applicationName: SITE.name,
+  authors: [{ name: SITE.name, url: SITE_URL }],
+  creator: SITE.name,
+  publisher: SITE.name,
+  alternates: { canonical: "/" },
+  category: "technology",
   openGraph: {
-    title: "Tessar — AI Cloud Architect",
+    type: "website",
+    siteName: SITE.name,
+    title: SITE.title,
     description:
       "Senior cloud architect, on tap. Brief in, board-ready report out. First design free for new accounts.",
-    type: "website",
+    url: SITE_URL,
+    locale: SITE.locale,
   },
-  twitter: { card: "summary_large_image", title: "Tessar — AI Cloud Architect" },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.title,
+    description:
+      "Senior cloud architect, on tap. Brief in, board-ready report out. First design free for new accounts.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F2E9" },
+    { media: "(prefers-color-scheme: dark)", color: "#14161A" },
+  ],
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -76,6 +112,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen flex flex-col antialiased">
+        <JsonLd data={organizationLd()} />
+        <JsonLd data={websiteLd()} />
         <RouteProgress />
         <AppHeader />
         <div className="flex-1 min-h-0 flex flex-col">

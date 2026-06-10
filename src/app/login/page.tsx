@@ -9,7 +9,11 @@ import { FadeIn } from "@/components/motion/FadeIn";
 import { Reveal } from "@/components/motion/Reveal";
 import { Parallax } from "@/components/motion/Parallax";
 
-export const metadata = { title: "Sign in" };
+export const metadata = {
+  title: "Sign in",
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/login" },
+};
 
 export default async function LoginPage({
   searchParams,

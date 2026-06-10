@@ -4,8 +4,26 @@ import { ComparisonMatrix } from "@/components/billing/ComparisonMatrix";
 import { FAQ, type FAQItem } from "@/components/billing/FAQ";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Footer } from "@/components/shared/Footer";
+import { JsonLd } from "@/components/seo/JsonLd";
+import {
+  faqPageLd,
+  softwareApplicationLd,
+  PRICING_FAQ_LD,
+} from "@/lib/seo/jsonLd";
 
-export const metadata = { title: "Credits" };
+export const metadata = {
+  title: "Pricing — ₹300 a design, no subscription",
+  description:
+    "Pay-as-you-go cloud architecture. ₹300 per design (cheaper in packs), GST-inclusive, refunded on failure, credits never expire. First design free — no card.",
+  alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Tessar pricing — ₹300 a design, no subscription",
+    description:
+      "Pay-as-you-go cloud architecture. ₹300 per design, GST-inclusive, refunded on failure. First design free.",
+    url: "/pricing",
+    type: "website",
+  },
+};
 
 const INFO = [
   { n: "01", title: "Refund on failure", body: "If the agent fails to produce a valid architecture, the credits for that run are automatically returned to your balance." },
@@ -114,6 +132,8 @@ export default async function PricingPage() {
 
   return (
     <div className="grain min-h-screen bg-[hsl(var(--paper))]">
+      <JsonLd data={softwareApplicationLd()} />
+      <JsonLd data={faqPageLd(PRICING_FAQ_LD)} />
       <div className="mx-auto w-full max-w-[1400px] px-6 py-10 md:px-12 md:py-14 lg:px-16">
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">

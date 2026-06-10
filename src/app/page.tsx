@@ -3,6 +3,8 @@ import { getSessionUser } from "@/lib/firebase/auth";
 import { Footer } from "@/components/shared/Footer";
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { softwareApplicationLd } from "@/lib/seo/jsonLd";
 import {
   AmbientDiagram,
   DrawnUnderline,
@@ -18,16 +20,25 @@ export const metadata = {
   title: "Tessar — Senior cloud architect, on tap",
   description:
     "Brief in. A 14-section, schema-validated cloud architecture out — components, C4 diagrams, scored risks, applied patterns, monthly cost in INR, roadmap. Sized to your scale. ₹300 a design. First one on us.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Tessar — Senior cloud architect, on tap",
+    description:
+      "Describe your system; get a board-ready cloud architecture in minutes — diagrams, cost in ₹, risks, and a roadmap. First design free.",
+    url: "/",
+    type: "website",
+  },
 };
 
 export default async function HomePage() {
   const user = await getSessionUser();
   const signedIn = !!user;
-  const primaryHref = signedIn ? "/studio" : "/login?next=/studio";
+  const primaryHref = signedIn ? "/new" : "/login?next=/new";
   const primaryLabel = signedIn ? "Open studio" : "Start free — first design on us";
 
   return (
     <div className="grain min-h-screen bg-[hsl(var(--paper))] text-[hsl(var(--ink))]">
+      <JsonLd data={softwareApplicationLd()} />
       <ScrollProgress thickness={2} />
       {/* HERO */}
       <section className="relative px-6 pt-20 pb-20 md:px-12 md:pt-28 md:pb-28">

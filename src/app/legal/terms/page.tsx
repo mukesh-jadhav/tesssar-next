@@ -1,6 +1,9 @@
 import { Footer } from "@/components/shared/Footer";
 
-export const metadata = { title: "Terms of Service" };
+export const metadata = {
+  title: "Terms of Service",
+  alternates: { canonical: "/legal/terms" },
+};
 
 export default function TermsPage() {
   return (

@@ -5,9 +5,17 @@ import { SAMPLE_ARCHITECTURE } from "@/lib/samples/scribestack";
 import { getBalance } from "@/lib/credits/ledger";
 
 export const metadata = {
-  title: "Sample report",
+  title: "Sample report — a full Tessar architecture",
   description:
-    "See what Tessar produces. A complete, principal-grade cloud architecture for a sample product.",
+    "See exactly what Tessar produces: a complete, principal-grade cloud architecture for a sample product — components, diagrams, cost in INR, risks, and roadmap.",
+  alternates: { canonical: "/sample" },
+  openGraph: {
+    title: "Sample report — a full Tessar architecture",
+    description:
+      "See exactly what Tessar produces: a complete, principal-grade cloud architecture — diagrams, cost in ₹, risks, and roadmap.",
+    url: "/sample",
+    type: "website",
+  },
 };
 
 export default async function SamplePage() {

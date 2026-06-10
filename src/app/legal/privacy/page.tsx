@@ -1,6 +1,9 @@
 import { Footer } from "@/components/shared/Footer";
 
-export const metadata = { title: "Privacy Policy" };
+export const metadata = {
+  title: "Privacy Policy",
+  alternates: { canonical: "/legal/privacy" },
+};
 
 export default function PrivacyPage() {
   return (

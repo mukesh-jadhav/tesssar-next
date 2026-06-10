@@ -18,12 +18,15 @@ export async function generateMetadata({
 }) {
   const { slug } = await params;
   const d = await loadBySlug(slug);
-  if (!d?.architecture) return { title: "Shared design · Tessar" };
+  if (!d?.architecture) return { title: "Shared design · Tessar", robots: { index: false } };
   const arch = Architecture.safeParse(d.architecture);
   const title = arch.success ? arch.data.meta.title : "Shared design";
   return {
     title: `${title} · Tessar`,
     description: arch.success ? arch.data.executive_summary.slice(0, 180) : undefined,
+    // User-generated share links: reachable by anyone with the URL, but
+    // kept out of search to avoid thin/duplicate content and stale links.
+    robots: { index: false, follow: false },
   };
 }
 
