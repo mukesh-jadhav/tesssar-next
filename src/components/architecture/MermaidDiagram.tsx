@@ -128,11 +128,27 @@ export function MermaidDiagram({ chart, className }: { chart: string; className?
           });
           mermaidInitialized = true;
         }
-        const { svg: rendered } = await mermaid.render(`m_${id}`, sanitizeMermaid(stripClassDefs(chart)));
+        const input = sanitizeMermaid(stripClassDefs(chart));
+        // Validate BEFORE rendering. mermaid.render() on a bad chart injects
+        // its own "Syntax error in text" bomb SVG straight into document.body
+        // that escapes this component — pre-parsing with suppressErrors avoids
+        // ever triggering that path.
+        const valid = await mermaid.parse(input, { suppressErrors: true });
+        if (valid === false) {
+          if (!cancelled) setErr("Diagram syntax could not be parsed");
+          return;
+        }
+        const { svg: rendered } = await mermaid.render(`m_${id}`, input);
         if (!cancelled) setSvg(rendered);
       } catch (e) {
         if (!cancelled) setErr((e as Error).message || "Failed to render");
       } finally {
+        // Belt-and-suspenders: remove any orphan render/error nodes mermaid
+        // may have appended to the body so no stray bomb graphic is left.
+        if (typeof document !== "undefined") {
+          document.getElementById(`m_${id}`)?.remove();
+          document.getElementById(`dm_${id}`)?.remove();
+        }
         if (!cancelled) setLoading(false);
       }
     })();
