@@ -32,7 +32,7 @@ export function LandingTopBar({ signedIn }: { signedIn: boolean }) {
       <div className="mx-auto max-w-[1480px] px-4 md:px-6">
         <div
           className={cn(
-            "flex items-center justify-between gap-6 border border-transparent px-3 py-2 transition-all duration-300",
+            "flex items-center justify-between gap-6 rounded-xl border border-transparent px-3 py-2 transition-all duration-300",
             scrolled && "border-[hsl(var(--line))] bg-[hsl(var(--card))]/90 backdrop-blur",
           )}
         >
@@ -45,7 +45,7 @@ export function LandingTopBar({ signedIn }: { signedIn: boolean }) {
               <Link
                 key={n.href}
                 href={n.href}
-                className="state-layer px-4 py-2 text-[14px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
+                className="state-layer rounded-md px-4 py-2 text-[14px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
               >
                 {n.label}
               </Link>

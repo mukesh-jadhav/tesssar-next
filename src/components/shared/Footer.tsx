@@ -136,7 +136,7 @@ function StatusPill() {
       href="https://status.tessar.dev"
       target="_blank"
       rel="noopener noreferrer"
-      className="group inline-flex items-center gap-2 border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1.5 transition-colors hover:border-[hsl(var(--line-2))]"
+      className="group inline-flex items-center gap-2 rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))] px-3 py-1.5 transition-colors hover:border-[hsl(var(--line-2))]"
     >
       <span className="relative inline-flex size-2">
         <span className="absolute inset-0 rounded-full bg-[hsl(var(--good))] opacity-60 animate-status-ping" aria-hidden />

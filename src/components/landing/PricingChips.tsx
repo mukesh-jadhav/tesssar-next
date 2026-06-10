@@ -31,7 +31,7 @@ export function PricingChips() {
       {CHIPS.map((chip) => {
         const isPopular = !!chip.popular;
         const base =
-          "group relative inline-flex items-center gap-2 border px-4 py-2 transition-colors";
+          "group relative inline-flex items-center gap-2 rounded-md border px-4 py-2 transition-colors";
         const ringClass = isPopular
           ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent-paper))] text-[hsl(var(--accent-ink))]"
           : "border-[hsl(var(--line))] bg-[hsl(var(--card))] text-[hsl(var(--ink))] hover:border-[hsl(var(--line-2))]";

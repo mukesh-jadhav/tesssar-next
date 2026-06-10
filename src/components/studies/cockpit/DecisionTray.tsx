@@ -118,7 +118,7 @@ export function DecisionTray({
         transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
         className={cn(
           "fixed bottom-5 right-5 md:bottom-6 md:right-6 z-30",
-          "inline-flex items-center gap-2 px-4 py-2.5 text-[13px] font-medium",
+          "inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-[13px] font-medium",
           "transition-colors",
           busy
             ? "bg-[hsl(var(--ink))] text-[hsl(var(--paper))] cursor-wait"
@@ -210,7 +210,7 @@ export function DecisionTray({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ duration: 0.34, ease: EASE_OUT_EXPO }}
-              className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[760px] max-h-[80vh] flex flex-col bg-[hsl(var(--paper))] border-t border-[hsl(var(--line))]"
+              className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[760px] max-h-[80vh] flex flex-col rounded-t-xl bg-[hsl(var(--paper))] border-t border-[hsl(var(--line))]"
             >
               {/* Panel header */}
               <div className="flex items-start justify-between gap-3 border-b border-[hsl(var(--line))] px-5 py-4">
@@ -317,7 +317,7 @@ function SliceRow({
   onPick: (variantId: string) => void;
 }) {
   return (
-    <div className="grid grid-cols-[auto_1fr] items-center gap-3 border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
+    <div className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-2">
       <div className="flex flex-col items-start">
         <div className="flex items-center gap-1.5">
           <span
@@ -351,7 +351,7 @@ function SliceRow({
               disabled={disabled}
               onClick={() => onPick(v.variantId)}
               className={cn(
-                "relative border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider transition-colors",
+                "relative rounded-md border px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wider transition-colors",
                 selected
                   ? "text-[hsl(var(--paper))] border-transparent"
                   : "bg-transparent text-[hsl(var(--ink-2))] border-[hsl(var(--line-2))] hover:border-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))]",
@@ -362,7 +362,7 @@ function SliceRow({
               {selected && (
                 <motion.span
                   layoutId={`pick-${slice.id}`}
-                  className="absolute inset-0 bg-[hsl(var(--ink))]"
+                  className="absolute inset-0 rounded-md bg-[hsl(var(--ink))]"
                   transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
                 />
               )}

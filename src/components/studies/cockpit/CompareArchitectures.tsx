@@ -88,7 +88,7 @@ export function CompareArchitectures({ variants }: { variants: CockpitVariant[] 
               }}
               aria-pressed={on}
               className={cn(
-                "border px-3 py-1 text-[12px] transition-colors",
+                "rounded-md border px-3 py-1 text-[12px] transition-colors",
                 on
                   ? "border-[hsl(var(--ink))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
                   : "border-[hsl(var(--line))] bg-[hsl(var(--card))] text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-3))]/40",
@@ -215,7 +215,7 @@ function ComponentDetail({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="inline-flex items-center gap-1 border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/40 px-2 py-0.5 text-[11px] font-mono lowercase tracking-[0.04em] text-[hsl(var(--ink-2))]">
+        <span className="inline-flex items-center gap-1 rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-3))]/40 px-2 py-0.5 text-[11px] font-mono lowercase tracking-[0.04em] text-[hsl(var(--ink-2))]">
           <span
             className={cn(
               "inline-block size-2 rounded-full",

@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
  */
 const buttonVariants = cva(
   [
-    "state-layer press group/btn relative inline-flex items-center justify-center gap-2",
+    "state-layer press group/btn relative inline-flex items-center justify-center gap-2 rounded-md",
     "whitespace-nowrap font-medium tracking-[0.00625em] select-none",
     "transition-[transform,background-color,color,box-shadow,border-color,opacity]",
     "duration-m3-fast-effects ease-m3-default-effects",

@@ -148,7 +148,7 @@ export function CockpitTopPlane({
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))]">
               p95
             </span>
-            <div className="flex items-center border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 p-0.5">
+            <div className="flex items-center rounded-lg border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 p-0.5">
               {LATENCY_PRESETS.map((ms) => {
                 const active = ms === scenario.latencyBudgetMs;
                 return (
@@ -158,7 +158,7 @@ export function CockpitTopPlane({
                     onClick={() => setScenario({ ...scenario, latencyBudgetMs: ms })}
                     aria-pressed={active}
                     className={cn(
-                      "relative px-2.5 py-0.5 text-[12px] transition-colors",
+                      "relative rounded-md px-2.5 py-0.5 text-[12px] transition-colors",
                       active
                         ? "text-[hsl(var(--paper))]"
                         : "text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]",
@@ -167,7 +167,7 @@ export function CockpitTopPlane({
                     {active && (
                       <motion.span
                         layoutId="cockpit-latency-active"
-                        className="absolute inset-0 bg-[hsl(var(--ink))]"
+                        className="absolute inset-0 rounded-md bg-[hsl(var(--ink))]"
                         transition={{ duration: 0.28, ease: EASE_OUT_EXPO }}
                       />
                     )}
@@ -242,7 +242,7 @@ export function CockpitTopPlane({
                 info
               </span>
             </span>
-            <div className="flex items-center border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-2 py-0.5">
+            <div className="flex items-center rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-2 py-0.5">
               <span className="text-[11px] text-[hsl(var(--ink-3))] mr-1">₹</span>
               <input
                 type="number"

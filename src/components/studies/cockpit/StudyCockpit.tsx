@@ -198,8 +198,8 @@ function CockpitInner({
                 aria-pressed={view === "architectures"}
                 className={
                   view === "architectures"
-                    ? "inline-flex items-center gap-1.5 border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-3 py-1.5 text-[12px] text-[hsl(var(--paper))] transition-colors"
-                    : "inline-flex items-center gap-1.5 border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] transition-colors hover:text-[hsl(var(--ink))] hover:border-[hsl(var(--ink-3))]"
+                    ? "inline-flex items-center gap-1.5 rounded-md border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-3 py-1.5 text-[12px] text-[hsl(var(--paper))] transition-colors"
+                    : "inline-flex items-center gap-1.5 rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] transition-colors hover:text-[hsl(var(--ink))] hover:border-[hsl(var(--ink-3))]"
                 }
                 title={view === "architectures" ? "Back to dashboard" : "Show all architectures side-by-side"}
               >

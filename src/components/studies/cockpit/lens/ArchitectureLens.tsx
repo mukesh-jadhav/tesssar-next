@@ -130,8 +130,8 @@ export function ArchitectureLens({ variants }: { variants: CockpitVariant[] }) {
             onClick={() => setKind(k)}
             className={
               kind === k
-                ? "border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--paper))]"
-                : "border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-3))]/40 transition-colors"
+                ? "rounded-md border border-[hsl(var(--ink))] bg-[hsl(var(--ink))] px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--paper))]"
+                : "rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--card))] px-2.5 py-1 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-2))] hover:bg-[hsl(var(--paper-3))]/40 transition-colors"
             }
           >
             {KIND_LABEL[k]}
@@ -365,7 +365,7 @@ function ComponentChip({
       onClick={onClick}
       title={`${component.name} — ${variantLabel}`}
       className={cn(
-        "group inline-flex items-center gap-1 border px-2 py-0.5 text-[11px] font-mono lowercase tracking-[0.04em] transition-all duration-200",
+        "group inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-mono lowercase tracking-[0.04em] transition-all duration-200",
         isHighlighted
           ? "border-[hsl(var(--accent))] bg-[hsl(var(--accent-paper))] text-[hsl(var(--accent-ink))] shadow-[0_0_0_3px_hsl(var(--accent)/0.18)]"
           : isDimmed

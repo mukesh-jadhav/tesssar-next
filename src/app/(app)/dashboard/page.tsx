@@ -274,7 +274,7 @@ function Status({ status }: { status: ArchitectureDoc["status"] }) {
   };
   const s = styles[status];
   return (
-    <span className={"inline-flex items-center border px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider " + s.cls}>
+    <span className={"inline-flex items-center rounded-md border px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider " + s.cls}>
       {s.label}
     </span>
   );

@@ -82,22 +82,23 @@
     --border: var(--line);
     --input: var(--line);
     --ring: var(--accent);
-    --radius: 0px;
+    --radius: 0.625rem;
     --brand: var(--accent);
     --brand-soft: var(--accent-paper);
 
-    /* Shape scale — flattened to 0 for the sharp editorial look.
-       Only `full` stays round, reserved for genuine circles (avatars,
-       status dots, spinners, progress tracks). */
+    /* Shape scale — a restrained "soft-square" editorial system.
+       Small, consistent radii on boxes/controls; `full` stays round and
+       is reserved for genuine circles (avatars, status dots, spinners,
+       progress tracks, toggle knobs). `none` stays 0 for hairline insets. */
     --md-sys-shape-corner-none: 0px;
-    --md-sys-shape-corner-extra-small: 0px;
-    --md-sys-shape-corner-small: 0px;
-    --md-sys-shape-corner-medium: 0px;
-    --md-sys-shape-corner-large: 0px;
-    --md-sys-shape-corner-large-increased: 0px;
-    --md-sys-shape-corner-extra-large: 0px;
-    --md-sys-shape-corner-extra-large-increased: 0px;
-    --md-sys-shape-corner-extra-extra-large: 0px;
+    --md-sys-shape-corner-extra-small: 4px;
+    --md-sys-shape-corner-small: 6px;
+    --md-sys-shape-corner-medium: 8px;
+    --md-sys-shape-corner-large: 10px;
+    --md-sys-shape-corner-large-increased: 12px;
+    --md-sys-shape-corner-extra-large: 14px;
+    --md-sys-shape-corner-extra-large-increased: 16px;
+    --md-sys-shape-corner-extra-extra-large: 20px;
     --md-sys-shape-corner-full: 9999px;
 
     /* Motion */
@@ -294,16 +295,16 @@
   .ulgrow:hover::after { transform: scaleX(1); }
 
   /* Squircle press */
-  .squircle-press { border-radius: 0; transition: border-radius var(--dur-fast) var(--ease-soft-spring); }
-  .squircle-press:active { border-radius: 0; }
+  .squircle-press { border-radius: 10px; transition: border-radius var(--dur-fast) var(--ease-soft-spring); }
+  .squircle-press:active { border-radius: 6px; }
   .m3-squircle-press { border-radius: inherit; transition: border-radius var(--dur-fast) var(--ease-soft-spring); }
-  .m3-squircle-press:active { border-radius: 0; }
+  .m3-squircle-press:active { border-radius: 6px; }
 
   /* Icon button */
   .m3-icon-btn {
     display: inline-grid; place-items: center;
     width: 40px; height: 40px;
-    border-radius: 0;
+    border-radius: 10px;
     color: hsl(var(--ink));
     transition: background-color var(--dur-fast) var(--ease-out-quart);
   }
@@ -316,7 +317,7 @@
     left: 50%; transform: translateX(-50%);
     z-index: 40;
     display: flex; gap: 4px; padding: 6px;
-    border-radius: 0;
+    border-radius: 16px;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--line));
   }
@@ -324,7 +325,7 @@
   /* List item */
   .m3-list-item {
     display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px; border-radius: 0;
+    padding: 14px 16px; border-radius: 12px;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--line));
     transition: background-color var(--dur-fast) var(--ease-out-quart),
@@ -333,7 +334,7 @@
   .m3-list-item:hover { background: hsl(var(--paper-2)); border-color: hsl(var(--line-2)); }
 
   /* Hero tile */
-  .m3-hero-tile { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 0; }
+  .m3-hero-tile { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 18px; }
 
   /* Wavy progress */
   @keyframes wave-flow { from { background-position: 0 0; } to { background-position: 28px 0; } }
@@ -403,7 +404,7 @@
   .btn-pill {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     height: 52px; padding: 0 24px;
-    border-radius: 0;
+    border-radius: 10px;
     background: hsl(var(--ink));
     color: hsl(var(--paper));
     font-family: var(--font-ui), "Manrope", system-ui, sans-serif;
@@ -426,7 +427,7 @@
   .tag {
     display: inline-flex; align-items: center; gap: 6px;
     height: 30px; padding: 0 12px;
-    border-radius: 0;
+    border-radius: 8px;
     border: 1px solid hsl(var(--line));
     background: hsl(var(--card));
     color: hsl(var(--ink-2));
@@ -438,9 +439,9 @@
   .tag-accent { background: hsl(var(--accent-paper)); border-color: hsl(var(--accent-paper)); color: hsl(var(--accent-ink)); }
 
   /* CARDS */
-  .card-paper { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 0; }
-  .card-inset { background: hsl(var(--paper-2)); border: 1px solid hsl(var(--line)); border-radius: 0; }
-  .card-ink   { background: hsl(var(--ink));   border: 1px solid hsl(var(--ink));   border-radius: 0; color: hsl(var(--paper)); }
+  .card-paper { background: hsl(var(--card)); border: 1px solid hsl(var(--line)); border-radius: 14px; }
+  .card-inset { background: hsl(var(--paper-2)); border: 1px solid hsl(var(--line)); border-radius: 12px; }
+  .card-ink   { background: hsl(var(--ink));   border: 1px solid hsl(var(--ink));   border-radius: 14px; color: hsl(var(--paper)); }
 
   /* SECTION NUMBER */
   .section-num {
@@ -452,7 +453,7 @@
   /* INPUT */
   .input-pill {
     width: 100%; height: 54px; padding: 0 22px;
-    border-radius: 0;
+    border-radius: 10px;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--line-2));
     color: hsl(var(--ink));

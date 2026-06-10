@@ -57,7 +57,7 @@ export default async function PublicReportPage({
         </Link>
         <Link
           href="/"
-          className="hidden md:inline-flex items-center gap-1.5 border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:border-[hsl(var(--ink))] hover:text-[hsl(var(--ink))] transition-colors"
+          className="hidden md:inline-flex items-center gap-1.5 rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] px-3 py-1.5 text-[12px] text-[hsl(var(--ink-2))] hover:border-[hsl(var(--ink))] hover:text-[hsl(var(--ink))] transition-colors"
         >
           Design your own
           <span className="ms text-[16px]" aria-hidden>arrow_forward</span>

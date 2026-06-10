@@ -70,7 +70,7 @@ export function ExportMenu({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex items-center gap-1.5 border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] hover:border-[hsl(var(--ink))] transition-colors",
+          "inline-flex items-center gap-1.5 rounded-md border border-[hsl(var(--line-2))] bg-[hsl(var(--paper-2))] hover:border-[hsl(var(--ink))] transition-colors",
           btnBase,
         )}
         aria-haspopup="menu"

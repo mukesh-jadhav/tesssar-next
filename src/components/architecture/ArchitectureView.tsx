@@ -58,7 +58,7 @@ export function ArchitectureView({
           <div
             role="note"
             aria-label="Draft notice"
-            className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-3.5 py-1.5 text-[11.5px] text-[hsl(var(--ink-3))]"
+            className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-dashed border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-3.5 py-1.5 text-[11.5px] text-[hsl(var(--ink-3))]"
           >
             <span className="font-mono uppercase tracking-[0.16em] text-[hsl(var(--accent))]">Draft</span>
             <span aria-hidden className="opacity-50">·</span>
@@ -350,7 +350,7 @@ export function ArchitectureView({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <h4 className="display text-[20px] tracking-[-0.02em]">{r.title}</h4>
                     <div className="flex flex-wrap gap-1.5">
-                      <span className={cn("inline-flex items-center border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
+                      <span className={cn("inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider", RISK_PALETTE[r.impact])}>
                         {r.impact} impact
                       </span>
                       <span className="tag">{r.likelihood} likelihood</span>
@@ -410,7 +410,7 @@ export function ArchitectureView({
               <li key={i} className="py-4 flex items-start gap-4">
                 <span
                   className={cn(
-                    "shrink-0 inline-flex items-center border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
+                    "shrink-0 inline-flex items-center rounded-md border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider",
                     a.severity === "critical"
                       ? "bg-[hsl(var(--bad))]/10 text-[hsl(var(--bad))] border-[hsl(var(--bad))]/20"
                       : a.severity === "warning"

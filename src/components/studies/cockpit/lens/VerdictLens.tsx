@@ -278,7 +278,7 @@ function ComplianceCallout({
               <button
                 type="button"
                 onClick={() => onOpen(g)}
-                className="inline-flex items-center gap-1 border border-[hsl(var(--warn))]/30 bg-[hsl(var(--card))] px-2 py-0.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[hsl(var(--warn))] hover:bg-[hsl(var(--warn))]/10 transition-colors"
+                className="inline-flex items-center gap-1 rounded-md border border-[hsl(var(--warn))]/30 bg-[hsl(var(--card))] px-2 py-0.5 text-[11px] font-mono uppercase tracking-[0.08em] text-[hsl(var(--warn))] hover:bg-[hsl(var(--warn))]/10 transition-colors"
               >
                 {g.label} · {g.regime}
               </button>

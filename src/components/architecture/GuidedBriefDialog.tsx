@@ -198,7 +198,7 @@ export function GuidedBriefDialog({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-[13px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
+              className="rounded-md px-4 py-2 text-[13px] text-[hsl(var(--ink-2))] hover:text-[hsl(var(--ink))]"
             >
               Cancel
             </button>
@@ -266,7 +266,7 @@ function Chips(props: ChipsProps) {
             type="button"
             onClick={() => props.onChange(opt)}
             className={cn(
-              "border px-3.5 py-1.5 text-[12.5px] transition-colors press",
+              "rounded-md border px-3.5 py-1.5 text-[12.5px] transition-colors press",
               active
                 ? "border-[hsl(var(--ink))] bg-[hsl(var(--ink))] text-[hsl(var(--paper))]"
                 : "border-[hsl(var(--line))] bg-[hsl(var(--paper))] text-[hsl(var(--ink-2))] hover:border-[hsl(var(--line-2))] hover:text-[hsl(var(--ink))]",
