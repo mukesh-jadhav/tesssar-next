@@ -35,7 +35,7 @@
     "d3-shape": "^3.2.0",
     "d3-zoom": "^3.0.0",
     "firebase": "^12.14.0",
-    "firebase-admin": "^13.0.2",
+    "firebase-admin": "^14.0.0",
     "framer-motion": "^12.40.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.17.0",
