@@ -15,6 +15,7 @@ import { InspectorPane, InspectorSheet } from "./InspectorPane";
 import { VerdictLens } from "./lens/VerdictLens";
 import { CostLens } from "./lens/CostLens";
 import { ArchitectureLens } from "./lens/ArchitectureLens";
+import { CompareArchitectures } from "./CompareArchitectures";
 import { LockInLens } from "./lens/LockInLens";
 import { OpsLens } from "./lens/OpsLens";
 import { SecurityLens } from "./lens/SecurityLens";
@@ -291,17 +292,17 @@ function CockpitInner({
                     Compare
                   </span>
                   <h2 className="display-tight text-[22px] leading-none tracking-[-0.02em]">
-                    Architectures side-by-side
+                    Full system architectures
                   </h2>
                 </div>
                 <span className="hidden md:inline text-[12px] text-[hsl(var(--ink-2))] max-w-[44ch] text-right">
-                  Each column is one full architecture &mdash; title, summary,
-                  diagram, and component map. Hover a component to glow its
-                  equivalents in the others.
+                  One full system architecture at a time, using the whole
+                  screen. Switch variants above; click any component for
+                  detail.
                 </span>
               </div>
               <div className="mt-4">
-                <ArchitectureLens variants={variants} />
+                <CompareArchitectures variants={variants} />
               </div>
             </div>
           </motion.main>
