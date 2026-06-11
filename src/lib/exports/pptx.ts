@@ -3,6 +3,7 @@ import "server-only";
 import PptxGenJS from "pptxgenjs";
 import type { Architecture } from "@/types/architecture";
 import { SCALE_TIER_META } from "@/types/architecture";
+import type { Region } from "@/lib/geo/region";
 
 /**
  * Renders an Architecture as a polished PowerPoint deck.
@@ -11,7 +12,11 @@ import { SCALE_TIER_META } from "@/types/architecture";
  * Palette mirrors the rest of the brand: paper background, ink text,
  * orange accent. 16:9 widescreen.
  */
-export async function renderArchitecturePPTX(arch: Architecture): Promise<Buffer> {
+export async function renderArchitecturePPTX(
+  arch: Architecture,
+  region: Region = "IN",
+): Promise<Buffer> {
+  const intl = region === "INTL";
   const pptx = new PptxGenJS();
   pptx.author = "Tessar";
   pptx.company = "Tessar";
@@ -379,7 +384,11 @@ export async function renderArchitecturePPTX(arch: Architecture): Promise<Buffer
         color: accent,
         charSpacing: 3,
       });
-      slide.addText(`₹${sp.monthly_cost_inr_low.toLocaleString("en-IN")}`, {
+      slide.addText(
+        intl
+          ? `$${sp.monthly_cost_usd_low.toLocaleString("en-US")}`
+          : `₹${sp.monthly_cost_inr_low.toLocaleString("en-IN")}`,
+        {
         x: x + 0.2,
         y: 2.55,
         w: cardW - 0.4,
@@ -391,7 +400,9 @@ export async function renderArchitecturePPTX(arch: Architecture): Promise<Buffer
         charSpacing: -1,
       });
       slide.addText(
-        `– ₹${sp.monthly_cost_inr_high.toLocaleString("en-IN")} / month`,
+        intl
+          ? `– $${sp.monthly_cost_usd_high.toLocaleString("en-US")} / month`
+          : `– ₹${sp.monthly_cost_inr_high.toLocaleString("en-IN")} / month`,
         {
           x: x + 0.2,
           y: 3.4,

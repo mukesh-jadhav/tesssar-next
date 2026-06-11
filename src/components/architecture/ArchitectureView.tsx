@@ -7,6 +7,8 @@ import { EditorialDiagram } from "./EditorialDiagram";
 import { DiagramErrorBoundary } from "./DiagramErrorBoundary";
 import { ExportMenu } from "./ExportMenu";
 import { ScaleExplorer } from "./ScaleExplorer";
+import { useRegion } from "@/components/billing/RegionalPrice";
+import { formatInrBand } from "@/lib/geo/cost";
 import type { Architecture, Risk } from "@/types/architecture";
 
 const RISK_PALETTE: Record<Risk["impact"], string> = {
@@ -26,6 +28,7 @@ export function ArchitectureView({
   showDownload?: boolean;
 }) {
   const [activeDiagram, setActiveDiagram] = useState(arch.diagrams[0]?.id ?? "");
+  const region = useRegion();
   const currentDiagram = arch.diagrams.find((d) => d.id === activeDiagram) ?? arch.diagrams[0];
 
   // Split the executive summary into a "lead sentence" and the rest of the body.
@@ -321,12 +324,12 @@ export function ArchitectureView({
 
           <SubHead n="05b">Monthly cost — growth tier baseline</SubHead>
           <DataTable
-            headers={["Service", "Estimated qty", "Monthly INR", "Notes"]}
+            headers={["Service", "Estimated qty", region === "INTL" ? "Monthly USD" : "Monthly INR", "Notes"]}
             rows={arch.cost_breakdown.map((c) => [
               <span key="s" className="font-medium">{c.service}</span>,
               <span key="q" className="text-[12px] text-[hsl(var(--ink-2))]">{c.estimated_qty}</span>,
               <span key="i" className="font-mono text-[12px] tabular-nums">
-                ₹{c.monthly_inr_low.toLocaleString("en-IN")} – ₹{c.monthly_inr_high.toLocaleString("en-IN")}
+                {formatInrBand(c.monthly_inr_low, c.monthly_inr_high, region)}
               </span>,
               <span key="n" className="text-[12px] text-[hsl(var(--ink-3))]">{c.notes}</span>,
             ])}

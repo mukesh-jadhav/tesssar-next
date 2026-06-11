@@ -6,14 +6,17 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ScaleProfile, ScaleTier } from "@/types/architecture";
 import { SCALE_TIER_META } from "@/types/architecture";
-import { ArrowUpRight, IndianRupee, Users, Zap, HardDrive } from "lucide-react";
+import { ArrowUpRight, IndianRupee, DollarSign, Users, Zap, HardDrive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedCounter } from "@/components/motion";
+import { useRegion } from "@/components/billing/RegionalPrice";
 
 const ORDER: ScaleTier[] = ["startup", "growth", "scale", "hyperscale"];
 
 export function ScaleExplorer({ profiles }: { profiles: ScaleProfile[] }) {
   const [idx, setIdx] = useState(1);
+  const region = useRegion();
+  const intl = region === "INTL";
 
   const sorted = useMemo(() => {
     const byTier = new Map(profiles.map((p) => [p.tier, p]));
@@ -87,23 +90,25 @@ export function ScaleExplorer({ profiles }: { profiles: ScaleProfile[] }) {
         />
         <Card className="card-lift p-5">
           <div className="flex items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            <IndianRupee className="size-4" /> Monthly cost
+            {intl ? <DollarSign className="size-4" /> : <IndianRupee className="size-4" />} Monthly cost
           </div>
           <div className="mt-2.5 text-base font-semibold tracking-tight tabular-nums">
             <AnimatedCounter
-              value={current.monthly_cost_inr_low}
-              prefix="₹"
+              value={intl ? current.monthly_cost_usd_low : current.monthly_cost_inr_low}
+              prefix={intl ? "$" : "₹"}
               duration={700}
             />
             {" – "}
             <AnimatedCounter
-              value={current.monthly_cost_inr_high}
-              prefix="₹"
+              value={intl ? current.monthly_cost_usd_high : current.monthly_cost_inr_high}
+              prefix={intl ? "$" : "₹"}
               duration={700}
             />
           </div>
           <div className="text-xs text-muted-foreground tabular-nums">
-            ${current.monthly_cost_usd_low}–${current.monthly_cost_usd_high}
+            {intl
+              ? `₹${current.monthly_cost_inr_low.toLocaleString("en-IN")}–₹${current.monthly_cost_inr_high.toLocaleString("en-IN")}`
+              : `$${current.monthly_cost_usd_low}–$${current.monthly_cost_usd_high}`}
           </div>
         </Card>
       </div>

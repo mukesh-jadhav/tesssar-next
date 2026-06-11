@@ -6,6 +6,7 @@ import { slugify } from "@/lib/utils";
 import { renderArchitecturePDF } from "@/lib/pdf/report";
 import { renderArchitectureMarkdown } from "@/lib/exports/markdown";
 import { renderArchitecturePPTX } from "@/lib/exports/pptx";
+import { coerceRegion } from "@/lib/geo/region";
 import { rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
@@ -15,7 +16,7 @@ const FORMATS = ["pdf", "md", "pptx"] as const;
 type Format = (typeof FORMATS)[number];
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string; format: string }> },
 ) {
   const { id, format: rawFormat } = await params;
@@ -23,6 +24,10 @@ export async function GET(
   if (!FORMATS.includes(format as Format)) {
     return new NextResponse(`Unsupported format: ${rawFormat}`, { status: 400 });
   }
+
+  // Display currency for the exported artifact (INR for India, USD
+  // elsewhere). Validated to the IN/INTL enum; never trusted raw.
+  const region = coerceRegion(req.nextUrl.searchParams.get("region"));
 
   const user = await getSessionUser();
   if (!user) return new NextResponse("Unauthorized", { status: 401 });
@@ -49,11 +54,11 @@ export async function GET(
 
   switch (format as Format) {
     case "pdf": {
-      const buffer = await renderArchitecturePDF(arch);
+      const buffer = await renderArchitecturePDF(arch, region);
       return binary(new Uint8Array(buffer), `${baseName}.pdf`, "application/pdf");
     }
     case "md": {
-      const text = renderArchitectureMarkdown(arch);
+      const text = renderArchitectureMarkdown(arch, region);
       return new NextResponse(text, {
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",

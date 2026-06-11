@@ -2,12 +2,16 @@ import "server-only";
 
 import type { Architecture } from "@/types/architecture";
 import { SCALE_TIER_META } from "@/types/architecture";
+import type { Region } from "@/lib/geo/region";
 
 /**
  * Renders an Architecture as a polished Markdown report.
  * Pure string; safe to call anywhere on the server.
  */
-export function renderArchitectureMarkdown(arch: Architecture): string {
+export function renderArchitectureMarkdown(
+  arch: Architecture,
+  region: Region = "IN",
+): string {
   const m = arch.meta;
   const generated = new Date(m.generated_at).toLocaleString("en-IN", {
     dateStyle: "long",
@@ -121,9 +125,13 @@ export function renderArchitectureMarkdown(arch: Architecture): string {
     const meta = SCALE_TIER_META[sp.tier];
     h(`### ${meta.label}`);
     h(
-      `**₹${sp.monthly_cost_inr_low.toLocaleString("en-IN")} – ₹${sp.monthly_cost_inr_high.toLocaleString(
-        "en-IN",
-      )} / month** ($${sp.monthly_cost_usd_low}–$${sp.monthly_cost_usd_high})`,
+      region === "INTL"
+        ? `**$${sp.monthly_cost_usd_low}–$${sp.monthly_cost_usd_high} / month** (₹${sp.monthly_cost_inr_low.toLocaleString(
+            "en-IN",
+          )} – ₹${sp.monthly_cost_inr_high.toLocaleString("en-IN")})`
+        : `**₹${sp.monthly_cost_inr_low.toLocaleString("en-IN")} – ₹${sp.monthly_cost_inr_high.toLocaleString(
+            "en-IN",
+          )} / month** ($${sp.monthly_cost_usd_low}–$${sp.monthly_cost_usd_high})`,
     );
     blank();
     h(`- **Expected users:** ${sp.expected_users}`);

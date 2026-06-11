@@ -12,6 +12,13 @@ import { ScaleExplorer } from "@/components/architecture/ScaleExplorer";
 import { SystemDiagram } from "@/components/architecture/SystemDiagram";
 import { CountUp } from "@/components/motion/CountUp";
 import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
+import { useRegion } from "@/components/billing/RegionalPrice";
+import {
+  formatCostCompact,
+  formatInrBand,
+  usdFromInr,
+  costSymbol,
+} from "@/lib/geo/cost";
 import type {
   AppliedPattern,
   ArchComponent,
@@ -1296,6 +1303,7 @@ function StoryPanel({
   body: string;
   onJump: (id: ChapterId) => void;
 }) {
+  const region = useRegion();
   const componentCount = arch.components.length;
   const diagramCount = arch.diagrams.length;
   const riskCount = arch.risks.length;
@@ -1308,7 +1316,13 @@ function StoryPanel({
     arch.scale_profiles.find((p) => /growth/i.test(p.tier)) ??
     arch.scale_profiles[Math.min(1, arch.scale_profiles.length - 1)];
   const costBand = growth
-    ? `₹${formatINRCompact(growth.monthly_cost_inr_low)}–₹${formatINRCompact(growth.monthly_cost_inr_high)} / mo`
+    ? `${formatCostCompact(
+        region === "INTL" ? growth.monthly_cost_usd_low : growth.monthly_cost_inr_low,
+        region,
+      )}–${formatCostCompact(
+        region === "INTL" ? growth.monthly_cost_usd_high : growth.monthly_cost_inr_high,
+        region,
+      )} / mo`
     : "—";
 
   const acts: { act: Act; ids: ChapterId[] }[] = [
@@ -1420,16 +1434,6 @@ function StoryStat({ n, label, k }: { n?: number; label?: string; k: string }) {
   );
 }
 
-function formatINRCompact(paiseOrRupees: number): string {
-  // scale_profiles values are stored as rupees per docs; format with Indian grouping.
-  const n = paiseOrRupees;
-  if (!Number.isFinite(n)) return "—";
-  if (n >= 1_00_00_000) return `${(n / 1_00_00_000).toFixed(1)}Cr`;
-  if (n >= 1_00_000)    return `${(n / 1_00_000).toFixed(1)}L`;
-  if (n >= 1_000)       return `${(n / 1_000).toFixed(0)}K`;
-  return String(Math.round(n));
-}
-
 /* ════════════════════════════════════════════════════════════════
    Phase 5A — motion + interactivity primitives (cockpit-local)
    ════════════════════════════════════════════════════════════════ */
@@ -1539,17 +1543,22 @@ function FilterPills<T extends string>({
 
 function CostBreakdown({ items }: { items: CostLineItem[] }) {
   const reduce = useReducedMotionSafe();
+  const region = useRegion();
   const mids = items.map((c) => (c.monthly_inr_low + c.monthly_inr_high) / 2);
   const max = Math.max(1, ...mids);
   const total = mids.reduce((s, n) => s + n, 0);
   const totalLow = items.reduce((s, c) => s + c.monthly_inr_low, 0);
   const totalHigh = items.reduce((s, c) => s + c.monthly_inr_high, 0);
+  // Bar proportions are currency-independent (ratios). Only the displayed
+  // amounts switch: INR for India, USD (converted at the fixed rate) for
+  // international viewers.
+  const totalDisplay = region === "INTL" ? usdFromInr(total) : total;
   return (
     <div className="bg-[hsl(var(--paper))] border border-[hsl(var(--line))] overflow-hidden">
       <div className="hidden md:grid grid-cols-[1.4fr_0.7fr_1.6fr_0.4fr] gap-x-4 px-4 py-2.5 bg-[hsl(var(--paper-2))] font-mono text-[10px] uppercase tracking-[0.16em] text-[hsl(var(--ink-3))] border-b border-[hsl(var(--line))]">
         <div>Service</div>
         <div className="text-right">Qty</div>
-        <div>Monthly INR</div>
+        <div>Monthly {costSymbol(region) === "$" ? "USD" : "INR"}</div>
         <div className="text-right">Share</div>
       </div>
       {items.map((c, i) => {
@@ -1580,7 +1589,7 @@ function CostBreakdown({ items }: { items: CostLineItem[] }) {
                 />
               </div>
               <div className="font-mono text-[11.5px] tabular-nums whitespace-nowrap shrink-0">
-                ₹{c.monthly_inr_low.toLocaleString("en-IN")}–₹{c.monthly_inr_high.toLocaleString("en-IN")}
+                {formatInrBand(c.monthly_inr_low, c.monthly_inr_high, region)}
               </div>
             </div>
             <div className="font-mono text-[11.5px] tabular-nums text-[hsl(var(--ink-2))] text-right whitespace-nowrap col-start-2 md:col-start-auto row-start-1 md:row-start-auto">
@@ -1596,9 +1605,9 @@ function CostBreakdown({ items }: { items: CostLineItem[] }) {
         </div>
         <div className="hidden md:block" />
         <div className="display tabular-nums tracking-[-0.02em] text-[clamp(1.1rem,1.8vw,1.5rem)]">
-          ≈ ₹<CountUp to={Math.round(total)} duration={1.6} />
+          ≈ {costSymbol(region)}<CountUp to={Math.round(totalDisplay)} duration={1.6} />
           <span className="ml-3 font-mono text-[11px] tracking-wider text-[hsl(var(--ink-3))] normal-case">
-            band ₹{totalLow.toLocaleString("en-IN")}–₹{totalHigh.toLocaleString("en-IN")}
+            band {formatInrBand(totalLow, totalHigh, region)}
           </span>
         </div>
         <div className="font-mono text-[11.5px] tabular-nums text-[hsl(var(--ink-3))] text-right hidden md:block">

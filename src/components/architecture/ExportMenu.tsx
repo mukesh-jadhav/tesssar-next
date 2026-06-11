@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { detectRegion } from "@/lib/geo/region";
 
 type Format = "pdf" | "md" | "pptx";
 
@@ -48,7 +49,10 @@ export function ExportMenu({
     setBusy(f);
     try {
       // Force a real navigation so the browser handles the file dialog.
-      window.location.href = `/api/architect/${architectureId}/export/${f}`;
+      // Pass the viewer's region so the exported artifact shows costs in
+      // their currency (INR for India, USD elsewhere).
+      const region = detectRegion();
+      window.location.href = `/api/architect/${architectureId}/export/${f}?region=${region}`;
       // Browser will keep the page; close the menu after a moment.
       setTimeout(() => {
         setOpen(false);

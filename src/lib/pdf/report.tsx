@@ -13,6 +13,7 @@ import {
 import React from "react";
 import type { Architecture } from "@/types/architecture";
 import { SCALE_TIER_META } from "@/types/architecture";
+import type { Region } from "@/lib/geo/region";
 
 /* Brand palette — mirrors the editorial Tessar identity. */
 const ink    = "#0E0E0F";
@@ -240,9 +241,16 @@ function severityPill(impact: string) {
   return s.pill;
 }
 
-export function ArchitectureReport({ arch }: { arch: Architecture }) {
+export function ArchitectureReport({
+  arch,
+  region = "IN",
+}: {
+  arch: Architecture;
+  region?: Region;
+}) {
   const title = arch.meta.title;
   const generated = new Date(arch.meta.generated_at);
+  const intl = region === "INTL";
   const tiers = arch.scale_profiles;
 
   return (
@@ -443,10 +451,14 @@ export function ArchitectureReport({ arch }: { arch: Architecture }) {
               <View key={sp.tier} style={s.tier}>
                 <Text style={s.tierLabel}>{meta.label}</Text>
                 <Text style={s.tierPrice}>
-                  ₹{sp.monthly_cost_inr_low.toLocaleString("en-IN")}
+                  {intl
+                    ? `$${sp.monthly_cost_usd_low.toLocaleString("en-US")}`
+                    : `₹${sp.monthly_cost_inr_low.toLocaleString("en-IN")}`}
                 </Text>
                 <Text style={{ ...s.small, marginBottom: 6 }}>
-                  – ₹{sp.monthly_cost_inr_high.toLocaleString("en-IN")} / mo
+                  {intl
+                    ? `– $${sp.monthly_cost_usd_high.toLocaleString("en-US")} / mo`
+                    : `– ₹${sp.monthly_cost_inr_high.toLocaleString("en-IN")} / mo`}
                 </Text>
                 <Text style={{ ...s.small, marginBottom: 2 }}>{sp.expected_users}</Text>
                 <Text style={{ ...s.small, marginBottom: 6 }}>{sp.expected_rps}</Text>
@@ -560,6 +572,9 @@ function CoverStat({ n, k }: { n: string; k: string }) {
   );
 }
 
-export async function renderArchitecturePDF(arch: Architecture): Promise<Buffer> {
-  return renderToBuffer(<ArchitectureReport arch={arch} />);
+export async function renderArchitecturePDF(
+  arch: Architecture,
+  region: Region = "IN",
+): Promise<Buffer> {
+  return renderToBuffer(<ArchitectureReport arch={arch} region={region} />);
 }
