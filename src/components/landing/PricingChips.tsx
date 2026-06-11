@@ -3,33 +3,24 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
-
-type Chip = {
-  label: string;
-  price: string;
-  popular?: boolean;
-};
-
-const CHIPS: Chip[] = [
-  { label: "Solo",    price: "₹300" },
-  { label: "Trio",    price: "₹840", popular: true },
-  { label: "Sprint",  price: "₹2,500" },
-  { label: "Studio",  price: "₹10,000" },
-];
+import { CREDIT_PACKS } from "@/lib/razorpay/packs";
+import { useRegion, packPrice } from "@/components/billing/RegionalPrice";
 
 /**
  * Four-chip pricing strip that lives inside the landing pricing teaser.
  * Each chip lifts on hover. The "Trio" chip carries an accent ring as the
  * popular default; clicking any chip navigates to /pricing with that pack
- * pre-selected via hash.
+ * pre-selected via hash. Prices are region-aware (₹ for India, premium
+ * USD for everyone else).
  */
 export function PricingChips() {
   const reduced = useReducedMotionSafe();
+  const region = useRegion();
 
   return (
     <div className="mt-8 flex flex-wrap gap-2.5" role="list">
-      {CHIPS.map((chip) => {
-        const isPopular = !!chip.popular;
+      {CREDIT_PACKS.map((pack) => {
+        const isPopular = pack.badge === "Most popular";
         const base =
           "group relative inline-flex items-center gap-2 rounded-md border px-4 py-2 transition-colors";
         const ringClass = isPopular
@@ -38,21 +29,21 @@ export function PricingChips() {
 
         return (
           <motion.div
-            key={chip.label}
+            key={pack.id}
             role="listitem"
             whileHover={reduced ? undefined : { y: -3 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             className={isPopular ? "scale-[1.04]" : undefined}
           >
             <Link
-              href={`/pricing#${chip.label.toLowerCase()}`}
+              href={`/pricing#${pack.id}`}
               className={`${base} ${ringClass}`}
             >
               <span className="font-mono text-[10.5px] uppercase tracking-[0.16em]">
-                {chip.label}
+                {pack.name}
               </span>
               <span className="display text-[14px] tabular-nums tracking-[-0.01em]">
-                {chip.price}
+                {packPrice(pack, region)}
               </span>
               {isPopular && (
                 <span className="ml-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-[hsl(var(--accent))]">

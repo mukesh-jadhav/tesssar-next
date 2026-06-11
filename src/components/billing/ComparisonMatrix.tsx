@@ -1,7 +1,9 @@
 "use client";
 
 import { CREDIT_PACKS } from "@/lib/razorpay/packs";
-import { formatINR, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useRegion, packPrice } from "@/components/billing/RegionalPrice";
+import type { Region } from "@/lib/geo/region";
 
 type Row = {
   label: string;
@@ -13,52 +15,59 @@ type Row = {
 
 const BASELINE_PAISE = CREDIT_PACKS[0]?.perDesignPaise ?? 30_000;
 
-const ROWS: Row[] = [
-  {
-    label: "Designs included",
-    values: CREDIT_PACKS.map((p) => String(p.designs)),
-    mono: true,
-  },
-  {
-    label: "Per-design price",
-    values: CREDIT_PACKS.map((p) => formatINR(p.perDesignPaise)),
-    mono: true,
-  },
-  {
-    label: "Bulk discount",
-    values: CREDIT_PACKS.map((p) => {
-      const diff = (BASELINE_PAISE - p.perDesignPaise) / BASELINE_PAISE;
-      return diff <= 0 ? "—" : `${Math.round(diff * 100)}% off`;
-    }),
-    mono: true,
-  },
-  {
-    label: "Full report — diagrams, tiers, costs, risks",
-    values: CREDIT_PACKS.map(() => true),
-  },
-  {
-    label: "Downloadable PDF",
-    values: CREDIT_PACKS.map(() => true),
-  },
-  {
-    label: "Permanent history & versioning",
-    values: CREDIT_PACKS.map(() => true),
-  },
-  {
-    label: "Refund on agent failure",
-    values: CREDIT_PACKS.map(() => true),
-  },
-  {
-    label: "Credits never expire",
-    values: CREDIT_PACKS.map(() => true),
-  },
-  {
-    label: "GST-inclusive INR invoice",
-    values: CREDIT_PACKS.map(() => true),
-  },
-];
+function buildRows(region: Region): Row[] {
+  return [
+    {
+      label: "Designs included",
+      values: CREDIT_PACKS.map((p) => String(p.designs)),
+      mono: true,
+    },
+    {
+      label: "Per-design price",
+      values: CREDIT_PACKS.map((p) => packPrice(p, region, true)),
+      mono: true,
+    },
+    {
+      label: "Bulk discount",
+      values: CREDIT_PACKS.map((p) => {
+        const diff = (BASELINE_PAISE - p.perDesignPaise) / BASELINE_PAISE;
+        return diff <= 0 ? "—" : `${Math.round(diff * 100)}% off`;
+      }),
+      mono: true,
+    },
+    {
+      label: "Full report — diagrams, tiers, costs, risks",
+      values: CREDIT_PACKS.map(() => true),
+    },
+    {
+      label: "Downloadable PDF",
+      values: CREDIT_PACKS.map(() => true),
+    },
+    {
+      label: "Permanent history & versioning",
+      values: CREDIT_PACKS.map(() => true),
+    },
+    {
+      label: "Refund on agent failure",
+      values: CREDIT_PACKS.map(() => true),
+    },
+    {
+      label: "Credits never expire",
+      values: CREDIT_PACKS.map(() => true),
+    },
+    {
+      label:
+        region === "INTL"
+          ? "Tax invoice on request"
+          : "GST-inclusive INR invoice",
+      values: CREDIT_PACKS.map(() => true),
+    },
+  ];
+}
 
 export function ComparisonMatrix() {
+  const region = useRegion();
+  const rows = buildRows(region);
   return (
     <div className="-mx-6 md:mx-0 overflow-x-auto">
       <table className="w-full min-w-[720px] border-collapse text-left">
@@ -97,7 +106,7 @@ export function ComparisonMatrix() {
           </tr>
         </thead>
         <tbody>
-          {ROWS.map((row, ri) => (
+          {rows.map((row, ri) => (
             <tr
               key={row.label}
               className="border-b border-[hsl(var(--line))] last:border-b-0"

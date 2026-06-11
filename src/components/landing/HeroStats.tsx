@@ -2,12 +2,20 @@
 
 import { CountUp } from "@/components/motion/CountUp";
 import { FadeIn } from "@/components/motion/FadeIn";
+import { CREDIT_PACKS } from "@/lib/razorpay/packs";
+import { useRegion } from "@/components/billing/RegionalPrice";
 
 /**
  * Hero stats row — four count-up tickers. Numbers tick from 0 on viewport
- * entry. Labels use the existing mono eyebrow treatment.
+ * entry. Labels use the existing mono eyebrow treatment. The price stat is
+ * region-aware: ₹300 for India, the premium USD Solo price elsewhere.
  */
 export function HeroStats() {
+  const region = useRegion();
+  const solo = CREDIT_PACKS[0];
+  const priceTo = region === "INTL" ? Math.round(solo.priceUsdCents / 100) : 300;
+  const pricePrefix = region === "INTL" ? "$" : "₹";
+
   return (
     <FadeIn
       delay={0.2}
@@ -16,7 +24,7 @@ export function HeroStats() {
       <Stat to={14} label="sections per report" />
       <Stat to={6} suffix="+" label="named diagrams" />
       <Stat to={42} label="cloud patterns" />
-      <Stat to={300} prefix="₹" label="per design" />
+      <Stat to={priceTo} prefix={pricePrefix} label="per design" />
     </FadeIn>
   );
 }

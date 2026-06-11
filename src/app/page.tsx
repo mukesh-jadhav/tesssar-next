@@ -5,6 +5,7 @@ import { ScrollProgress } from "@/components/motion/ScrollProgress";
 import { FadeIn } from "@/components/motion/FadeIn";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { softwareApplicationLd } from "@/lib/seo/jsonLd";
+import { Price, PacksSummary, FreelanceRate } from "@/components/billing/RegionalPrice";
 import {
   AmbientDiagram,
   DrawnUnderline,
@@ -87,7 +88,7 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-6 text-[12.5px] text-[hsl(var(--ink-3))]">
-            Google sign-in. Your first design free, no card. Then ₹300 a design — no subscription, no seats, refunded if a run fails.
+            Google sign-in. Your first design free, no card. Then <Price packId="single" /> a design — no subscription, no seats, refunded if a run fails.
           </p>
 
           <HeroStats />
@@ -351,17 +352,17 @@ export default async function HomePage() {
           <div className="mt-14 grid gap-14 lg:grid-cols-[1.1fr_1fr] items-start">
             <h2 className="display text-[clamp(2.2rem,4.5vw,3.6rem)] leading-[1.04] tracking-[-0.03em] max-w-[18ch]">
               First design on us.{" "}
-              <span className="serif italic accent">Then ₹300 each.</span>
+              <span className="serif italic accent">Then <Price packId="single" /> each.</span>
             </h2>
             <div>
               <p className="text-[16px] leading-[1.6] text-[hsl(var(--ink-2))] max-w-[52ch]">
-                A freelance architect charges ₹50,000+ and takes two weeks for this report.
-                Tessar ships it in minutes for ₹300. Pay only when you generate —
+                A freelance architect charges <FreelanceRate /> and takes two weeks for this report.
+                Tessar ships it in minutes for <Price packId="single" />. Pay only when you generate —
                 no subscription, no seats, no annual lock-in. Failed runs auto-refund.
               </p>
               <ul className="mt-8 grid gap-3 text-[14px]">
                 <Bullet>1 free design the moment you sign in</Bullet>
-                <Bullet>₹300 / design — packs of 3 (₹840), 10 (₹2,500) and 50 (₹10,000 — ₹200 each)</Bullet>
+                <Bullet><PacksSummary /></Bullet>
                 <Bullet>Failed runs refund automatically</Bullet>
                 <Bullet>Credits never expire</Bullet>
                 <Bullet>One Razorpay invoice per pack</Bullet>

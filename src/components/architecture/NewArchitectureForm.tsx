@@ -9,6 +9,7 @@ import { GuidedBriefDialog } from "@/components/architecture/GuidedBriefDialog";
 import { RecentBriefsRail, type RecentBrief } from "@/components/architecture/RecentBriefsRail";
 import { RefineDisclosure } from "@/components/architecture/RefineDisclosure";
 import { canAffordRun } from "@/lib/credits/display";
+import { Price } from "@/components/billing/RegionalPrice";
 import { useReducedMotionSafe } from "@/components/motion/useReducedMotionSafe";
 import {
   composeBriefWithPreferences,
@@ -224,7 +225,7 @@ export function NewArchitectureForm({
 
           <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[hsl(var(--line))]">
             <span className="text-[12px] text-[hsl(var(--ink-3))]">
-              ₹300 per design · refunded automatically on failure ·{" "}
+              <Price packId="single" /> per design · refunded automatically on failure ·{" "}
               <a
                 href="/studies/new"
                 className="text-[hsl(var(--ink-2))] underline underline-offset-4 decoration-[hsl(var(--accent))]/40 hover:decoration-[hsl(var(--accent))] hover:text-[hsl(var(--ink))] transition-colors"
