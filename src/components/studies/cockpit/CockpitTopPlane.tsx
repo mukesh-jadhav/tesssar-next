@@ -25,6 +25,8 @@ import { KpiHero } from "./KpiHero";
 import { MetricMatrix } from "./MetricMatrix";
 import { estimatedMonthlyRequests } from "@/lib/studies/scenario";
 import { computeVerdict } from "@/lib/studies/insights";
+import { useRegion } from "@/components/billing/RegionalPrice";
+import { usdFromInr, inrFromUsd, costSymbol } from "@/lib/geo/cost";
 import type { CockpitVariant } from "./StudyCockpit";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
@@ -80,6 +82,8 @@ export function CockpitTopPlane({
   showDashboard?: boolean;
 }) {
   const { scenario, setScenario } = useCockpit();
+  const region = useRegion();
+  const intl = region === "INTL";
 
   const sliderValue = useMemo(
     () => mauToSlider(scenario.loadMau),
@@ -95,8 +99,8 @@ export function CockpitTopPlane({
   );
 
   const verdict = useMemo(
-    () => computeVerdict(liveVariants, scenario, { regimes: [] }),
-    [liveVariants, scenario],
+    () => computeVerdict(liveVariants, scenario, { regimes: [] }, region),
+    [liveVariants, scenario, region],
   );
 
   return (
@@ -231,7 +235,7 @@ export function CockpitTopPlane({
           {/* Cost ceiling */}
           <div
             className="flex items-center gap-2"
-            title="Monthly cost ceiling in INR. Variants that exceed this at the current load show a warning in the matrix."
+            title={`Monthly cost ceiling in ${intl ? "USD" : "INR"}. Variants that exceed this at the current load show a warning in the matrix.`}
           >
             <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-[hsl(var(--ink-3))] inline-flex items-center gap-1">
               Ceiling
@@ -243,23 +247,41 @@ export function CockpitTopPlane({
               </span>
             </span>
             <div className="flex items-center rounded-md border border-[hsl(var(--line))] bg-[hsl(var(--paper-2))]/60 px-2 py-0.5">
-              <span className="text-[11px] text-[hsl(var(--ink-3))] mr-1">₹</span>
+              <span className="text-[11px] text-[hsl(var(--ink-3))] mr-1">{costSymbol(region)}</span>
               <input
                 type="number"
                 inputMode="numeric"
                 min={0}
-                step={10000}
-                value={scenario.costCeilingInr ?? ""}
+                step={intl ? 100 : 10000}
+                value={
+                  scenario.costCeilingInr == null
+                    ? ""
+                    : intl
+                      ? Math.round(usdFromInr(scenario.costCeilingInr))
+                      : scenario.costCeilingInr
+                }
                 onChange={(e) => {
                   const raw = e.currentTarget.value;
-                  const n = raw === "" ? undefined : Math.max(0, Number(raw));
+                  // Store always in INR (engine compares against INR totals).
+                  // International users type USD → convert before storing.
+                  let next: number | undefined;
+                  if (raw === "") {
+                    next = undefined;
+                  } else {
+                    const n = Math.max(0, Number(raw));
+                    next = Number.isFinite(n)
+                      ? intl
+                        ? inrFromUsd(n)
+                        : n
+                      : undefined;
+                  }
                   setScenario({
                     ...scenario,
-                    costCeilingInr: Number.isFinite(n!) ? n : undefined,
+                    costCeilingInr: next,
                   });
                 }}
                 placeholder="—"
-                aria-label="Monthly cost ceiling in INR"
+                aria-label={`Monthly cost ceiling in ${intl ? "USD" : "INR"}`}
                 className="w-[80px] bg-transparent text-[12px] tabular-nums focus:outline-none placeholder:text-[hsl(var(--ink-3))]/60"
               />
               <span className="text-[10px] text-[hsl(var(--ink-3))] ml-1">/mo</span>
@@ -397,7 +419,7 @@ function LivingVerdict({
                 <DetailRow
                   label="Cheapest at this load"
                   value={cheapestLabel}
-                  hint="Lowest projected monthly INR for the current load, after the cost ceiling rule."
+                  hint="Lowest projected monthly cost for the current load, after the cost ceiling rule."
                 />
               )}
               {lowestOpsLabel && (

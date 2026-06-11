@@ -15,7 +15,9 @@
 
 import { motion } from "framer-motion";
 import { categoryLabel, projectCost, costPer1MRequests, type CostCategory } from "@/lib/studies/scenario";
-import { formatInr } from "@/lib/studies/insights";
+import { formatCostFromInr } from "@/lib/geo/cost";
+import { useRegion } from "@/components/billing/RegionalPrice";
+import type { Region } from "@/lib/geo/region";
 import { useCockpit } from "../state";
 import { LensColumns } from "../LensColumns";
 import { FlashRemount, MiniChip, StackedBar, StatBlock } from "./primitives";
@@ -36,6 +38,7 @@ const CATEGORY_ORDER: CostCategory[] = [
 
 export function CostLens({ variants }: { variants: CockpitVariant[] }) {
   const { scenario, openDrawer } = useCockpit();
+  const region = useRegion();
 
   return (
     <LensColumns
@@ -57,12 +60,12 @@ export function CostLens({ variants }: { variants: CockpitVariant[] }) {
               label="Total / month"
               value={
                 <FlashRemount keyValue={Math.round(cost.totalInr)}>
-                  ₹{formatInr(cost.totalInr)}
+                  {formatCostFromInr(cost.totalInr, region)}
                 </FlashRemount>
               }
               caption={
                 <>
-                  <span>{cost.totalInr > 0 ? `₹${formatInr(per1M)} / 1M req` : "no data"}</span>
+                  <span>{cost.totalInr > 0 ? `${formatCostFromInr(per1M, region)} / 1M req` : "no data"}</span>
                   {cost.overCeiling && (
                     <span className="ml-2 inline-flex items-center gap-1 text-[hsl(var(--bad))]">
                       <span className="ms text-[12px]" aria-hidden>warning</span>
@@ -95,7 +98,7 @@ export function CostLens({ variants }: { variants: CockpitVariant[] }) {
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
               {scenario.regionFailureSim && cost.drOverheadInr > 0 && (
-                <MiniChip tone="warn">+₹{formatInr(cost.drOverheadInr)}/mo DR</MiniChip>
+                <MiniChip tone="warn">+{formatCostFromInr(cost.drOverheadInr, region)}/mo DR</MiniChip>
               )}
               {cost.totalInr === 0 ? (
                 <MiniChip>no scale_profiles</MiniChip>
@@ -106,7 +109,7 @@ export function CostLens({ variants }: { variants: CockpitVariant[] }) {
                     openDrawer({
                       title: `${v.label} cost breakdown`,
                       caption: `at ${formatMauLabel(scenario.loadMau)} MAU · budget ${scenario.latencyBudgetMs}ms`,
-                      body: <CostDrawerBody variant={v} segments={segments} per1M={per1M} drOverhead={cost.drOverheadInr} />,
+                      body: <CostDrawerBody variant={v} segments={segments} per1M={per1M} drOverhead={cost.drOverheadInr} region={region} />,
                     })
                   }
                   className="inline-flex items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-[hsl(var(--ink-3))] hover:text-[hsl(var(--ink))] transition-colors"
@@ -128,11 +131,13 @@ function CostDrawerBody({
   segments,
   per1M,
   drOverhead,
+  region,
 }: {
   variant: CockpitVariant;
   segments: { key: string; label: string; value: number; className: string }[];
   per1M: number;
   drOverhead: number;
+  region: Region;
 }) {
   return (
     <div className="flex flex-col gap-4 text-[13px] text-[hsl(var(--ink-2))]">
@@ -158,15 +163,15 @@ function CostDrawerBody({
                 <span>{s.label}</span>
               </span>
               <span className="font-mono tabular-nums text-[13px] text-[hsl(var(--ink))]">
-                ₹{formatInr(s.value)}
+                {formatCostFromInr(s.value, region)}
               </span>
             </li>
           ))}
       </ul>
       <p className="text-[12px] text-[hsl(var(--ink-3))]">
-        Per-million requests: <strong>₹{formatInr(per1M)}</strong>
+        Per-million requests: <strong>{formatCostFromInr(per1M, region)}</strong>
         {drOverhead > 0 && (
-          <> · DR overhead included: <strong>₹{formatInr(drOverhead)}/mo</strong></>
+          <> · DR overhead included: <strong>{formatCostFromInr(drOverhead, region)}/mo</strong></>
         )}
       </p>
     </div>

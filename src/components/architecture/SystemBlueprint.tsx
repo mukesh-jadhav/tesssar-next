@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { formatScaleBand } from "@/lib/geo/cost";
+import { useRegion } from "@/components/billing/RegionalPrice";
 import type { Architecture, ArchComponent } from "@/types/architecture";
 
 /**
@@ -47,6 +49,7 @@ const CAT_ICON: Record<ArchComponent["category"], string> = {
 };
 
 export function SystemBlueprint({ arch }: { arch: Architecture }) {
+  const region = useRegion();
   const lanes = useMemo(
     () =>
       LANES.map((lane) => ({
@@ -209,7 +212,7 @@ export function SystemBlueprint({ arch }: { arch: Architecture }) {
                   {p.expected_rps} · {p.storage_estimate}
                 </div>
                 <div className="mt-1 pt-2 border-t border-[hsl(var(--line))] font-mono text-[10px] tabular-nums text-[hsl(var(--ink-2))]">
-                  ₹{p.monthly_cost_inr_low.toLocaleString("en-IN")}–{p.monthly_cost_inr_high.toLocaleString("en-IN")}/mo
+                  {formatScaleBand(p, region)}/mo
                 </div>
               </div>
             ))}

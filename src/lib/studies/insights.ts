@@ -12,6 +12,8 @@
 
 import type { Architecture } from "@/types/architecture";
 import { projectCost, type Scenario } from "./scenario";
+import { formatCostFromInr } from "@/lib/geo/cost";
+import type { Region } from "@/lib/geo/region";
 
 // ---------- Inputs ----------
 
@@ -260,14 +262,14 @@ export function residencyScore(arch: Architecture | null, regionHint: string): n
 export function cheapestAtScale(
   variants: readonly InsightVariant[],
   scenario: Scenario,
+  region: Region = "IN",
 ): WinnerOrNull {
   return pickMin(
     variants,
     (v) => projectCost(v.arch!, scenario).totalInr,
     (v, score, margin) => {
       if (margin === 0) return `${v.label} is cheapest at this load.`;
-      const inr = formatInr(margin);
-      return `${v.label} is cheapest by ₹${inr}/mo vs the next option.`;
+      return `${v.label} is cheapest by ${formatCostFromInr(margin, region)}/mo vs the next option.`;
     },
   );
 }
@@ -403,9 +405,10 @@ export function computeVerdict(
   variants: readonly InsightVariant[],
   scenario: Scenario,
   options: { residencyHint?: string; regimes?: readonly string[] } = {},
+  region: Region = "IN",
 ): VerdictBundle {
   return {
-    cheapest:      cheapestAtScale(variants, scenario),
+    cheapest:      cheapestAtScale(variants, scenario, region),
     lowestOps:     lowestOps(variants),
     fastestToShip: fastestToShip(variants),
     bestResidency: options.residencyHint ? bestResidency(variants, options.residencyHint) : null,

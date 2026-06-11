@@ -42,6 +42,9 @@ import type { Architecture } from "@/types/architecture";
 import { useCockpit } from "./state";
 import type { LensId } from "./state";
 import type { CockpitVariant } from "./StudyCockpit";
+import { formatCostFromInr, costFromInrValue, costSymbol } from "@/lib/geo/cost";
+import { useRegion } from "@/components/billing/RegionalPrice";
+import type { Region } from "@/lib/geo/region";
 
 interface ComputedMetrics {
   totalCostInr: number;
@@ -105,17 +108,18 @@ interface MetricRow {
   warn?: (m: ComputedMetrics) => boolean;
 }
 
-const ROWS: MetricRow[] = [
+function buildRows(region: Region): MetricRow[] {
+  return [
   {
     id: "cost",
     label: "Monthly cost",
     lens: "cost",
-    caption: "Total ₹/mo at your load",
+    caption: region === "INTL" ? "Total $/mo at your load" : "Total ₹/mo at your load",
     direction: "lower",
     read:  (m) => m.totalCostInr,
     render: (m) => (
       <span className="font-mono">
-        ₹<LiveCounter to={m.totalCostInr} duration={0.55} className="display-tight text-[15px] tabular-nums" />
+        {costSymbol(region)}<LiveCounter to={costFromInrValue(m.totalCostInr, region)} duration={0.55} className="display-tight text-[15px] tabular-nums" />
       </span>
     ),
   },
@@ -128,7 +132,7 @@ const ROWS: MetricRow[] = [
     read: (m) => m.per1MInr,
     render: (m) => (
       <span className="font-mono">
-        ₹<LiveCounter to={Math.round(m.per1MInr)} duration={0.5} className="tabular-nums" />
+        {formatCostFromInr(m.per1MInr, region)}
       </span>
     ),
   },
@@ -213,7 +217,8 @@ const ROWS: MetricRow[] = [
       <LiveCounter to={m.componentCount} duration={0.4} className="font-mono tabular-nums" />
     ),
   },
-];
+  ];
+}
 
 interface VariantColumn {
   variantId: string;
@@ -225,6 +230,8 @@ interface VariantColumn {
 
 export function MetricMatrix({ variants }: { variants: CockpitVariant[] }) {
   const { scenario, setCurrentLens } = useCockpit();
+  const region = useRegion();
+  const rows = buildRows(region);
 
   const columns: VariantColumn[] = useMemo(
     () =>
@@ -269,7 +276,7 @@ export function MetricMatrix({ variants }: { variants: CockpitVariant[] }) {
 
       {/* Body rows */}
       <div className="divide-y divide-[hsl(var(--line))]">
-        {ROWS.map((row) => {
+        {rows.map((row) => {
           const values = liveCols.map((c) => row.read(c.metrics!));
           const winner = winningValue(values, row.direction);
           const range = rangeOf(values);

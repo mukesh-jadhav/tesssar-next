@@ -26,6 +26,12 @@ export function usdFromInr(inr: number): number {
   return inr / USD_TO_INR_CHARGE;
 }
 
+/** Convert a USD figure back to whole rupees at the fixed rate. */
+export function inrFromUsd(usd: number): number {
+  if (!Number.isFinite(usd)) return 0;
+  return Math.round(usd * USD_TO_INR_CHARGE);
+}
+
 /** The currency symbol for a region's cost display. */
 export function costSymbol(region: Region): "₹" | "$" {
   return region === "INTL" ? "$" : "₹";
@@ -98,4 +104,19 @@ export function formatScaleBand(
     return `${formatCost(profile.monthly_cost_usd_low, region)}–${formatCost(profile.monthly_cost_usd_high, region)}`;
   }
   return `${formatCost(profile.monthly_cost_inr_low, region)}–${formatCost(profile.monthly_cost_inr_high, region)}`;
+}
+
+/**
+ * Single safe primitive for the studies cockpit: a value computed in INR
+ * by the cost engine, displayed compactly in the viewer's currency
+ * (₹1.2L for India, $1.4K for international — converted at the fixed
+ * rate). Use this anywhere the engine hands you an INR figure to show.
+ */
+export function formatCostFromInr(inr: number, region: Region): string {
+  return formatCostCompact(region === "INTL" ? usdFromInr(inr) : inr, region);
+}
+
+/** The compact currency-symbol-prefixed string for a value already in INR. */
+export function costFromInrValue(inr: number, region: Region): number {
+  return region === "INTL" ? usdFromInr(inr) : inr;
 }

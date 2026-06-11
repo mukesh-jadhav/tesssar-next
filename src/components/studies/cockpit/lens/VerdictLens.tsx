@@ -17,7 +17,9 @@
 
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
-import { computeVerdict, formatInr, type WinnerOrNull, type ComplianceGap } from "@/lib/studies/insights";
+import { computeVerdict, type WinnerOrNull, type ComplianceGap } from "@/lib/studies/insights";
+import { formatCostFromInr } from "@/lib/geo/cost";
+import { useRegion } from "@/components/billing/RegionalPrice";
 import { useCockpit } from "../state";
 import { MiniChip, StatBlock } from "./primitives";
 import type { CockpitVariant } from "../StudyCockpit";
@@ -26,6 +28,7 @@ const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
 export function VerdictLens({ variants }: { variants: CockpitVariant[] }) {
   const { scenario, openDrawer } = useCockpit();
+  const region = useRegion();
   const liveVariants = variants
     .filter((v) => !v.failed)
     .map((v) => ({ variantId: v.variantId, label: v.label, arch: v.architecture }));
@@ -36,7 +39,7 @@ export function VerdictLens({ variants }: { variants: CockpitVariant[] }) {
     // first variant's primary region.
     residencyHint: inferRegionHint(liveVariants[0]?.arch?.deployment?.primary_region),
     regimes: ["dpdp", "gdpr", "hipaa", "pci", "soc2"],
-  });
+  }, region);
 
   const chips: Array<{
     label: string;
@@ -52,7 +55,7 @@ export function VerdictLens({ variants }: { variants: CockpitVariant[] }) {
           {" "}<code className="font-mono text-[12px]">scale_profiles</code> + 
           {" "}<code className="font-mono text-[12px]">cost_breakdown</code>, interpolated to your MAU.
           {verdict.cheapest && verdict.cheapest.marginOverNext > 0 && (
-            <> Margin over the next variant: <strong>₹{formatInr(verdict.cheapest.marginOverNext)}/mo</strong>.</>
+            <> Margin over the next variant: <strong>{formatCostFromInr(verdict.cheapest.marginOverNext, region)}/mo</strong>.</>
           )}
         </p>
       ),

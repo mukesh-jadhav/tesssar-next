@@ -18,8 +18,9 @@ import {
 import {
   attackSurface,
   headcountAtTier,
-  formatInr,
 } from "@/lib/studies/insights";
+import { formatCostFromInr, costFromInrValue, costSymbol } from "@/lib/geo/cost";
+import { useRegion } from "@/components/billing/RegionalPrice";
 import type { CockpitVariant } from "./StudyCockpit";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
@@ -38,6 +39,7 @@ interface Kpi {
 
 export function KpiHero({ variants }: { variants: CockpitVariant[] }) {
   const { scenario } = useCockpit();
+  const region = useRegion();
 
   const kpis = useMemo<Kpi[]>(() => {
     const live = variants
@@ -81,10 +83,10 @@ export function KpiHero({ variants }: { variants: CockpitVariant[] }) {
         value: cheapest.cost.totalInr,
         render: () => (
           <span className="font-mono">
-            ₹<LiveCounter to={cheapest.cost.totalInr} duration={0.55} className="display-tight text-[32px] tracking-[-0.02em] tabular-nums" />
+            {costSymbol(region)}<LiveCounter to={costFromInrValue(cheapest.cost.totalInr, region)} duration={0.55} className="display-tight text-[32px] tracking-[-0.02em] tabular-nums" />
           </span>
         ),
-        caption: `vs next ₹${formatInr(nextBest(live.map((l) => l.cost.totalInr), cheapest.cost.totalInr, "lower"))} more`,
+        caption: `vs next ${formatCostFromInr(nextBest(live.map((l) => l.cost.totalInr), cheapest.cost.totalInr, "lower"), region)} more`,
       },
       {
         key: "fastest",
@@ -128,7 +130,7 @@ export function KpiHero({ variants }: { variants: CockpitVariant[] }) {
         caption: "components facing internet",
       },
     ];
-  }, [variants, scenario]);
+  }, [variants, scenario, region]);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
