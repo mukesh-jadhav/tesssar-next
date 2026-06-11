@@ -1,6 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CREDIT_PACKS } from "@/lib/razorpay/packs";
-import { formatINR } from "@/lib/utils";
+import { formatINR, formatUSD } from "@/lib/utils";
+import { detectRegion, type Region } from "@/lib/geo/region";
 import { EditorialIllustration } from "@/components/empty/EditorialIllustration";
 
 /**
@@ -10,6 +14,10 @@ import { EditorialIllustration } from "@/components/empty/EditorialIllustration"
  * paywall — it's the same surface, just out of fuel.
  */
 export function ZeroCreditsLadder() {
+  // Home-market (INR) by default; client upgrades to USD for non-India.
+  const [region, setRegion] = useState<Region>("IN");
+  useEffect(() => { setRegion(detectRegion()); }, []);
+
   return (
     <section className="m3-page-enter mt-12 card-paper px-8 py-14 md:px-16 md:py-20">
       <div className="mx-auto grid w-full max-w-[920px] gap-12 md:grid-cols-[auto_1fr] md:items-center md:gap-16">
@@ -58,11 +66,16 @@ export function ZeroCreditsLadder() {
                     )}
                   </div>
                   <div className="mt-4 display tabular-nums text-[clamp(1.6rem,3vw,2.25rem)] tracking-[-0.03em] leading-none">
-                    {formatINR(pack.pricePaise)}
+                    {region === "INTL" ? formatUSD(pack.priceUsdCents) : formatINR(pack.pricePaise)}
                   </div>
                   <div className="mt-2 text-[12px] text-[hsl(var(--ink-2))]">
                     {pack.designs} {pack.designs === 1 ? "design" : "designs"} ·{" "}
-                    <span className="tabular-nums">{formatINR(pack.perDesignPaise)}</span> each
+                    <span className="tabular-nums">
+                      {region === "INTL"
+                        ? formatUSD(pack.perDesignUsdCents)
+                        : formatINR(pack.perDesignPaise)}
+                    </span>{" "}
+                    each
                   </div>
                   <div className="mt-6 flex items-center gap-1.5 text-[12px] font-medium text-[hsl(var(--ink))] group-hover:text-[hsl(var(--accent))] transition-colors">
                     Top up
@@ -76,7 +89,9 @@ export function ZeroCreditsLadder() {
           })}
         </ul>
         <p className="mt-4 text-[12px] text-[hsl(var(--ink-3))] text-center md:text-left">
-          Secure checkout via Razorpay · UPI, cards, netbanking · GST invoice on request.
+          {region === "INTL"
+            ? "Secure checkout via Razorpay · international cards accepted · billed in INR."
+            : "Secure checkout via Razorpay · UPI, cards, netbanking · GST invoice on request."}
         </p>
       </div>
     </section>

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/firebase/auth";
 import { getRazorpay } from "@/lib/razorpay/client";
-import { getPack } from "@/lib/razorpay/packs";
+import { getPack, chargePaiseForRegion } from "@/lib/razorpay/packs";
+import { coerceRegion } from "@/lib/geo/region";
 import { adminDb } from "@/lib/firebase/admin";
 import type { TransactionDoc } from "@/types/architecture";
 import { clientIp, rateLimit, rateLimitResponse } from "@/lib/security/rateLimit";
@@ -31,21 +32,32 @@ export async function POST(req: NextRequest) {
     });
     if (!userGuard.ok) return rateLimitResponse(userGuard);
 
-    const { packId } = (await req.json()) as { packId?: string };
+    const { packId, region: regionRaw } = (await req.json()) as {
+      packId?: string;
+      region?: string;
+    };
     const pack = packId ? getPack(packId) : undefined;
     if (!pack) return NextResponse.json({ error: "Invalid pack" }, { status: 400 });
+
+    // Region decides the price tier. We re-derive the charge amount on the
+    // server from the trusted pack data — the client only hints the region.
+    const region = coerceRegion(regionRaw);
+    const amountPaise = chargePaiseForRegion(pack, region);
+    const displayCurrency = region === "INTL" ? "USD" : "INR";
+    const displayAmount = region === "INTL" ? pack.priceUsdCents : pack.pricePaise;
 
     const razorpay = getRazorpay();
     const txRef = adminDb.collection("transactions").doc();
 
     const order = await razorpay.orders.create({
-      amount: pack.pricePaise,
+      amount: amountPaise,
       currency: "INR",
       receipt: txRef.id,
       notes: {
         uid: user.uid,
         packId: pack.id,
         credits: String(pack.credits),
+        region,
         txId: txRef.id,
       },
     });
@@ -55,8 +67,11 @@ export async function POST(req: NextRequest) {
       uid: user.uid,
       packId: pack.id,
       credits: pack.credits,
-      amountPaise: pack.pricePaise,
+      amountPaise,
       currency: "INR",
+      region,
+      displayCurrency,
+      displayAmount,
       razorpayOrderId: order.id,
       status: "created",
       createdAt: Date.now(),
@@ -66,8 +81,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       orderId: order.id,
-      amount: pack.pricePaise,
+      amount: amountPaise,
       currency: "INR",
+      region,
+      displayCurrency,
+      displayAmount,
       keyId: process.env.RAZORPAY_KEY_ID,
       txId: txRef.id,
       pack,

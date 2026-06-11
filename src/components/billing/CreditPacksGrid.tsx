@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { CREDIT_PACKS, type CreditPack } from "@/lib/razorpay/packs";
-import { cn, formatINR } from "@/lib/utils";
+import { CREDIT_PACKS, chargePaiseForRegion, type CreditPack } from "@/lib/razorpay/packs";
+import { cn, formatINR, formatUSD } from "@/lib/utils";
+import { detectRegion, type Region } from "@/lib/geo/region";
 import { trackPurchase } from "@/lib/analytics/track";
 import { DrawnUnderline } from "@/components/landing/DrawnUnderline";
 
@@ -92,6 +93,11 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
   const router = useRouter();
   const loadRazorpay = useRazorpayLoader();
   const [loadingPackId, setLoadingPackId] = useState<string | null>(null);
+  // SSR default is the home market (INR); the client upgrades to USD for
+  // international visitors on mount (timezone-based). Minor first-paint
+  // swap for the non-India minority only.
+  const [region, setRegion] = useState<Region>("IN");
+  useEffect(() => { setRegion(detectRegion()); }, []);
 
   async function buyPack(pack: CreditPack) {
     if (!signedIn) { router.push("/login?next=/pricing"); return; }
@@ -107,7 +113,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
       const res = await fetch("/api/payments/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packId: pack.id }),
+        body: JSON.stringify({ packId: pack.id, region }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = (await res.json()) as {
@@ -244,7 +250,7 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
                       : "text-[clamp(3rem,5.5vw,4.5rem)]",
                   )}
                 >
-                  {formatINR(pack.pricePaise)}
+                  {region === "INTL" ? formatUSD(pack.priceUsdCents) : formatINR(pack.pricePaise)}
                 </span>
               </div>
               <div
@@ -253,8 +259,21 @@ export function CreditPacksGrid({ signedIn }: { signedIn: boolean }) {
                   popular ? "text-[hsl(var(--paper))]/65" : "text-[hsl(var(--ink-3))]",
                 )}
               >
-                {pack.designs} {pack.designs === 1 ? "design" : "designs"} · {formatINR(pack.perDesignPaise)} each
+                {pack.designs} {pack.designs === 1 ? "design" : "designs"} ·{" "}
+                {region === "INTL"
+                  ? `${formatUSD(pack.perDesignUsdCents)} each`
+                  : `${formatINR(pack.perDesignPaise)} each`}
               </div>
+              {region === "INTL" && (
+                <div
+                  className={cn(
+                    "mt-1.5 text-[11px]",
+                    popular ? "text-[hsl(var(--paper))]/50" : "text-[hsl(var(--ink-3))]",
+                  )}
+                >
+                  Billed in INR ({formatINR(chargePaiseForRegion(pack, "INTL"))}) · your card converts to USD
+                </div>
+              )}
 
               <p
                 className={cn(

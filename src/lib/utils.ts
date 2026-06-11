@@ -14,6 +14,16 @@ export function formatINR(amountInPaise: number): string {
   }).format(rupees);
 }
 
+export function formatUSD(amountInCents: number): string {
+  const dollars = amountInCents / 100;
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    // Show cents only when not a whole dollar (e.g. $9.90 but $14).
+    maximumFractionDigits: Number.isInteger(dollars) ? 0 : 2,
+  }).format(dollars);
+}
+
 export function formatDate(value: Date | number | string): string {
   const d = value instanceof Date ? value : new Date(value);
   return new Intl.DateTimeFormat("en-IN", {

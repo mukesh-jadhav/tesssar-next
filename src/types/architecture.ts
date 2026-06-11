@@ -318,6 +318,11 @@ export interface TransactionDoc {
   credits: number;
   amountPaise: number;
   currency: "INR";
+  // Region the buyer was priced in, and the price they were shown.
+  // The actual charge (amountPaise) always settles in INR.
+  region?: "IN" | "INTL";
+  displayCurrency?: "INR" | "USD";
+  displayAmount?: number; // minor units of displayCurrency (paise or cents)
   razorpayOrderId: string;
   razorpayPaymentId?: string;
   razorpaySignature?: string;

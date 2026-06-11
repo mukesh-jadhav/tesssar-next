@@ -5,6 +5,7 @@ import { FAQ, type FAQItem } from "@/components/billing/FAQ";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { Footer } from "@/components/shared/Footer";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { PricingHeroPrice, PricingCurrencyNote } from "@/components/billing/PricingHeroPrice";
 import {
   faqPageLd,
   softwareApplicationLd,
@@ -138,12 +139,12 @@ export default async function PricingPage() {
       {/* Masthead */}
       <div className="rule-dots flex items-baseline justify-between pb-4">
         <span className="tag tag-accent">Credits</span>
-        <span className="eyebrow hidden md:inline">All prices in INR, GST inclusive</span>
+        <PricingCurrencyNote />
       </div>
 
       <section className="m3-page-enter mt-12 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
         <h1 className="display-tight text-[clamp(3rem,9vw,8rem)] leading-[0.88] tracking-[-0.045em]">
-          ₹300 a design.<br />
+          <PricingHeroPrice /><br />
           <span className="serif font-normal italic accent">No subscriptions.</span>
         </h1>
         <div className="flex flex-col justify-end gap-6 pb-3">
